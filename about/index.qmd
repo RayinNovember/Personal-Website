@@ -64,7 +64,7 @@ I work as a data scientist at [Wallick Communities](https://www.wallick.com/), w
 
 Outside of work I'm on an ongoing learning journey through Python, statistics, and modern data tooling. This site is where I write things down — partly so future-me can find them, and partly in case they help someone else.
 
-Get in touch by [sending me a note](/contact.qmd)! {{< fa feather-pointed >}}
+Get in touch by [sending me a note](../contact.qmd)! {{< fa feather-pointed >}}
 
 :::
 
@@ -86,7 +86,7 @@ My day-to-day involves working with operational data — pulling it together, mo
 
 ::: {.g-col-6 #about-me-2}
 
-I'm always picking up new tools and ideas — currently spending a lot of time with Python, SQL, and the wider data ecosystem. I write up the things I learn (and the things that stumped me) on the [blog](/blog), and the things I build show up in [projects](/project).
+I'm always picking up new tools and ideas — currently spending a lot of time with Python, SQL, and the wider data ecosystem. I write up the things I learn (and the things that stumped me) on the [blog](../blog/index.qmd), and the things I build show up in [projects](../project/index.qmd).
 
 <ul class="fa-ul">
    <li><span class="fa-li"><i class="fa-solid fa-graduation-cap"></i></span>Currently learning ∙ Python &amp; data science</li>
@@ -105,14 +105,14 @@ I'm always picking up new tools and ideas — currently spending a lot of time w
 #### Blog
 ::: {#blog}
 :::
-[See all &rarr;](../blog){.about-links .subtitle}
+[See all &rarr;](../blog/index.qmd){.about-links .subtitle}
 :::
 
 ::: {.g-col-6}
 #### Projects
 ::: {#project}
 :::
-[See all &rarr;](../project){.about-links .subtitle}
+[See all &rarr;](../project/index.qmd){.about-links .subtitle}
 :::
 
 ::::

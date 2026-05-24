@@ -3,11 +3,11 @@ comments: false
 title: "Accessibility commitment"
 ---
 
-Travel back to the [home page](/) or [about page](/about).
+Travel back to the [home page](index.qmd) or [about page](about/index.qmd).
 
 ## Feedback
 
-I welcome any feedback on the accessibility of this site. Please let me know if you encounter any accessibility barriers by using my [contact form](/contact) and I'll do my best to respond promptly.
+I welcome any feedback on the accessibility of this site. Please let me know if you encounter any accessibility barriers by using my [contact form](contact.qmd) and I'll do my best to respond promptly.
 
 Thank you for visiting and for taking the time to read this page {{< bi heart-fill >}}
 
