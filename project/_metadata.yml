@@ -22,12 +22,7 @@ format:
       - ../_partials/title-block-link-buttons/title-block.html
 
 # Post info
-author: Silvia Canelón
+author: Ray Wang
 
-# Enable comments
-comments:
-  utterances:
-    repo: spcanelon/silvia
-    issue-term: title
-    theme: boxy-light
-    label: "comments :crystal_ball:"
+# Comments disabled
+comments: false

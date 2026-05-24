@@ -1,10 +1,9 @@
 ---
-pagetitle: Silvia Canelón - Contact
-# title: Send me a note
+pagetitle: Ray Wang - Contact
 name: Contact Form
 page-layout: article
-format: 
-  html: 
+format:
+  html:
     grid:
       margin-width: 0px
       sidebar-width: 0px
@@ -21,30 +20,28 @@ resources:
 
 # Send me a note {{< fa feather-pointed >}}
 
-You can use this form to contact me about speaking engagements, collaborations, or simply to say hello.
+You can use this form to contact me about projects, collaborations, or simply to say hello.
 
-I also love hearing if my educational materials have been helpful for you, and how they could be improved &#8212; particularly if they could be made more accessible {{< bi heart-fill >}}
+I'm always happy to hear from folks working on similar data/Python journeys, or anyone with feedback on something I've written {{< bi heart-fill >}}
 
 <a class="link-dark me-1" href="/accessibility.html" title="Accessibility commitment" target="_blank" rel="noopener">{{< fa universal-access >}}</a>
-<a class="link-dark me-1" href="https://bsky.app/profile/silviacanelon.com" title="bluesky" target="_blank" rel="noopener">{{< fa brands bluesky >}}</a>
-<a class="link-dark me-1" href="https://linkedin.com/in/spcanelon" title="LinkedIn" target="_blank" rel="noopener">{{< fa brands linkedin >}}</a>
-<a class="link-dark me-1" href="https://github.com/spcanelon" title="github" target="_blank" rel="noopener">{{< fa brands github >}}</a>
-<!-- <a class="link-dark me-1" href="https://hachyderm.io/@spcanelon" title="mastodon" target="_blank" rel="noopener">{{< fa brands mastodon >}}</a> -->
-<a class="link-dark me-1" href="https://orcid.org/0000-0003-1709-1394" title="orcid" target="_blank" rel="noopener">{{< ai orcid >}}</a>
-<a class="link-dark me-1" href="https://scholar.google.com/citations?user=GAzkvpcAAAAJ&hl=en&oi=ao" title="Google Scholar" target="_blank"rel="noopener">{{< ai google-scholar >}}</a>
-<a class="link-dark me-1" href="https://buttondown.com/spcanelon" title="Newsletter" target="_blank" rel="noopener">{{< fa envelope >}}</a>
+<a class="link-dark me-1" href="https://linkedin.com/in/" title="LinkedIn" target="_blank" rel="noopener">{{< fa brands linkedin >}}</a>
+<a class="link-dark me-1" href="https://github.com/" title="GitHub" target="_blank" rel="noopener">{{< fa brands github >}}</a>
+<a class="link-dark me-1" href="mailto:you@example.com" title="Email" target="_blank" rel="noopener">{{< fa envelope >}}</a>
 
 :::
-<!-- source: https://github.com/mccarthy-m-g/tidytales/blob/main/about/index.qmd#L24-L46 -->
 
 ::: {.g-col-1}
 :::
 
 ::: {.g-col-6 #form}
 
-<form 
+<!-- TODO: replace the action URL below with your own Formspree form ID
+     (sign up at https://formspree.io to get one), or swap this whole form
+     for a simple mailto: link. -->
+<form
 style="margin-top: -5em;"
-action="https://formspree.io/f/mwkapgzw" method="POST" accept-charset="utf-8">
+action="https://formspree.io/f/YOUR_FORM_ID" method="POST" accept-charset="utf-8">
 
 
 <label for="full-name">Full Name</label>
@@ -54,53 +51,12 @@ action="https://formspree.io/f/mwkapgzw" method="POST" accept-charset="utf-8">
 <input type="email" name="_replyto" id="email-address" class="form-control" placeholder="your@email.here" required>
 
 <label for="message">Message</label>
-  <textarea rows="6" name="message" id="message" class="form-control" placeholder="Aenean lacinia bibendum nulla sed consectetur. Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Donec ullamcorper nulla non metus auctor fringilla nullam quis risus." required></textarea>
+  <textarea rows="6" name="message" id="message" class="form-control" placeholder="Type your message here..." required></textarea>
 
 <button type="submit" class="btn btn-primary mt-4">Send message</button>
 </form>
 
 :::
-
-::: {.g-col-5 #buttondown}
-
-# Sign up for my newsletter {{< fa envelope >}}
-
-You can use this form to sign up to receive a little e-mail note from me anytime I post something new on my website.
-
-:::
-
-::: {.g-col-1}
-:::
-
-::: {.g-col-6 #buttondown-form}
-
-
-```{=html}
-<form
-  style="margin-top: 4em;"
-  action="https://buttondown.com/api/emails/embed-subscribe/spcanelon"
-  method="post"
-  target="popupwindow"
-  onsubmit="window.open('https://buttondown.com/spcanelon?tag=website', 'popupwindow')"
-  class="embeddable-buttondown-form"
->
-  <label for="bd-email">Email Address</label>
-  <input 
-  class="form-control"
-  placeholder="your@email.here" 
-  type="email" name="email" id="bd-email" />
-  
-  <input 
-  class="btn btn-primary mt-1"
-  type="submit" value="Subscribe" />
-  <p>
-    <a href="https://buttondown.com/refer/spcanelon" target="_blank">Powered by Buttondown.</a>
-  </p>
-</form>
-```
-
-:::
-
 
 :::
 <!-- end grid -->

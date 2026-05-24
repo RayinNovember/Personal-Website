@@ -1,11 +1,19 @@
-# Personal website for<br>Silvia Canelón <a href='https://silvia.rbind.io'><img src='https://github.com/spcanelon/silvia/assets/49913337/d9aa4577-983e-4423-932d-9836bf60c4f4' align="right" height="180" alt=''/></a>
+# Ray Wang — Personal Website
 
-👋 Hello, and welcome to the repo for [my personal website](https://silvia.rbind.io)!
+Source for my personal website, built with [Quarto](https://quarto.org/).
 
-This version was made using [Quarto](https://quarto.org/) and inspired by the [Hugo Apéro theme](https://hugo-apero-docs.netlify.app/).
+The structure is adapted from the open-source Quarto site by [Silvia Canelón](https://github.com/spcanelon/silvia) — many thanks to her for sharing it.
 
-I keep this repository public so that people can repo-dive and learn how to recreate what they like for their own site. This is how I learned! 🙌
+## Local preview
 
-In return, I only ask that you avoid duplicating my site for yourself without permission. A lot of thought went into making my site unique to me and your site deserves to reflect your own unique style too!
+```powershell
+quarto preview
+```
 
-Thanks and happy repo-diving! 🤿 <a href='https://app.netlify.com/sites/silvia/deploys'><img src='https://api.netlify.com/api/v1/badges/4d7dccd9-ec21-47eb-b218-34cb5b768883/deploy-status' align="right" height="20" alt='Netlify Status'/></a>
+## Build
+
+```powershell
+quarto render
+```
+
+Output is written to `_site/`.

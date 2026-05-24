@@ -1,0 +1,32 @@
+---
+title: "Example Project"
+author: Ray Wang
+date: "2026-05-24"
+categories:
+  - example
+subtitle: >
+  A placeholder project entry showing the layout. Replace with real projects.
+description: |
+  This is a placeholder demonstrating how a project listing entry is structured.
+  Drop a `featured.png` (or `featured.jpg`) in this folder for the cover image,
+  add real content below, and rename the folder to your dated project slug
+  (`YYYY-MM-DD-project-slug`).
+links:
+- icon: github
+  name: Source
+  url: https://github.com/
+---
+
+## Overview
+
+Short summary of what this project is and why it exists.
+
+## What I learned
+
+A few takeaways from building it — things that worked, things that didn't, and what I'd do differently next time.
+
+## Tech
+
+- Tool / library 1
+- Tool / library 2
+- Tool / library 3
