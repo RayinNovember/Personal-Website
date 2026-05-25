@@ -1,6 +1,3 @@
 [build]
-  command = "quarto render"
+  command = "wget -qO- https://github.com/quarto-dev/quarto-cli/releases/download/v1.9.36/quarto-1.9.36-linux-amd64.tar.gz | tar -xz && ./quarto-1.9.36/bin/quarto render"
   publish = "_site"
-
-[build.environment]
-  QUARTO_VERSION = "1.9.36"
