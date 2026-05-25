@@ -8,6 +8,8 @@ listing:
     - "**/index.qmd"
     - "**/index.markdown"
     - "**/index.md"
+  exclude:
+    - path: "index.qmd"
   sort: "date desc"
   type: default
   categories: false

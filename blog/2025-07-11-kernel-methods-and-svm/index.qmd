@@ -1,0 +1,196 @@
+---
+title: "Kernel Methods and SVM"
+date: "2025-07-11"
+description: "An introduction to kernel methods, the kernel trick, and how kernels power Support Vector Machines."
+categories: [machine learning, SVM, kernels]
+image: ""
+draft: false
+---
+
+## Why Kernels?
+
+Adding non-linear features is a typical approach to reducing bias when building a machine learning model. Such features include two-way, three-way or even higher interaction terms.
+
+With the focus of machine learning models being prediction accuracy instead of model interpretability, one can add as many non-linear terms as possible, in the hope that the practice reveals hidden relationships among the data. However, when there are many original features, the non-linear terms can quickly become computationally expensive.
+
+Consider a d-dimensional feature vector $\mathbf{x}$:
+
+$$\mathbf{x} = \begin{pmatrix} x_1 \\ \vdots \\ x_d \end{pmatrix}$$
+
+where $x_1$ through $x_d$ represent the features of an observation. For example, if $\mathbf{x}$ represents the feature vector of a house, $x_1$ through $x_d$ could be area, year built, number of bedrooms, and other features of the house.
+
+To add as many interaction terms as possible, we can have a transformation $\phi(x)$ such that:
+
+$$\phi(x) = \begin{pmatrix} x_1 \\ \vdots \\ x_d \\ x_1x_2 \\ \vdots \\ x_{d-1}x_d \end{pmatrix}$$
+
+With a feature vector of length $d$, a transformation $\phi(x)$ that contains all possible interaction terms is of length $2^d$. As a result, the dimension of the transformed features becomes high and if we calculate the higher-dimension terms one by one, the training of the model may become slow or even unfeasible.
+
+So one may ask: is there an easier way to include the non-linear terms in a model in a cost-effective manner?
+
+The answer is something called the **kernel trick**. It allows us to build models with transformed features using the original features only, without ever having to calculate the actual high-dimension features.
+
+The kernel trick takes a two-step detour:
+
+1. Find a kernel function that takes low-dimension features and returns the **inner products** of high-dimension features.
+2. Find a machine learning model that takes the **inner products** of features among pairs of observations as input.
+
+## What are Kernels?
+
+Kernel functions take low-dimension features $x = \begin{pmatrix} x_1 \\ \vdots \\ x_d \end{pmatrix}$ as input and return the inner product of high-dimension features.
+
+Kernels often appear in the context of similarity, since the similarity of two observations is usually calculated as the inner product of their feature vectors.
+
+As a toy example, consider two observations with feature vectors $(180, 70)$ and $(160, 50)$.
+
+To calculate their similarity, we take the inner product:
+
+$$\langle \mathbf{x}, \mathbf{z} \rangle = 180 \times 160 + 70 \times 50$$
+
+Now suppose we wish to better represent the similarity by adding a non-linear transformation:
+
+$$\phi(\mathbf{x}) = (x_1^2,\ x_2^2,\ \sqrt{2}\,x_1 x_2)$$
+
+The inner product of two transformed vectors becomes:
+
+$$\langle \phi(\mathbf{x}), \phi(\mathbf{z}) \rangle = 180^2 \cdot 160^2 + 70^2 \cdot 50^2 + \sqrt{2} \cdot 180 \cdot 70 \cdot \sqrt{2} \cdot 160 \cdot 50 = 1{,}043{,}290{,}000$$
+
+This requires computing $\sqrt{2}\,x_1 x_2$ first — 11 multiplications and 2 summations in total.
+
+However, using the kernel function $K(\mathbf{x}, \mathbf{z}) = (\langle \mathbf{x}, \mathbf{z} \rangle)^2$:
+
+$$K(\mathbf{x}, \mathbf{z}) = (x_1 z_1 + x_2 z_2)^2 = (180 \times 160 + 70 \times 50)^2 = 1{,}043{,}290{,}000$$
+
+Only 3 multiplications and 1 summation — same result, far less computation. This demonstrates that kernel functions give us the inner product of high-dimensional features without ever computing those features directly.
+
+### Polynomial Kernel
+
+Suppose observation $x$ has two variables $x_1$ and $x_2$:
+
+$$x = \begin{pmatrix} x_1 \\ x_2 \end{pmatrix}$$
+
+We want to add a bias term plus the square and interaction terms:
+
+$$\phi(x) = \begin{pmatrix} 1 \\ x_1 \\ x_2 \\ x_1 x_2 \\ x_1^2 \\ x_2^2 \end{pmatrix}$$
+
+The inner product of two transformed observations is:
+
+$$\langle \phi(\mathbf{x}), \phi(\mathbf{z}) \rangle = 1 + x_1 z_1 + x_2 z_2 + x_1 x_2 z_1 z_2 + x_1^2 z_1^2 + x_2^2 z_2^2$$
+
+This is equivalent to the 2nd degree polynomial kernel:
+
+$$K_{\text{poly}(2)}(\mathbf{x}, \mathbf{z}) = (1 + \mathbf{x}^T \mathbf{z})^2$$
+
+To verify, expand the squared term:
+
+$$(1 + x_1 z_1 + x_2 z_2)^2 = 1 + x_1 z_1 + x_2 z_2 + x_1 x_2 z_1 z_2 + x_1^2 z_1^2 + x_2^2 z_2^2$$
+
+In general, the $n$-degree polynomial kernel is defined as:
+
+$$K_{\text{poly}(n)}(\mathbf{x}, \mathbf{z}) = (1 + \mathbf{x}^T \mathbf{z})^n$$
+
+Polynomial kernels are building blocks of the most powerful kernel — the radial basis function kernel.
+
+### The Radial Basis Function (RBF) Kernel
+
+The RBF kernel is defined as:
+
+$$K_{\text{RBF}}(x, z) = e^{-\frac{1}{2\sigma^2} \|x - z\|^2}$$
+
+It takes the idea of adding interaction terms to the extreme by considering an **infinite** number of interactions. To see why, expand the exponent:
+
+$$e^{-\frac{1}{2\sigma^2}(x-z)^T(x-z)} = e^{-\frac{1}{2\sigma^2}(x^T x - 2x^T z + z^T z)} = e^{-\frac{1}{2\sigma^2}(x^T x + z^T z)} \cdot e^{x^T z}$$
+
+$$= e^{-\frac{1}{2\sigma^2}(x^T x + z^T z)} \cdot e^{x^T z + 1} \cdot e^{-1}$$
+
+Gathering all terms except $e^{x^T z + 1}$ into a constant $C$:
+
+$$= C \cdot e^{x^T z + 1}$$
+
+By definition, $e^x = \sum_{n=0}^{\infty} \dfrac{x^n}{n!}$, so:
+
+$$e^{x^T z + 1} = \sum_{n=0}^{\infty} \frac{(1 + x^T z)^n}{n!}$$
+
+Notice that $(1 + \mathbf{x}^T \mathbf{z})^n$ is exactly the $n$-degree polynomial kernel $K_{\text{poly}(n)}$. Therefore, the RBF kernel is an **infinite sum of polynomial kernels** from degree 1 to $\infty$.
+
+## Kernelized Algorithms
+
+Kernel functions efficiently capture high-dimensional information using low-dimensional data. But how do they connect to building a machine learning model?
+
+It turns out that many models can be re-expressed so that they depend only on the **inner products** of feature vectors between pairs of observations. Two key examples are Linear Regression and Support Vector Machines.
+
+### Kernelized Linear Regression
+
+The conventional linear regression model can be re-expressed as a linear combination of inner products of input feature vectors.
+
+Denote the regression parameter vector as $\mathbf{w}$. The loss function is:
+
+$$\ell(\mathbf{w}) = \sum_{i=1}^{n} (\mathbf{w}^T x_i - y_i)^2$$
+
+Gradient descent updates $\mathbf{w}$ as:
+
+$$w_{t+1} = w_t - s \left(\frac{\partial \ell}{\partial \mathbf{w}}\right)$$
+
+where $s$ is the learning rate. The gradient can be expressed as a linear combination of input feature vectors:
+
+$$\frac{\partial \ell}{\partial \mathbf{w}} = \sum_{i=1}^{n} \underbrace{2(\mathbf{w}^T \mathbf{x}_i - y_i)}_{\gamma_i} \mathbf{x}_i = \sum_{i=1}^{n} \gamma_i \mathbf{x}_i$$
+
+By induction, if we express $\mathbf{w}$ as a linear combination of all input vectors:
+
+$$\mathbf{w} = \sum_{i=1}^{n} \alpha_i \mathbf{x}_i$$
+
+then gradient descent preserves this structure at every step:
+
+$$\mathbf{w}_1 = \sum_{i=1}^{n} \alpha_i^0 \mathbf{x}_i - s \sum_{i=1}^{n} \gamma_i^0 \mathbf{x}_i = \sum_{i=1}^{n} (\alpha_i^0 - s\gamma_i^0)\mathbf{x}_i = \sum_{i=1}^{n} \alpha_i^1 \mathbf{x}_i$$
+
+This means the prediction for the $j$th observation can be written entirely in terms of inner products:
+
+$$h(x_j) = \mathbf{w}^T x_j + b = \sum_{i=1}^{n} \alpha_i x_i^T x_j + b$$
+
+And for a new observation $\mathbf{z}$:
+
+$$h(\mathbf{z}) = \mathbf{w}^T \mathbf{z} + b = \sum_{i=1}^{n} \alpha_i x_i^T \mathbf{z} + b$$
+
+The prediction is a weighted sum of inner products between $\mathbf{z}$ and each training point $x_i$.
+
+### Support Vector Machine
+
+**Primal problem:**
+
+$$\min_{w,\, w_0} \frac{1}{2} w^T w \quad \text{s.t.} \quad \forall i: \ y_i(w^T x_i + w_0) \geq 1$$
+
+**Dual problem:**
+
+$$\min_{\alpha} \frac{1}{2} \sum_{i=1}^{n} \sum_{j=1}^{n} y_i y_j \alpha_i \alpha_j x_i^T x_j - \sum_{i=1}^{n} \alpha_i$$
+
+$$\text{s.t.} \quad 0 \leq \alpha_i \leq C, \quad \sum_{i=1}^{n} \alpha_i y_i = 0$$
+
+The optimization depends only on the inner products $x_i^T x_j$ between pairs of observations. Solving for $w$:
+
+$$w = \sum_{i=1}^{n} \alpha_i y_i x_i$$
+
+The decision rule for a new observation $\mathbf{z}$ is:
+
+$$h(\mathbf{z}) = \text{sign}\!\left(\sum_{i=1}^{n} \alpha_i y_i\, k(x_i, \mathbf{z}) + b\right)$$
+
+where $b$ is solved using $w$.
+
+#### SVM as a Smart Nearest Neighbor
+
+The k-nearest neighbor algorithm classifies as:
+
+$$h(\mathbf{z}) = \text{sign}\!\left(\sum_{i=1}^{n} y_i\, \delta^{nn}(x_i, \mathbf{z})\right)$$
+
+where $\delta^{nn}(x_i, \mathbf{z}) = 1$ if $x_i$ is among the $k$ nearest neighbors of $\mathbf{z}$, and $0$ otherwise.
+
+SVM can be seen as a smarter version of KNN with three additional components: $k(x_i, \mathbf{z}),\ \alpha_i,\ b$.
+
+- $k(x_i, \mathbf{z})$ acts as a **distance-based weight** — with the RBF kernel, the test point places a Gaussian around itself and weighs nearby points more heavily.
+- $\alpha_i$ **removes redundant training points** that are already classified correctly (support vectors are the only ones with $\alpha_i > 0$).
+- $b$ is the **bias term**.
+
+## References
+
+- Cornell CS4780 Lecture 13: <https://www.cs.cornell.edu/courses/cs4780/2018fa/lectures/lecturenote13.html>
+- Cornell CS4780 Lecture 14: <https://www.cs.cornell.edu/courses/cs4780/2018fa/lectures/lecturenote14.html>
+- Lecture video (Kernel Methods): <https://www.youtube.com/watch?v=RwF1esLCG4U>
+- Lecture video (SVM): <https://www.youtube.com/watch?v=_PwhiWxHK8o>

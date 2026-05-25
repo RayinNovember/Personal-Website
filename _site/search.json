@@ -42,27 +42,6 @@
     "text": "A code example, because every dev blog needs one\ndef greet(name: str) -&gt; str:\n    return f\"Hello, {name}!\"\n\nprint(greet(\"world\"))\nMore soon."
   },
   {
-    "objectID": "about/index.html",
-    "href": "about/index.html",
-    "title": "Ray Wang",
-    "section": "",
-    "text": "Hey, I’m Ray\n\nThanks for stopping by!\nI work as a data scientist at Wallick Communities, where I focus on reporting, analytics, and turning operational data into something useful for the rest of the business.\nOutside of work I’m on an ongoing learning journey through Python, statistics, and modern data tooling. This site is where I write things down — partly so future-me can find them, and partly in case they help someone else.\nGet in touch by sending me a note!"
-  },
-  {
-    "objectID": "about/index.html#about-me",
-    "href": "about/index.html#about-me",
-    "title": "Ray Wang",
-    "section": "About me",
-    "text": "About me\n\n\nReports and analytics by day, Python learner by night.\nMy day-to-day involves working with operational data — pulling it together, modeling it, and packaging it into reports and dashboards that help teams make decisions. I enjoy the slow craft of turning messy data into something legible.\n\n\nData Scientist ∙ Wallick Communities\n\n\n\n\nI’m always picking up new tools and ideas — currently spending a lot of time with Python, SQL, and the wider data ecosystem. I write up the things I learn (and the things that stumped me) on the blog, and the things I build show up in projects.\n\n\nCurrently learning ∙ Python & data science"
-  },
-  {
-    "objectID": "about/index.html#lately",
-    "href": "about/index.html#lately",
-    "title": "Ray Wang",
-    "section": "Lately …",
-    "text": "Lately …\n\n\nBlog\n\n\n\n\n\n\n\n\nHello, world\n\n\nA first post — what this blog is, and what I’ll be writing about.\n\n\n\n\n\nNo matching items\n\nSee all →\n\n\nProjects\n\n\n\n\n\n\n\n\nExample Project\n\n\nA placeholder project entry showing the layout. Replace with real projects.\n\n\n\n\n\nNo matching items\n\nSee all →"
-  },
-  {
     "objectID": "accessibility.html",
     "href": "accessibility.html",
     "title": "Accessibility commitment",
@@ -91,11 +70,67 @@
     "text": "Footnotes\n\n\nFor more on font accessibility, I recommend the talk Don’t Believe the Type! by The Readability Group.↩︎"
   },
   {
+    "objectID": "about/index.html",
+    "href": "about/index.html",
+    "title": "Ray Wang",
+    "section": "",
+    "text": "Hey, I’m Ray\n\nThanks for stopping by!\nI work as a data scientist at Wallick Communities, where I focus on reporting, analytics, and turning operational data into something useful for the rest of the business.\nOutside of work I’m on an ongoing learning journey through Python, statistics, and modern data tooling. This site is where I write things down — partly so future-me can find them, and partly in case they help someone else.\nGet in touch by sending me a note!"
+  },
+  {
+    "objectID": "about/index.html#about-me",
+    "href": "about/index.html#about-me",
+    "title": "Ray Wang",
+    "section": "About me",
+    "text": "About me\n\n\nReports and analytics by day, Python learner by night.\nMy day-to-day involves working with operational data — pulling it together, modeling it, and packaging it into reports and dashboards that help teams make decisions. I enjoy the slow craft of turning messy data into something legible.\n\n\nData Scientist ∙ Wallick Communities\n\n\n\n\nI’m always picking up new tools and ideas — currently spending a lot of time with Python, SQL, and the wider data ecosystem. I write up the things I learn (and the things that stumped me) on the blog, and the things I build show up in projects.\n\n\nCurrently learning ∙ Python & data science"
+  },
+  {
+    "objectID": "about/index.html#lately",
+    "href": "about/index.html#lately",
+    "title": "Ray Wang",
+    "section": "Lately …",
+    "text": "Lately …\n\n\nBlog\n\n\n\n\n\n\n\n\nHello, world\n\n\nA first post — what this blog is, and what I’ll be writing about.\n\n\n\n\n\nNo matching items\n\nSee all →\n\n\nProjects\n\n\n\n\n\n\n\n\nExample Project\n\n\nA placeholder project entry showing the layout. Replace with real projects.\n\n\n\n\n\nNo matching items\n\nSee all →"
+  },
+  {
+    "objectID": "blog/2025-07-11-kernel-methods-and-svm/index.html",
+    "href": "blog/2025-07-11-kernel-methods-and-svm/index.html",
+    "title": "Kernel Methods and SVM",
+    "section": "",
+    "text": "Adding non-linear features is a typical approach to reducing bias when building a machine learning model. Such features include two-way, three-way or even higher interaction terms.\nWith the focus of machine learning models being prediction accuracy instead of model interpretability, one can add as many non-linear terms as possible, in the hope that the practice reveals hidden relationships among the data. However, when there are many original features, the non-linear terms can quickly become computationally expensive.\nConsider a d-dimensional feature vector \\(\\mathbf{x}\\):\n\\[\\mathbf{x} = \\begin{pmatrix} x_1 \\\\ \\vdots \\\\ x_d \\end{pmatrix}\\]\nwhere \\(x_1\\) through \\(x_d\\) represent the features of an observation. For example, if \\(\\mathbf{x}\\) represents the feature vector of a house, \\(x_1\\) through \\(x_d\\) could be area, year built, number of bedrooms, and other features of the house.\nTo add as many interaction terms as possible, we can have a transformation \\(\\phi(x)\\) such that:\n\\[\\phi(x) = \\begin{pmatrix} x_1 \\\\ \\vdots \\\\ x_d \\\\ x_1x_2 \\\\ \\vdots \\\\ x_{d-1}x_d \\end{pmatrix}\\]\nWith a feature vector of length \\(d\\), a transformation \\(\\phi(x)\\) that contains all possible interaction terms is of length \\(2^d\\). As a result, the dimension of the transformed features becomes high and if we calculate the higher-dimension terms one by one, the training of the model may become slow or even unfeasible.\nSo one may ask: is there an easier way to include the non-linear terms in a model in a cost-effective manner?\nThe answer is something called the kernel trick. It allows us to build models with transformed features using the original features only, without ever having to calculate the actual high-dimension features.\nThe kernel trick takes a two-step detour:\n\nFind a kernel function that takes low-dimension features and returns the inner products of high-dimension features.\nFind a machine learning model that takes the inner products of features among pairs of observations as input."
+  },
+  {
+    "objectID": "blog/2025-07-11-kernel-methods-and-svm/index.html#why-kernels",
+    "href": "blog/2025-07-11-kernel-methods-and-svm/index.html#why-kernels",
+    "title": "Kernel Methods and SVM",
+    "section": "",
+    "text": "Adding non-linear features is a typical approach to reducing bias when building a machine learning model. Such features include two-way, three-way or even higher interaction terms.\nWith the focus of machine learning models being prediction accuracy instead of model interpretability, one can add as many non-linear terms as possible, in the hope that the practice reveals hidden relationships among the data. However, when there are many original features, the non-linear terms can quickly become computationally expensive.\nConsider a d-dimensional feature vector \\(\\mathbf{x}\\):\n\\[\\mathbf{x} = \\begin{pmatrix} x_1 \\\\ \\vdots \\\\ x_d \\end{pmatrix}\\]\nwhere \\(x_1\\) through \\(x_d\\) represent the features of an observation. For example, if \\(\\mathbf{x}\\) represents the feature vector of a house, \\(x_1\\) through \\(x_d\\) could be area, year built, number of bedrooms, and other features of the house.\nTo add as many interaction terms as possible, we can have a transformation \\(\\phi(x)\\) such that:\n\\[\\phi(x) = \\begin{pmatrix} x_1 \\\\ \\vdots \\\\ x_d \\\\ x_1x_2 \\\\ \\vdots \\\\ x_{d-1}x_d \\end{pmatrix}\\]\nWith a feature vector of length \\(d\\), a transformation \\(\\phi(x)\\) that contains all possible interaction terms is of length \\(2^d\\). As a result, the dimension of the transformed features becomes high and if we calculate the higher-dimension terms one by one, the training of the model may become slow or even unfeasible.\nSo one may ask: is there an easier way to include the non-linear terms in a model in a cost-effective manner?\nThe answer is something called the kernel trick. It allows us to build models with transformed features using the original features only, without ever having to calculate the actual high-dimension features.\nThe kernel trick takes a two-step detour:\n\nFind a kernel function that takes low-dimension features and returns the inner products of high-dimension features.\nFind a machine learning model that takes the inner products of features among pairs of observations as input."
+  },
+  {
+    "objectID": "blog/2025-07-11-kernel-methods-and-svm/index.html#what-are-kernels",
+    "href": "blog/2025-07-11-kernel-methods-and-svm/index.html#what-are-kernels",
+    "title": "Kernel Methods and SVM",
+    "section": "What are Kernels?",
+    "text": "What are Kernels?\nKernel functions take low-dimension features \\(x = \\begin{pmatrix} x_1 \\\\ \\vdots \\\\ x_d \\end{pmatrix}\\) as input and return the inner product of high-dimension features.\nKernels often appear in the context of similarity, since the similarity of two observations is usually calculated as the inner product of their feature vectors.\nAs a toy example, consider two observations with feature vectors \\((180, 70)\\) and \\((160, 50)\\).\nTo calculate their similarity, we take the inner product:\n\\[\\langle \\mathbf{x}, \\mathbf{z} \\rangle = 180 \\times 160 + 70 \\times 50\\]\nNow suppose we wish to better represent the similarity by adding a non-linear transformation:\n\\[\\phi(\\mathbf{x}) = (x_1^2,\\ x_2^2,\\ \\sqrt{2}\\,x_1 x_2)\\]\nThe inner product of two transformed vectors becomes:\n\\[\\langle \\phi(\\mathbf{x}), \\phi(\\mathbf{z}) \\rangle = 180^2 \\cdot 160^2 + 70^2 \\cdot 50^2 + \\sqrt{2} \\cdot 180 \\cdot 70 \\cdot \\sqrt{2} \\cdot 160 \\cdot 50 = 1{,}043{,}290{,}000\\]\nThis requires computing \\(\\sqrt{2}\\,x_1 x_2\\) first — 11 multiplications and 2 summations in total.\nHowever, using the kernel function \\(K(\\mathbf{x}, \\mathbf{z}) = (\\langle \\mathbf{x}, \\mathbf{z} \\rangle)^2\\):\n\\[K(\\mathbf{x}, \\mathbf{z}) = (x_1 z_1 + x_2 z_2)^2 = (180 \\times 160 + 70 \\times 50)^2 = 1{,}043{,}290{,}000\\]\nOnly 3 multiplications and 1 summation — same result, far less computation. This demonstrates that kernel functions give us the inner product of high-dimensional features without ever computing those features directly.\n\nPolynomial Kernel\nSuppose observation \\(x\\) has two variables \\(x_1\\) and \\(x_2\\):\n\\[x = \\begin{pmatrix} x_1 \\\\ x_2 \\end{pmatrix}\\]\nWe want to add a bias term plus the square and interaction terms:\n\\[\\phi(x) = \\begin{pmatrix} 1 \\\\ x_1 \\\\ x_2 \\\\ x_1 x_2 \\\\ x_1^2 \\\\ x_2^2 \\end{pmatrix}\\]\nThe inner product of two transformed observations is:\n\\[\\langle \\phi(\\mathbf{x}), \\phi(\\mathbf{z}) \\rangle = 1 + x_1 z_1 + x_2 z_2 + x_1 x_2 z_1 z_2 + x_1^2 z_1^2 + x_2^2 z_2^2\\]\nThis is equivalent to the 2nd degree polynomial kernel:\n\\[K_{\\text{poly}(2)}(\\mathbf{x}, \\mathbf{z}) = (1 + \\mathbf{x}^T \\mathbf{z})^2\\]\nTo verify, expand the squared term:\n\\[(1 + x_1 z_1 + x_2 z_2)^2 = 1 + x_1 z_1 + x_2 z_2 + x_1 x_2 z_1 z_2 + x_1^2 z_1^2 + x_2^2 z_2^2\\]\nIn general, the \\(n\\)-degree polynomial kernel is defined as:\n\\[K_{\\text{poly}(n)}(\\mathbf{x}, \\mathbf{z}) = (1 + \\mathbf{x}^T \\mathbf{z})^n\\]\nPolynomial kernels are building blocks of the most powerful kernel — the radial basis function kernel.\n\n\nThe Radial Basis Function (RBF) Kernel\nThe RBF kernel is defined as:\n\\[K_{\\text{RBF}}(x, z) = e^{-\\frac{1}{2\\sigma^2} \\|x - z\\|^2}\\]\nIt takes the idea of adding interaction terms to the extreme by considering an infinite number of interactions. To see why, expand the exponent:\n\\[e^{-\\frac{1}{2\\sigma^2}(x-z)^T(x-z)} = e^{-\\frac{1}{2\\sigma^2}(x^T x - 2x^T z + z^T z)} = e^{-\\frac{1}{2\\sigma^2}(x^T x + z^T z)} \\cdot e^{x^T z}\\]\n\\[= e^{-\\frac{1}{2\\sigma^2}(x^T x + z^T z)} \\cdot e^{x^T z + 1} \\cdot e^{-1}\\]\nGathering all terms except \\(e^{x^T z + 1}\\) into a constant \\(C\\):\n\\[= C \\cdot e^{x^T z + 1}\\]\nBy definition, \\(e^x = \\sum_{n=0}^{\\infty} \\dfrac{x^n}{n!}\\), so:\n\\[e^{x^T z + 1} = \\sum_{n=0}^{\\infty} \\frac{(1 + x^T z)^n}{n!}\\]\nNotice that \\((1 + \\mathbf{x}^T \\mathbf{z})^n\\) is exactly the \\(n\\)-degree polynomial kernel \\(K_{\\text{poly}(n)}\\). Therefore, the RBF kernel is an infinite sum of polynomial kernels from degree 1 to \\(\\infty\\)."
+  },
+  {
+    "objectID": "blog/2025-07-11-kernel-methods-and-svm/index.html#kernelized-algorithms",
+    "href": "blog/2025-07-11-kernel-methods-and-svm/index.html#kernelized-algorithms",
+    "title": "Kernel Methods and SVM",
+    "section": "Kernelized Algorithms",
+    "text": "Kernelized Algorithms\nKernel functions efficiently capture high-dimensional information using low-dimensional data. But how do they connect to building a machine learning model?\nIt turns out that many models can be re-expressed so that they depend only on the inner products of feature vectors between pairs of observations. Two key examples are Linear Regression and Support Vector Machines.\n\nKernelized Linear Regression\nThe conventional linear regression model can be re-expressed as a linear combination of inner products of input feature vectors.\nDenote the regression parameter vector as \\(\\mathbf{w}\\). The loss function is:\n\\[\\ell(\\mathbf{w}) = \\sum_{i=1}^{n} (\\mathbf{w}^T x_i - y_i)^2\\]\nGradient descent updates \\(\\mathbf{w}\\) as:\n\\[w_{t+1} = w_t - s \\left(\\frac{\\partial \\ell}{\\partial \\mathbf{w}}\\right)\\]\nwhere \\(s\\) is the learning rate. The gradient can be expressed as a linear combination of input feature vectors:\n\\[\\frac{\\partial \\ell}{\\partial \\mathbf{w}} = \\sum_{i=1}^{n} \\underbrace{2(\\mathbf{w}^T \\mathbf{x}_i - y_i)}_{\\gamma_i} \\mathbf{x}_i = \\sum_{i=1}^{n} \\gamma_i \\mathbf{x}_i\\]\nBy induction, if we express \\(\\mathbf{w}\\) as a linear combination of all input vectors:\n\\[\\mathbf{w} = \\sum_{i=1}^{n} \\alpha_i \\mathbf{x}_i\\]\nthen gradient descent preserves this structure at every step:\n\\[\\mathbf{w}_1 = \\sum_{i=1}^{n} \\alpha_i^0 \\mathbf{x}_i - s \\sum_{i=1}^{n} \\gamma_i^0 \\mathbf{x}_i = \\sum_{i=1}^{n} (\\alpha_i^0 - s\\gamma_i^0)\\mathbf{x}_i = \\sum_{i=1}^{n} \\alpha_i^1 \\mathbf{x}_i\\]\nThis means the prediction for the \\(j\\)th observation can be written entirely in terms of inner products:\n\\[h(x_j) = \\mathbf{w}^T x_j + b = \\sum_{i=1}^{n} \\alpha_i x_i^T x_j + b\\]\nAnd for a new observation \\(\\mathbf{z}\\):\n\\[h(\\mathbf{z}) = \\mathbf{w}^T \\mathbf{z} + b = \\sum_{i=1}^{n} \\alpha_i x_i^T \\mathbf{z} + b\\]\nThe prediction is a weighted sum of inner products between \\(\\mathbf{z}\\) and each training point \\(x_i\\).\n\n\nSupport Vector Machine\nPrimal problem:\n\\[\\min_{w,\\, w_0} \\frac{1}{2} w^T w \\quad \\text{s.t.} \\quad \\forall i: \\ y_i(w^T x_i + w_0) \\geq 1\\]\nDual problem:\n\\[\\min_{\\alpha} \\frac{1}{2} \\sum_{i=1}^{n} \\sum_{j=1}^{n} y_i y_j \\alpha_i \\alpha_j x_i^T x_j - \\sum_{i=1}^{n} \\alpha_i\\]\n\\[\\text{s.t.} \\quad 0 \\leq \\alpha_i \\leq C, \\quad \\sum_{i=1}^{n} \\alpha_i y_i = 0\\]\nThe optimization depends only on the inner products \\(x_i^T x_j\\) between pairs of observations. Solving for \\(w\\):\n\\[w = \\sum_{i=1}^{n} \\alpha_i y_i x_i\\]\nThe decision rule for a new observation \\(\\mathbf{z}\\) is:\n\\[h(\\mathbf{z}) = \\text{sign}\\!\\left(\\sum_{i=1}^{n} \\alpha_i y_i\\, k(x_i, \\mathbf{z}) + b\\right)\\]\nwhere \\(b\\) is solved using \\(w\\).\n\nSVM as a Smart Nearest Neighbor\nThe k-nearest neighbor algorithm classifies as:\n\\[h(\\mathbf{z}) = \\text{sign}\\!\\left(\\sum_{i=1}^{n} y_i\\, \\delta^{nn}(x_i, \\mathbf{z})\\right)\\]\nwhere \\(\\delta^{nn}(x_i, \\mathbf{z}) = 1\\) if \\(x_i\\) is among the \\(k\\) nearest neighbors of \\(\\mathbf{z}\\), and \\(0\\) otherwise.\nSVM can be seen as a smarter version of KNN with three additional components: \\(k(x_i, \\mathbf{z}),\\ \\alpha_i,\\ b\\).\n\n\\(k(x_i, \\mathbf{z})\\) acts as a distance-based weight — with the RBF kernel, the test point places a Gaussian around itself and weighs nearby points more heavily.\n\\(\\alpha_i\\) removes redundant training points that are already classified correctly (support vectors are the only ones with \\(\\alpha_i &gt; 0\\)).\n\\(b\\) is the bias term."
+  },
+  {
+    "objectID": "blog/2025-07-11-kernel-methods-and-svm/index.html#references",
+    "href": "blog/2025-07-11-kernel-methods-and-svm/index.html#references",
+    "title": "Kernel Methods and SVM",
+    "section": "References",
+    "text": "References\n\nCornell CS4780 Lecture 13: https://www.cs.cornell.edu/courses/cs4780/2018fa/lectures/lecturenote13.html\nCornell CS4780 Lecture 14: https://www.cs.cornell.edu/courses/cs4780/2018fa/lectures/lecturenote14.html\nLecture video (Kernel Methods): https://www.youtube.com/watch?v=RwF1esLCG4U\nLecture video (SVM): https://www.youtube.com/watch?v=_PwhiWxHK8o"
+  },
+  {
     "objectID": "blog/index.html",
     "href": "blog/index.html",
     "title": "Blog",
     "section": "",
-    "text": "Hello, world\n\n\n\nmeta\n\n\n\n\n\n\nMay 24, 2026\n\n\nRay Wang\n\n\n\n\n\nNo matching items\n Back to topReuseCC BY-SA 4.0"
+    "text": "Hello, world\n\n\n\nmeta\n\n\n\n\n\n\nMay 24, 2026\n\n\nRay Wang\n\n\n\n\n\n\n\n\n\n\n\n\nKernel Methods and SVM\n\n\n\nmachine learning\n\nSVM\n\nkernels\n\n\n\n\n\n\nJul 11, 2025\n\n\n\n\n\nNo matching items\n Back to topReuseCC BY-SA 4.0"
   },
   {
     "objectID": "index.html",
