@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss  xmlns:atom="http://www.w3.org/2005/Atom" 
+      xmlns:media="http://search.yahoo.com/mrss/" 
+      xmlns:content="http://purl.org/rss/1.0/modules/content/" 
+      xmlns:dc="http://purl.org/dc/elements/1.1/" 
+      version="2.0">
+<channel>
+<title>Ray Wang</title>
+<link>https://changruiraywang.com/blog/</link>
+<atom:link href="https://changruiraywang.com/blog/index.xml" rel="self" type="application/rss+xml"/>
+<description>Notes and write-ups from my data and Python learning journey.&lt;br&gt;
+Half tutorials for future-me, half things I wish I&#39;d known sooner.
+</description>
+<generator>quarto-1.9.36</generator>
+<lastBuildDate>Sun, 24 May 2026 04:00:00 GMT</lastBuildDate>
+<item>
+  <title>Hello, world</title>
+  <dc:creator>Ray Wang</dc:creator>
+  <link>https://changruiraywang.com/blog/2026-05-24-hello-world/</link>
+  <description><![CDATA[ 
+
+
+<!-- source: https://github.com/gadenbuie/garrickadenbuie-com/blob/main/_partials/title-block-link-buttons/title-block.html -->
+<!-- 
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title"> 
+-->
+<!-- <header id="title-block-header" class="quarto-title-block default page-columns"> -->
+<!-- <div class="quarto-title page-columns page-full featured-image p-4" style="background-image: url(featured.png), url(featured.jpg), url(../featured.jpg);"> -->
+
+
+
+<p>This is the first post on my blog. I’m Ray, a data scientist at Wallick Communities, and this site is where I’ll be writing about what I’m learning — mostly Python, SQL, and bits of the wider data ecosystem.</p>
+<section id="what-to-expect" class="level2">
+<h2 class="anchored" data-anchor-id="what-to-expect">What to expect</h2>
+<p>A few categories of posts I’m planning:</p>
+<ul>
+<li><strong>Notes from learning Python</strong> — small things I had to figure out the hard way.</li>
+<li><strong>Working with data</strong> — patterns I find useful for reports and analytics work.</li>
+<li><strong>Tooling</strong> — the editors, libraries, and workflows I’ve settled on (and the ones I bounced off of).</li>
+</ul>
+<p>If a post helps you, I’d love to hear about it.</p>
+</section>
+<section id="a-code-example-because-every-dev-blog-needs-one" class="level2">
+<h2 class="anchored" data-anchor-id="a-code-example-because-every-dev-blog-needs-one">A code example, because every dev blog needs one</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> greet(name: <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">str</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-&gt;</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">str</span>:</span>
+<span id="cb1-2">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> <span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"Hello, </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>name<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">!"</span></span>
+<span id="cb1-3"></span>
+<span id="cb1-4"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(greet(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"world"</span>))</span></code></pre></div></div>
+<p>More soon.</p>
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" id="quarto-reuse"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></div></div></section><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-wang2026" class="csl-entry quarto-appendix-citeas">
+Wang, Ray. 2026. <span>“Hello, World.”</span> May 24. <a href="https://changruiraywang.com/blog/2026-05-24-hello-world/">https://changruiraywang.com/blog/2026-05-24-hello-world/</a>.
+</div></div></section></div> ]]></description>
+  <category>meta</category>
+  <guid>https://changruiraywang.com/blog/2026-05-24-hello-world/</guid>
+  <pubDate>Sun, 24 May 2026 04:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>Kernel Methods and SVM</title>
+  <dc:creator>Ray Wang</dc:creator>
+  <link>https://changruiraywang.com/blog/2025-07-11-kernel-methods-and-svm/</link>
+  <description><![CDATA[ 
+
+
+<!-- source: https://github.com/gadenbuie/garrickadenbuie-com/blob/main/_partials/title-block-link-buttons/title-block.html -->
+<!-- 
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title"> 
+-->
+<!-- <header id="title-block-header" class="quarto-title-block default page-columns"> -->
+<!-- <div class="quarto-title page-columns page-full featured-image p-4" style="background-image: url(featured.png), url(featured.jpg), url(../featured.jpg);"> -->
+
+
+
+<section id="why-kernels" class="level2">
+<h2 class="anchored" data-anchor-id="why-kernels">Why Kernels?</h2>
+<p>Adding non-linear features is a typical approach to reducing bias when building a machine learning model. Such features include two-way, three-way or even higher interaction terms.</p>
+<p>With the focus of machine learning models being prediction accuracy instead of model interpretability, one can add as many non-linear terms as possible, in the hope that the practice reveals hidden relationships among the data. However, when there are many original features, the non-linear terms can quickly become computationally expensive.</p>
+<p>Consider a d-dimensional feature vector <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bx%7D">:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bx%7D%20=%20%5Cbegin%7Bpmatrix%7D%20x_1%20%5C%5C%20%5Cvdots%20%5C%5C%20x_d%20%5Cend%7Bpmatrix%7D"></p>
+<p>where <img src="https://latex.codecogs.com/png.latex?x_1"> through <img src="https://latex.codecogs.com/png.latex?x_d"> represent the features of an observation. For example, if <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bx%7D"> represents the feature vector of a house, <img src="https://latex.codecogs.com/png.latex?x_1"> through <img src="https://latex.codecogs.com/png.latex?x_d"> could be area, year built, number of bedrooms, and other features of the house.</p>
+<p>To add as many interaction terms as possible, we can have a transformation <img src="https://latex.codecogs.com/png.latex?%5Cphi(x)"> such that:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Cphi(x)%20=%20%5Cbegin%7Bpmatrix%7D%20x_1%20%5C%5C%20%5Cvdots%20%5C%5C%20x_d%20%5C%5C%20x_1x_2%20%5C%5C%20%5Cvdots%20%5C%5C%20x_%7Bd-1%7Dx_d%20%5Cend%7Bpmatrix%7D"></p>
+<p>With a feature vector of length <img src="https://latex.codecogs.com/png.latex?d">, a transformation <img src="https://latex.codecogs.com/png.latex?%5Cphi(x)"> that contains all possible interaction terms is of length <img src="https://latex.codecogs.com/png.latex?2%5Ed">. As a result, the dimension of the transformed features becomes high and if we calculate the higher-dimension terms one by one, the training of the model may become slow or even unfeasible.</p>
+<p>So one may ask: is there an easier way to include the non-linear terms in a model in a cost-effective manner?</p>
+<p>The answer is something called the <strong>kernel trick</strong>. It allows us to build models with transformed features using the original features only, without ever having to calculate the actual high-dimension features.</p>
+<p>The kernel trick takes a two-step detour:</p>
+<ol type="1">
+<li>Find a kernel function that takes low-dimension features and returns the <strong>inner products</strong> of high-dimension features.</li>
+<li>Find a machine learning model that takes the <strong>inner products</strong> of features among pairs of observations as input.</li>
+</ol>
+</section>
+<section id="what-are-kernels" class="level2">
+<h2 class="anchored" data-anchor-id="what-are-kernels">What are Kernels?</h2>
+<p>Kernel functions take low-dimension features <img src="https://latex.codecogs.com/png.latex?x%20=%20%5Cbegin%7Bpmatrix%7D%20x_1%20%5C%5C%20%5Cvdots%20%5C%5C%20x_d%20%5Cend%7Bpmatrix%7D"> as input and return the inner product of high-dimension features.</p>
+<p>Kernels often appear in the context of similarity, since the similarity of two observations is usually calculated as the inner product of their feature vectors.</p>
+<p>As a toy example, consider two observations with feature vectors <img src="https://latex.codecogs.com/png.latex?(180,%2070)"> and <img src="https://latex.codecogs.com/png.latex?(160,%2050)">.</p>
+<p>To calculate their similarity, we take the inner product:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Clangle%20%5Cmathbf%7Bx%7D,%20%5Cmathbf%7Bz%7D%20%5Crangle%20=%20180%20%5Ctimes%20160%20+%2070%20%5Ctimes%2050"></p>
+<p>Now suppose we wish to better represent the similarity by adding a non-linear transformation:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Cphi(%5Cmathbf%7Bx%7D)%20=%20(x_1%5E2,%5C%20x_2%5E2,%5C%20%5Csqrt%7B2%7D%5C,x_1%20x_2)"></p>
+<p>The inner product of two transformed vectors becomes:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Clangle%20%5Cphi(%5Cmathbf%7Bx%7D),%20%5Cphi(%5Cmathbf%7Bz%7D)%20%5Crangle%20=%20180%5E2%20%5Ccdot%20160%5E2%20+%2070%5E2%20%5Ccdot%2050%5E2%20+%20%5Csqrt%7B2%7D%20%5Ccdot%20180%20%5Ccdot%2070%20%5Ccdot%20%5Csqrt%7B2%7D%20%5Ccdot%20160%20%5Ccdot%2050%20=%201%7B,%7D043%7B,%7D290%7B,%7D000"></p>
+<p>This requires computing <img src="https://latex.codecogs.com/png.latex?%5Csqrt%7B2%7D%5C,x_1%20x_2"> first — 11 multiplications and 2 summations in total.</p>
+<p>However, using the kernel function <img src="https://latex.codecogs.com/png.latex?K(%5Cmathbf%7Bx%7D,%20%5Cmathbf%7Bz%7D)%20=%20(%5Clangle%20%5Cmathbf%7Bx%7D,%20%5Cmathbf%7Bz%7D%20%5Crangle)%5E2">:</p>
+<p><img src="https://latex.codecogs.com/png.latex?K(%5Cmathbf%7Bx%7D,%20%5Cmathbf%7Bz%7D)%20=%20(x_1%20z_1%20+%20x_2%20z_2)%5E2%20=%20(180%20%5Ctimes%20160%20+%2070%20%5Ctimes%2050)%5E2%20=%201%7B,%7D043%7B,%7D290%7B,%7D000"></p>
+<p>Only 3 multiplications and 1 summation — same result, far less computation. This demonstrates that kernel functions give us the inner product of high-dimensional features without ever computing those features directly.</p>
+<section id="polynomial-kernel" class="level3">
+<h3 class="anchored" data-anchor-id="polynomial-kernel">Polynomial Kernel</h3>
+<p>Suppose observation <img src="https://latex.codecogs.com/png.latex?x"> has two variables <img src="https://latex.codecogs.com/png.latex?x_1"> and <img src="https://latex.codecogs.com/png.latex?x_2">:</p>
+<p><img src="https://latex.codecogs.com/png.latex?x%20=%20%5Cbegin%7Bpmatrix%7D%20x_1%20%5C%5C%20x_2%20%5Cend%7Bpmatrix%7D"></p>
+<p>We want to add a bias term plus the square and interaction terms:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Cphi(x)%20=%20%5Cbegin%7Bpmatrix%7D%201%20%5C%5C%20x_1%20%5C%5C%20x_2%20%5C%5C%20x_1%20x_2%20%5C%5C%20x_1%5E2%20%5C%5C%20x_2%5E2%20%5Cend%7Bpmatrix%7D"></p>
+<p>The inner product of two transformed observations is:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Clangle%20%5Cphi(%5Cmathbf%7Bx%7D),%20%5Cphi(%5Cmathbf%7Bz%7D)%20%5Crangle%20=%201%20+%20x_1%20z_1%20+%20x_2%20z_2%20+%20x_1%20x_2%20z_1%20z_2%20+%20x_1%5E2%20z_1%5E2%20+%20x_2%5E2%20z_2%5E2"></p>
+<p>This is equivalent to the 2nd degree polynomial kernel:</p>
+<p><img src="https://latex.codecogs.com/png.latex?K_%7B%5Ctext%7Bpoly%7D(2)%7D(%5Cmathbf%7Bx%7D,%20%5Cmathbf%7Bz%7D)%20=%20(1%20+%20%5Cmathbf%7Bx%7D%5ET%20%5Cmathbf%7Bz%7D)%5E2"></p>
+<p>To verify, expand the squared term:</p>
+<p><img src="https://latex.codecogs.com/png.latex?(1%20+%20x_1%20z_1%20+%20x_2%20z_2)%5E2%20=%201%20+%20x_1%20z_1%20+%20x_2%20z_2%20+%20x_1%20x_2%20z_1%20z_2%20+%20x_1%5E2%20z_1%5E2%20+%20x_2%5E2%20z_2%5E2"></p>
+<p>In general, the <img src="https://latex.codecogs.com/png.latex?n">-degree polynomial kernel is defined as:</p>
+<p><img src="https://latex.codecogs.com/png.latex?K_%7B%5Ctext%7Bpoly%7D(n)%7D(%5Cmathbf%7Bx%7D,%20%5Cmathbf%7Bz%7D)%20=%20(1%20+%20%5Cmathbf%7Bx%7D%5ET%20%5Cmathbf%7Bz%7D)%5En"></p>
+<p>Polynomial kernels are building blocks of the most powerful kernel — the radial basis function kernel.</p>
+</section>
+<section id="the-radial-basis-function-rbf-kernel" class="level3">
+<h3 class="anchored" data-anchor-id="the-radial-basis-function-rbf-kernel">The Radial Basis Function (RBF) Kernel</h3>
+<p>The RBF kernel is defined as:</p>
+<p><img src="https://latex.codecogs.com/png.latex?K_%7B%5Ctext%7BRBF%7D%7D(x,%20z)%20=%20e%5E%7B-%5Cfrac%7B1%7D%7B2%5Csigma%5E2%7D%20%5C%7Cx%20-%20z%5C%7C%5E2%7D"></p>
+<p>It takes the idea of adding interaction terms to the extreme by considering an <strong>infinite</strong> number of interactions. To see why, expand the exponent:</p>
+<p><img src="https://latex.codecogs.com/png.latex?e%5E%7B-%5Cfrac%7B1%7D%7B2%5Csigma%5E2%7D(x-z)%5ET(x-z)%7D%20=%20e%5E%7B-%5Cfrac%7B1%7D%7B2%5Csigma%5E2%7D(x%5ET%20x%20-%202x%5ET%20z%20+%20z%5ET%20z)%7D%20=%20e%5E%7B-%5Cfrac%7B1%7D%7B2%5Csigma%5E2%7D(x%5ET%20x%20+%20z%5ET%20z)%7D%20%5Ccdot%20e%5E%7Bx%5ET%20z%7D"></p>
+<p><img src="https://latex.codecogs.com/png.latex?=%20e%5E%7B-%5Cfrac%7B1%7D%7B2%5Csigma%5E2%7D(x%5ET%20x%20+%20z%5ET%20z)%7D%20%5Ccdot%20e%5E%7Bx%5ET%20z%20+%201%7D%20%5Ccdot%20e%5E%7B-1%7D"></p>
+<p>Gathering all terms except <img src="https://latex.codecogs.com/png.latex?e%5E%7Bx%5ET%20z%20+%201%7D"> into a constant <img src="https://latex.codecogs.com/png.latex?C">:</p>
+<p><img src="https://latex.codecogs.com/png.latex?=%20C%20%5Ccdot%20e%5E%7Bx%5ET%20z%20+%201%7D"></p>
+<p>By definition, <img src="https://latex.codecogs.com/png.latex?e%5Ex%20=%20%5Csum_%7Bn=0%7D%5E%7B%5Cinfty%7D%20%5Cdfrac%7Bx%5En%7D%7Bn!%7D">, so:</p>
+<p><img src="https://latex.codecogs.com/png.latex?e%5E%7Bx%5ET%20z%20+%201%7D%20=%20%5Csum_%7Bn=0%7D%5E%7B%5Cinfty%7D%20%5Cfrac%7B(1%20+%20x%5ET%20z)%5En%7D%7Bn!%7D"></p>
+<p>Notice that <img src="https://latex.codecogs.com/png.latex?(1%20+%20%5Cmathbf%7Bx%7D%5ET%20%5Cmathbf%7Bz%7D)%5En"> is exactly the <img src="https://latex.codecogs.com/png.latex?n">-degree polynomial kernel <img src="https://latex.codecogs.com/png.latex?K_%7B%5Ctext%7Bpoly%7D(n)%7D">. Therefore, the RBF kernel is an <strong>infinite sum of polynomial kernels</strong> from degree 1 to <img src="https://latex.codecogs.com/png.latex?%5Cinfty">.</p>
+</section>
+</section>
+<section id="kernelized-algorithms" class="level2">
+<h2 class="anchored" data-anchor-id="kernelized-algorithms">Kernelized Algorithms</h2>
+<p>Kernel functions efficiently capture high-dimensional information using low-dimensional data. But how do they connect to building a machine learning model?</p>
+<p>It turns out that many models can be re-expressed so that they depend only on the <strong>inner products</strong> of feature vectors between pairs of observations. Two key examples are Linear Regression and Support Vector Machines.</p>
+<section id="kernelized-linear-regression" class="level3">
+<h3 class="anchored" data-anchor-id="kernelized-linear-regression">Kernelized Linear Regression</h3>
+<p>The conventional linear regression model can be re-expressed as a linear combination of inner products of input feature vectors.</p>
+<p>Denote the regression parameter vector as <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bw%7D">. The loss function is:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Cell(%5Cmathbf%7Bw%7D)%20=%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20(%5Cmathbf%7Bw%7D%5ET%20x_i%20-%20y_i)%5E2"></p>
+<p>Gradient descent updates <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bw%7D"> as:</p>
+<p><img src="https://latex.codecogs.com/png.latex?w_%7Bt+1%7D%20=%20w_t%20-%20s%20%5Cleft(%5Cfrac%7B%5Cpartial%20%5Cell%7D%7B%5Cpartial%20%5Cmathbf%7Bw%7D%7D%5Cright)"></p>
+<p>where <img src="https://latex.codecogs.com/png.latex?s"> is the learning rate. The gradient can be expressed as a linear combination of input feature vectors:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Cfrac%7B%5Cpartial%20%5Cell%7D%7B%5Cpartial%20%5Cmathbf%7Bw%7D%7D%20=%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Cunderbrace%7B2(%5Cmathbf%7Bw%7D%5ET%20%5Cmathbf%7Bx%7D_i%20-%20y_i)%7D_%7B%5Cgamma_i%7D%20%5Cmathbf%7Bx%7D_i%20=%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Cgamma_i%20%5Cmathbf%7Bx%7D_i"></p>
+<p>By induction, if we express <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bw%7D"> as a linear combination of all input vectors:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bw%7D%20=%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Calpha_i%20%5Cmathbf%7Bx%7D_i"></p>
+<p>then gradient descent preserves this structure at every step:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bw%7D_1%20=%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Calpha_i%5E0%20%5Cmathbf%7Bx%7D_i%20-%20s%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Cgamma_i%5E0%20%5Cmathbf%7Bx%7D_i%20=%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20(%5Calpha_i%5E0%20-%20s%5Cgamma_i%5E0)%5Cmathbf%7Bx%7D_i%20=%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Calpha_i%5E1%20%5Cmathbf%7Bx%7D_i"></p>
+<p>This means the prediction for the <img src="https://latex.codecogs.com/png.latex?j">th observation can be written entirely in terms of inner products:</p>
+<p><img src="https://latex.codecogs.com/png.latex?h(x_j)%20=%20%5Cmathbf%7Bw%7D%5ET%20x_j%20+%20b%20=%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Calpha_i%20x_i%5ET%20x_j%20+%20b"></p>
+<p>And for a new observation <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bz%7D">:</p>
+<p><img src="https://latex.codecogs.com/png.latex?h(%5Cmathbf%7Bz%7D)%20=%20%5Cmathbf%7Bw%7D%5ET%20%5Cmathbf%7Bz%7D%20+%20b%20=%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Calpha_i%20x_i%5ET%20%5Cmathbf%7Bz%7D%20+%20b"></p>
+<p>The prediction is a weighted sum of inner products between <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bz%7D"> and each training point <img src="https://latex.codecogs.com/png.latex?x_i">.</p>
+</section>
+<section id="support-vector-machine" class="level3">
+<h3 class="anchored" data-anchor-id="support-vector-machine">Support Vector Machine</h3>
+<p><strong>Primal problem:</strong></p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Cmin_%7Bw,%5C,%20w_0%7D%20%5Cfrac%7B1%7D%7B2%7D%20w%5ET%20w%20%5Cquad%20%5Ctext%7Bs.t.%7D%20%5Cquad%20%5Cforall%20i:%20%5C%20y_i(w%5ET%20x_i%20+%20w_0)%20%5Cgeq%201"></p>
+<p><strong>Dual problem:</strong></p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Cmin_%7B%5Calpha%7D%20%5Cfrac%7B1%7D%7B2%7D%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Csum_%7Bj=1%7D%5E%7Bn%7D%20y_i%20y_j%20%5Calpha_i%20%5Calpha_j%20x_i%5ET%20x_j%20-%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Calpha_i"></p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Ctext%7Bs.t.%7D%20%5Cquad%200%20%5Cleq%20%5Calpha_i%20%5Cleq%20C,%20%5Cquad%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Calpha_i%20y_i%20=%200"></p>
+<p>The optimization depends only on the inner products <img src="https://latex.codecogs.com/png.latex?x_i%5ET%20x_j"> between pairs of observations. Solving for <img src="https://latex.codecogs.com/png.latex?w">:</p>
+<p><img src="https://latex.codecogs.com/png.latex?w%20=%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Calpha_i%20y_i%20x_i"></p>
+<p>The decision rule for a new observation <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bz%7D"> is:</p>
+<p><img src="https://latex.codecogs.com/png.latex?h(%5Cmathbf%7Bz%7D)%20=%20%5Ctext%7Bsign%7D%5C!%5Cleft(%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Calpha_i%20y_i%5C,%20k(x_i,%20%5Cmathbf%7Bz%7D)%20+%20b%5Cright)"></p>
+<p>where <img src="https://latex.codecogs.com/png.latex?b"> is solved using <img src="https://latex.codecogs.com/png.latex?w">.</p>
+<section id="svm-as-a-smart-nearest-neighbor" class="level4">
+<h4 class="anchored" data-anchor-id="svm-as-a-smart-nearest-neighbor">SVM as a Smart Nearest Neighbor</h4>
+<p>The k-nearest neighbor algorithm classifies as:</p>
+<p><img src="https://latex.codecogs.com/png.latex?h(%5Cmathbf%7Bz%7D)%20=%20%5Ctext%7Bsign%7D%5C!%5Cleft(%5Csum_%7Bi=1%7D%5E%7Bn%7D%20y_i%5C,%20%5Cdelta%5E%7Bnn%7D(x_i,%20%5Cmathbf%7Bz%7D)%5Cright)"></p>
+<p>where <img src="https://latex.codecogs.com/png.latex?%5Cdelta%5E%7Bnn%7D(x_i,%20%5Cmathbf%7Bz%7D)%20=%201"> if <img src="https://latex.codecogs.com/png.latex?x_i"> is among the <img src="https://latex.codecogs.com/png.latex?k"> nearest neighbors of <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bz%7D">, and <img src="https://latex.codecogs.com/png.latex?0"> otherwise.</p>
+<p>SVM can be seen as a smarter version of KNN with three additional components: <img src="https://latex.codecogs.com/png.latex?k(x_i,%20%5Cmathbf%7Bz%7D),%5C%20%5Calpha_i,%5C%20b">.</p>
+<ul>
+<li><img src="https://latex.codecogs.com/png.latex?k(x_i,%20%5Cmathbf%7Bz%7D)"> acts as a <strong>distance-based weight</strong> — with the RBF kernel, the test point places a Gaussian around itself and weighs nearby points more heavily.</li>
+<li><img src="https://latex.codecogs.com/png.latex?%5Calpha_i"> <strong>removes redundant training points</strong> that are already classified correctly (support vectors are the only ones with <img src="https://latex.codecogs.com/png.latex?%5Calpha_i%20%3E%200">).</li>
+<li><img src="https://latex.codecogs.com/png.latex?b"> is the <strong>bias term</strong>.</li>
+</ul>
+</section>
+</section>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+<ul>
+<li>Cornell CS4780 Lecture 13: <a href="https://www.cs.cornell.edu/courses/cs4780/2018fa/lectures/lecturenote13.html" class="uri">https://www.cs.cornell.edu/courses/cs4780/2018fa/lectures/lecturenote13.html</a></li>
+<li>Cornell CS4780 Lecture 14: <a href="https://www.cs.cornell.edu/courses/cs4780/2018fa/lectures/lecturenote14.html" class="uri">https://www.cs.cornell.edu/courses/cs4780/2018fa/lectures/lecturenote14.html</a></li>
+<li>Lecture video (Kernel Methods): <a href="https://www.youtube.com/watch?v=RwF1esLCG4U" class="uri">https://www.youtube.com/watch?v=RwF1esLCG4U</a></li>
+<li>Lecture video (SVM): <a href="https://www.youtube.com/watch?v=_PwhiWxHK8o" class="uri">https://www.youtube.com/watch?v=_PwhiWxHK8o</a></li>
+</ul>
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" id="quarto-reuse"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></div></div></section><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-wang2025" class="csl-entry quarto-appendix-citeas">
+Wang, Ray. 2025. <span>“Kernel Methods and SVM.”</span> July 11. <a href="https://changruiraywang.com/blog/2025-07-11-kernel-methods-and-svm/">https://changruiraywang.com/blog/2025-07-11-kernel-methods-and-svm/</a>.
+</div></div></section></div> ]]></description>
+  <category>machine learning</category>
+  <category>SVM</category>
+  <category>kernels</category>
+  <guid>https://changruiraywang.com/blog/2025-07-11-kernel-methods-and-svm/</guid>
+  <pubDate>Fri, 11 Jul 2025 04:00:00 GMT</pubDate>
+  <media:content url="https://changruiraywang.com/blog/2025-07-11-kernel-methods-and-svm/sidebar.jpg" medium="image" type="image/jpeg"/>
+</item>
+</channel>
+</rss>

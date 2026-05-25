@@ -5,7 +5,7 @@
 .DS_Store
 Thumbs.db
 /.quarto/
-/_site/
+#/_site/
 /_freeze/
 .hugo_build.lock
 /.luarc.json

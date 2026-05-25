@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Ray Wang monogram avatar">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1f4f74"/>
+      <stop offset="100%" stop-color="#002642"/>
+    </linearGradient>
+  </defs>
+  <circle cx="100" cy="100" r="100" fill="url(#bg)"/>
+  <text x="100" y="100"
+        text-anchor="middle"
+        dominant-baseline="central"
+        font-family="Petrona, Georgia, 'Times New Roman', serif"
+        font-size="86"
+        font-weight="500"
+        fill="#fdfdfd"
+        letter-spacing="-2">RW</text>
+</svg>
