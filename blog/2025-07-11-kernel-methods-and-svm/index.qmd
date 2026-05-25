@@ -3,7 +3,7 @@ title: "Kernel Methods and SVM"
 date: "2025-07-11"
 description: "An introduction to kernel methods, the kernel trick, and how kernels power Support Vector Machines."
 categories: [machine learning, SVM, kernels]
-image: ""
+image: sidebar.jpg
 draft: false
 ---
 
