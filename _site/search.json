@@ -4,91 +4,49 @@
     "href": "project/index.html",
     "title": "Projects",
     "section": "",
-    "text": "Example Project\n\n\n\nexample\n\n\n\n\nMay 24, 2026\n\n\n\n\n\n\nNo matching items\n Back to top"
+    "text": "Example Project\n\n\n\nexample\n\n\n\n\nMay 24, 2026\n\n\n\n\n\n\n\n\n\n\n\nPersonal Knowledge Librarian\n\n\n\npython\n\nllm\n\ntools\n\n\n\n\nApr 10, 2026\n\n\n\n\n\n\nNo matching items\n Back to top"
   },
   {
-    "objectID": "license.html",
-    "href": "license.html",
-    "title": "License",
+    "objectID": "project/2026-04-10-personal-knowledge-librarian/index.html",
+    "href": "project/2026-04-10-personal-knowledge-librarian/index.html",
+    "title": "Personal Knowledge Librarian",
     "section": "",
-    "text": "My blog posts are released under a Creative Commons Attribution-ShareAlike 4.0 International License.\n\n  \n\n\n\n\n Back to top"
+    "text": "I save a lot of links — articles, Kaggle notebooks, YouTube tutorials — and almost never go back to them because I can’t remember what was in them. The Knowledge Librarian solves that by turning every saved URL into a structured summary with tags and key concepts, then letting me search across everything with a natural language question.\nThe app uses Claude to extract and summarise content, and stores entries locally as a JSON index that can be queried by semantic similarity."
   },
   {
-    "objectID": "contact.html",
-    "href": "contact.html",
-    "title": "Send me a note ",
+    "objectID": "project/2026-04-10-personal-knowledge-librarian/index.html#overview",
+    "href": "project/2026-04-10-personal-knowledge-librarian/index.html#overview",
+    "title": "Personal Knowledge Librarian",
     "section": "",
-    "text": "You can use this form to contact me about projects, collaborations, or simply to say hello.\nI’m always happy to hear from folks working on similar data/Python journeys, or anyone with feedback on something I’ve written \n   \n\n\n\n\n\n\n\n\nFull Name \nEmail Address \nMessage\n\n\nSend message\n\n\n\n\n\n\n\n\n Back to top"
+    "text": "I save a lot of links — articles, Kaggle notebooks, YouTube tutorials — and almost never go back to them because I can’t remember what was in them. The Knowledge Librarian solves that by turning every saved URL into a structured summary with tags and key concepts, then letting me search across everything with a natural language question.\nThe app uses Claude to extract and summarise content, and stores entries locally as a JSON index that can be queried by semantic similarity."
   },
   {
-    "objectID": "blog/2026-05-24-hello-world/index.html",
-    "href": "blog/2026-05-24-hello-world/index.html",
-    "title": "Hello, world",
-    "section": "",
-    "text": "This is the first post on my blog. I’m Ray, a data scientist at Wallick Communities, and this site is where I’ll be writing about what I’m learning — mostly Python, SQL, and bits of the wider data ecosystem."
+    "objectID": "project/2026-04-10-personal-knowledge-librarian/index.html#what-i-learned",
+    "href": "project/2026-04-10-personal-knowledge-librarian/index.html#what-i-learned",
+    "title": "Personal Knowledge Librarian",
+    "section": "What I learned",
+    "text": "What I learned\n\nHow to use trafilatura for reliable web content extraction across different site types\nHandling different source types (YouTube descriptions, Kaggle pages, general web) with a unified interface\nStructuring a Streamlit app around a persistent local index\nThe gap between “works on my machine” and “works on Streamlit Cloud” — specifically around persistent storage, which resets on redeploy\n\nThe biggest design lesson: storing knowledge as structured JSON (with summary, tags, key_concepts, domain) is far more useful than storing raw text, because it makes search and filtering much more powerful."
   },
   {
-    "objectID": "blog/2026-05-24-hello-world/index.html#what-to-expect",
-    "href": "blog/2026-05-24-hello-world/index.html#what-to-expect",
-    "title": "Hello, world",
-    "section": "What to expect",
-    "text": "What to expect\nA few categories of posts I’m planning:\n\nNotes from learning Python — small things I had to figure out the hard way.\nWorking with data — patterns I find useful for reports and analytics work.\nTooling — the editors, libraries, and workflows I’ve settled on (and the ones I bounced off of).\n\nIf a post helps you, I’d love to hear about it."
+    "objectID": "project/2026-04-10-personal-knowledge-librarian/index.html#tech",
+    "href": "project/2026-04-10-personal-knowledge-librarian/index.html#tech",
+    "title": "Personal Knowledge Librarian",
+    "section": "Tech",
+    "text": "Tech\n\nPython\nStreamlit\nClaude API (Anthropic)\ntrafilatura (web content extraction)\nJSON (local knowledge index)"
   },
   {
-    "objectID": "blog/2026-05-24-hello-world/index.html#a-code-example-because-every-dev-blog-needs-one",
-    "href": "blog/2026-05-24-hello-world/index.html#a-code-example-because-every-dev-blog-needs-one",
-    "title": "Hello, world",
-    "section": "A code example, because every dev blog needs one",
-    "text": "A code example, because every dev blog needs one\ndef greet(name: str) -&gt; str:\n    return f\"Hello, {name}!\"\n\nprint(greet(\"world\"))\nMore soon."
-  },
-  {
-    "objectID": "accessibility.html",
-    "href": "accessibility.html",
-    "title": "Accessibility commitment",
-    "section": "",
-    "text": "Travel back to the home page or about page."
-  },
-  {
-    "objectID": "accessibility.html#feedback",
-    "href": "accessibility.html#feedback",
-    "title": "Accessibility commitment",
-    "section": "Feedback",
-    "text": "Feedback\nI welcome any feedback on the accessibility of this site. Please let me know if you encounter any accessibility barriers by using my contact form and I’ll do my best to respond promptly.\nThank you for visiting and for taking the time to read this page"
-  },
-  {
-    "objectID": "accessibility.html#accessibility-practices",
-    "href": "accessibility.html#accessibility-practices",
-    "title": "Accessibility commitment",
-    "section": "Accessibility practices",
-    "text": "Accessibility practices\nThis site has been designed with the following features in mind:\n\nA color palette that meets WCAG 2.1 AA standards for contrast\nAlternative text for all informative images\nReadable font faces, specifically to avoid impostor letter shapes and mirroring. This site primarily uses Red Hat Text, which is freely available and has been found to be relatively accessible to users with dyslexic traits and poor near vision.1\nA table of contents in the blog post sidebar for easier navigation\n\nI’m not a web developer, but my plan is to periodically audit this site for accessibility failures and learn how to remedy them as best I can. Tools I find useful:\n\nWAVE Web Accessibility Evaluation Tool"
-  },
-  {
-    "objectID": "accessibility.html#footnotes",
-    "href": "accessibility.html#footnotes",
-    "title": "Accessibility commitment",
-    "section": "Footnotes",
-    "text": "Footnotes\n\n\nFor more on font accessibility, I recommend the talk Don’t Believe the Type! by The Readability Group.↩︎"
-  },
-  {
-    "objectID": "about/index.html",
-    "href": "about/index.html",
+    "objectID": "index.html",
+    "href": "index.html",
     "title": "Ray Wang",
     "section": "",
-    "text": "Hey, I’m Ray\n\nThanks for stopping by!\nI work as a data scientist at Wallick Communities, where I focus on reporting, analytics, and turning operational data into something useful for the rest of the business.\nOutside of work I’m on an ongoing learning journey through Python, statistics, and modern data tooling. This site is where I write things down — partly so future-me can find them, and partly in case they help someone else.\nGet in touch by sending me a note!"
+    "text": "I’m a data scientist working at Wallick Communities, where I turn operational data into reports and insights that help the business run better. Outside of work I’m on a continuous learning journey through Python, statistics, and modern data tooling — and this site is where I share what I’m working on and what I’ve learned along the way.\nLearn more about me →\n\n    \n  \n\n\n\n\n\n\n\n Back to top"
   },
   {
-    "objectID": "about/index.html#about-me",
-    "href": "about/index.html#about-me",
-    "title": "Ray Wang",
-    "section": "About me",
-    "text": "About me\n\n\nReports and analytics by day, Python learner by night.\nMy day-to-day involves working with operational data — pulling it together, modeling it, and packaging it into reports and dashboards that help teams make decisions. I enjoy the slow craft of turning messy data into something legible.\n\n\nData Scientist ∙ Wallick Communities\n\n\n\n\nI’m always picking up new tools and ideas — currently spending a lot of time with Python, SQL, and the wider data ecosystem. I write up the things I learn (and the things that stumped me) on the blog, and the things I build show up in projects.\n\n\nCurrently learning ∙ Python & data science"
-  },
-  {
-    "objectID": "about/index.html#lately",
-    "href": "about/index.html#lately",
-    "title": "Ray Wang",
-    "section": "Lately …",
-    "text": "Lately …\n\n\nBlog\n\n\n\n\n\n\n\n\nHello, world\n\n\nA first post — what this blog is, and what I’ll be writing about.\n\n\n\n\n\nNo matching items\n\nSee all →\n\n\nProjects\n\n\n\n\n\n\n\n\nExample Project\n\n\nA placeholder project entry showing the layout. Replace with real projects.\n\n\n\n\n\nNo matching items\n\nSee all →"
+    "objectID": "blog/index.html",
+    "href": "blog/index.html",
+    "title": "Blog",
+    "section": "",
+    "text": "Hello, world\n\n\n\nmeta\n\n\n\n\n\n\nMay 24, 2026\n\n\nRay Wang\n\n\n\n\n\n\n\n\n\n\n\n\nKernel Methods and SVM\n\n\n\nmachine learning\n\nSVM\n\nkernels\n\n\n\n\n\n\nJul 11, 2025\n\n\nRay Wang\n\n\n\n\n\nNo matching items\n Back to topReuseCC BY-SA 4.0"
   },
   {
     "objectID": "blog/2025-07-11-kernel-methods-and-svm/index.html",
@@ -126,18 +84,88 @@
     "text": "References\n\nCornell CS4780 Lecture 13: https://www.cs.cornell.edu/courses/cs4780/2018fa/lectures/lecturenote13.html\nCornell CS4780 Lecture 14: https://www.cs.cornell.edu/courses/cs4780/2018fa/lectures/lecturenote14.html\nLecture video (Kernel Methods): https://www.youtube.com/watch?v=RwF1esLCG4U\nLecture video (SVM): https://www.youtube.com/watch?v=_PwhiWxHK8o"
   },
   {
-    "objectID": "blog/index.html",
-    "href": "blog/index.html",
-    "title": "Blog",
-    "section": "",
-    "text": "Hello, world\n\n\n\nmeta\n\n\n\n\n\n\nMay 24, 2026\n\n\nRay Wang\n\n\n\n\n\n\n\n\n\n\n\n\nKernel Methods and SVM\n\n\n\nmachine learning\n\nSVM\n\nkernels\n\n\n\n\n\n\nJul 11, 2025\n\n\n\n\n\nNo matching items\n Back to topReuseCC BY-SA 4.0"
-  },
-  {
-    "objectID": "index.html",
-    "href": "index.html",
+    "objectID": "about/index.html",
+    "href": "about/index.html",
     "title": "Ray Wang",
     "section": "",
-    "text": "I’m a data scientist working at Wallick Communities, where I turn operational data into reports and insights that help the business run better. Outside of work I’m on a continuous learning journey through Python, statistics, and modern data tooling — and this site is where I share what I’m working on and what I’ve learned along the way.\nLearn more about me →\n\n    \n  \n\n\n\n\n\n\n\n Back to top"
+    "text": "Hey, I’m Ray\n\nThanks for stopping by!\nI work as a data scientist at Wallick Communities, where I focus on reporting, analytics, and turning operational data into something useful for the rest of the business.\nOutside of work I’m on an ongoing learning journey through Python, statistics, and modern data tooling. This site is where I write things down — partly so future-me can find them, and partly in case they help someone else.\nGet in touch by sending me a note!"
+  },
+  {
+    "objectID": "about/index.html#about-me",
+    "href": "about/index.html#about-me",
+    "title": "Ray Wang",
+    "section": "About me",
+    "text": "About me\n\n\nReports and analytics by day, Python learner by night.\nMy day-to-day involves working with operational data — pulling it together, modeling it, and packaging it into reports and dashboards that help teams make decisions. I enjoy the slow craft of turning messy data into something legible.\n\n\nData Scientist ∙ Wallick Communities\n\n\n\n\nI’m always picking up new tools and ideas — currently spending a lot of time with Python, SQL, and the wider data ecosystem. I write up the things I learn (and the things that stumped me) on the blog, and the things I build show up in projects.\n\n\nCurrently learning ∙ Python & data science"
+  },
+  {
+    "objectID": "about/index.html#lately",
+    "href": "about/index.html#lately",
+    "title": "Ray Wang",
+    "section": "Lately …",
+    "text": "Lately …\n\n\nBlog\n\n\n\n\n\n\n\n\nHello, world\n\n\nA first post — what this blog is, and what I’ll be writing about.\n\n\n\n\n\nNo matching items\n\nSee all →\n\n\nProjects\n\n\n\n\n\n\n\n\nExample Project\n\n\nA placeholder project entry showing the layout. Replace with real projects.\n\n\n\n\n\nNo matching items\n\nSee all →"
+  },
+  {
+    "objectID": "accessibility.html",
+    "href": "accessibility.html",
+    "title": "Accessibility commitment",
+    "section": "",
+    "text": "Travel back to the home page or about page."
+  },
+  {
+    "objectID": "accessibility.html#feedback",
+    "href": "accessibility.html#feedback",
+    "title": "Accessibility commitment",
+    "section": "Feedback",
+    "text": "Feedback\nI welcome any feedback on the accessibility of this site. Please let me know if you encounter any accessibility barriers by using my contact form and I’ll do my best to respond promptly.\nThank you for visiting and for taking the time to read this page"
+  },
+  {
+    "objectID": "accessibility.html#accessibility-practices",
+    "href": "accessibility.html#accessibility-practices",
+    "title": "Accessibility commitment",
+    "section": "Accessibility practices",
+    "text": "Accessibility practices\nThis site has been designed with the following features in mind:\n\nA color palette that meets WCAG 2.1 AA standards for contrast\nAlternative text for all informative images\nReadable font faces, specifically to avoid impostor letter shapes and mirroring. This site primarily uses Red Hat Text, which is freely available and has been found to be relatively accessible to users with dyslexic traits and poor near vision.1\nA table of contents in the blog post sidebar for easier navigation\n\nI’m not a web developer, but my plan is to periodically audit this site for accessibility failures and learn how to remedy them as best I can. Tools I find useful:\n\nWAVE Web Accessibility Evaluation Tool"
+  },
+  {
+    "objectID": "accessibility.html#footnotes",
+    "href": "accessibility.html#footnotes",
+    "title": "Accessibility commitment",
+    "section": "Footnotes",
+    "text": "Footnotes\n\n\nFor more on font accessibility, I recommend the talk Don’t Believe the Type! by The Readability Group.↩︎"
+  },
+  {
+    "objectID": "blog/2026-05-24-hello-world/index.html",
+    "href": "blog/2026-05-24-hello-world/index.html",
+    "title": "Hello, world",
+    "section": "",
+    "text": "This is the first post on my blog. I’m Ray, a data scientist at Wallick Communities, and this site is where I’ll be writing about what I’m learning — mostly Python, SQL, and bits of the wider data ecosystem."
+  },
+  {
+    "objectID": "blog/2026-05-24-hello-world/index.html#what-to-expect",
+    "href": "blog/2026-05-24-hello-world/index.html#what-to-expect",
+    "title": "Hello, world",
+    "section": "What to expect",
+    "text": "What to expect\nA few categories of posts I’m planning:\n\nNotes from learning Python — small things I had to figure out the hard way.\nWorking with data — patterns I find useful for reports and analytics work.\nTooling — the editors, libraries, and workflows I’ve settled on (and the ones I bounced off of).\n\nIf a post helps you, I’d love to hear about it."
+  },
+  {
+    "objectID": "blog/2026-05-24-hello-world/index.html#a-code-example-because-every-dev-blog-needs-one",
+    "href": "blog/2026-05-24-hello-world/index.html#a-code-example-because-every-dev-blog-needs-one",
+    "title": "Hello, world",
+    "section": "A code example, because every dev blog needs one",
+    "text": "A code example, because every dev blog needs one\ndef greet(name: str) -&gt; str:\n    return f\"Hello, {name}!\"\n\nprint(greet(\"world\"))\nMore soon."
+  },
+  {
+    "objectID": "contact.html",
+    "href": "contact.html",
+    "title": "Send me a note ",
+    "section": "",
+    "text": "You can use this form to contact me about projects, collaborations, or simply to say hello.\nI’m always happy to hear from folks working on similar data/Python journeys, or anyone with feedback on something I’ve written \n   \n\n\n\n\n\n\n\n\nFull Name \nEmail Address \nMessage\n\n\nSend message\n\n\n\n\n\n\n\n\n Back to top"
+  },
+  {
+    "objectID": "license.html",
+    "href": "license.html",
+    "title": "License",
+    "section": "",
+    "text": "My blog posts are released under a Creative Commons Attribution-ShareAlike 4.0 International License.\n\n  \n\n\n\n\n Back to top"
   },
   {
     "objectID": "project/2026-05-24-example-project/index.html",

@@ -1,0 +1,43 @@
+---
+title: "Personal Knowledge Librarian"
+author: Ray Wang
+date: "2026-04-10"
+categories:
+  - python
+  - llm
+  - tools
+subtitle: >
+  A Streamlit app that reads any URL, summarises it with Claude, and helps you search what you've saved.
+description: |
+  A personal knowledge management tool that turns URLs into searchable summaries.
+  Paste a link — YouTube, Kaggle, or any article — and the app extracts and summarises
+  the content using Claude. Ask a question later and it retrieves the most relevant sources
+  from your library.
+links:
+- icon: github
+  name: Source
+  url: https://github.com/RayinNovember/Personal_Knowledge_Librarian
+---
+
+## Overview
+
+I save a lot of links — articles, Kaggle notebooks, YouTube tutorials — and almost never go back to them because I can't remember what was in them. The Knowledge Librarian solves that by turning every saved URL into a structured summary with tags and key concepts, then letting me search across everything with a natural language question.
+
+The app uses Claude to extract and summarise content, and stores entries locally as a JSON index that can be queried by semantic similarity.
+
+## What I learned
+
+- How to use `trafilatura` for reliable web content extraction across different site types
+- Handling different source types (YouTube descriptions, Kaggle pages, general web) with a unified interface
+- Structuring a Streamlit app around a persistent local index
+- The gap between "works on my machine" and "works on Streamlit Cloud" — specifically around persistent storage, which resets on redeploy
+
+The biggest design lesson: storing knowledge as structured JSON (with `summary`, `tags`, `key_concepts`, `domain`) is far more useful than storing raw text, because it makes search and filtering much more powerful.
+
+## Tech
+
+- Python
+- Streamlit
+- Claude API (Anthropic)
+- trafilatura (web content extraction)
+- JSON (local knowledge index)

@@ -3,7 +3,7 @@ project:
 
 website:
   title: "Ray Wang"
-  # site-url: https://yourdomain.com
+  site-url: https://changruiraywang.com
   description: "Personal portfolio of Ray Wang — Data Scientist at Wallick Communities."
   # favicon: assets/ray/img/logo.svg
   page-navigation: true
