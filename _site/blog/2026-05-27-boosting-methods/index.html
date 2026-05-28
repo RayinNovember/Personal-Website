@@ -7,9 +7,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Ray Wang">
-<meta name="dcterms.date" content="2026-05-24">
+<meta name="dcterms.date" content="2026-05-27">
+<meta name="description" content="A walkthrough of the mathematical principles behind Gradient Boost and XGBoost, with a map of XGBoost parameters to the underlying concepts.">
 
-<title>Hello, world – Ray Wang</title>
+<title>Boosting Methods - Gradient Boost and XGBoost – Ray Wang</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -24,41 +25,6 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
-}
-/* CSS for syntax highlighting */
-html { -webkit-text-size-adjust: 100%; }
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -114,6 +80,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -320,13 +315,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <!-- content -->
 <header id="title-block-header" class="quarto-title-block default page-columns">
 <div id="title-block-header-title" class="quarto-title page-columns page-full page-layout-full featured-image p-4" style="background-image: url(featured.png), url(featured.jpg), url(../featured.jpg);">
-<h1 class="title">Hello, world</h1>
-<p class="subtitle lead">A first post — what this blog is, and what I’ll be writing about.</p>
+<h1 class="title">Boosting Methods - Gradient Boost and XGBoost</h1>
     <div class="quarto-categories">
-        <div class="quarto-category">meta</div>
+        <div class="quarto-category">machine learning</div>
+        <div class="quarto-category">boosting</div>
+        <div class="quarto-category">XGBoost</div>
       </div>
   </div>
 
+<div>
+  <div id="title-block-title-desc" class="description pt-4">
+    A walkthrough of the mathematical principles behind Gradient Boost and XGBoost, with a map of XGBoost parameters to the underlying concepts.
+  </div>
+</div>
 
 
 <div class="quarto-title-meta">
@@ -341,7 +342,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">May 24, 2026</p>
+      <p class="date">May 27, 2026</p>
     </div>
   </div>
   
@@ -359,8 +360,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#what-to-expect" id="toc-what-to-expect" class="nav-link active" data-scroll-target="#what-to-expect">What to expect</a></li>
-  <li><a href="#a-code-example-because-every-dev-blog-needs-one" id="toc-a-code-example-because-every-dev-blog-needs-one" class="nav-link" data-scroll-target="#a-code-example-because-every-dev-blog-needs-one">A code example, because every dev blog needs one</a></li>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a>
+  <ul class="collapse">
+  <li><a href="#gradient-boost" id="toc-gradient-boost" class="nav-link" data-scroll-target="#gradient-boost">Gradient Boost</a></li>
+  <li><a href="#gradient-boosted-tree" id="toc-gradient-boosted-tree" class="nav-link" data-scroll-target="#gradient-boosted-tree">Gradient Boosted Tree</a></li>
+  <li><a href="#xgboost" id="toc-xgboost" class="nav-link" data-scroll-target="#xgboost">XGBoost</a></li>
+  <li><a href="#xgboost-parameters" id="toc-xgboost-parameters" class="nav-link" data-scroll-target="#xgboost-parameters">XGBoost Parameters</a></li>
+  </ul></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   </ul>
 </nav>
     </div>
@@ -378,30 +385,260 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<p>This is the first post on my blog. I’m Ray, a data scientist at Wallick Communities, and this site is where I’ll be writing about what I’m learning — mostly Python, SQL, and bits of the wider data ecosystem.</p>
-<section id="what-to-expect" class="level2">
-<h2 class="anchored" data-anchor-id="what-to-expect">What to expect</h2>
-<p>A few categories of posts I’m planning:</p>
-<ul>
-<li><strong>Notes from learning Python</strong> — small things I had to figure out the hard way.</li>
-<li><strong>Working with data</strong> — patterns I find useful for reports and analytics work.</li>
-<li><strong>Tooling</strong> — the editors, libraries, and workflows I’ve settled on (and the ones I bounced off of).</li>
-</ul>
-<p>If a post helps you, I’d love to hear about it.</p>
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>Boosting methods are the Swiss Army knife for tabular data — they can be used for both regression and classification tasks, and they often outperform other algorithms. There’s no shortage of boosting hashtags: Gradient Boost, AdaBoost are two older, classical methods; XGBoost, LightGBM and CatBoost are more recent developments. They are like a famous family whose members show up at every party you go to, but you never really know what they do. You just know they are popular and everyone seems to like them.</p>
+<p>In my learning journey, I have seen many articles, lectures and tutorials on Boosting methods, with a focus on either the mathematical principles or the code implementation. I have not come across a resource that connects the two together. With this blog, I intend to go over the mathematical principles of boosting methods, and map the parameters of the XGBoost Python library to the concepts we discuss.</p>
+<p>The story of the Boosting family starts with a simple idea: Can we combine multiple weak learners to create a strong learner? The answer is yes. At its core, Boosting is a powerful ensemble method that combines multiple weak learners to create a strong learner. The idea is to sequentially add weak learners to the ensemble, where each new learner focuses on correcting the errors made by the previous learners.</p>
+<section id="gradient-boost" class="level3">
+<h3 class="anchored" data-anchor-id="gradient-boost">Gradient Boost</h3>
+<p>Gradient Boost is the granddaddy of all boosting methods. It is a general boosting algorithm that can be applied to any differentiable loss function.</p>
+<p>Suppose we start with T weak learners, denoted as <span class="math inline">\(f_1(x), f_2(x), ..., f_T(x)\)</span>. The combined model, or the strong model, <span class="math inline">\(H_{t}\)</span>, is a weighted sum of these weak learners:</p>
+<p><span class="math display">\[H_{t} = \sum^T_{t=1}\alpha f_t(x)\]</span></p>
+<p>where <span class="math inline">\(\alpha\)</span> is the learning rate that controls the contribution of each weak learner to the final model.</p>
+<p>The total loss function of this learner is:</p>
+<p><span class="math display">\[\ell(H_{t}) = \sum^n_{i=1}\ell(y_i,\hat{y}_i^{(t)})\]</span></p>
+<p>where <span class="math inline">\(y_i\)</span> is the observed value for the <span class="math inline">\(i\)</span>th observation, and <span class="math inline">\(\hat{y}_i^{(t)}\)</span> is the predicted value for the <span class="math inline">\(i\)</span>th observation by the combined model <span class="math inline">\(H_{t}\)</span>.</p>
+<p>The goal of boosting is to find the best next weak learner <span class="math inline">\(f_t(x)\)</span> that minimizes the total loss function of the next model.</p>
+<p><span class="math display">\[\ell(H_{t+1})=\ell(H_{t}+\alpha f_{t+1}) = \sum^{n}_{i=1}\ell(y_i,\hat{y}_i^{(t)}+\alpha f_{t+1}(x_i))\]</span></p>
+<p>where <span class="math inline">\(H_{t}\)</span> is the current combined model, and <span class="math inline">\(f_{t+1}\)</span> is the next weak learner we want to add to the ensemble.</p>
+<p>For convenience, we denote the current combined model as <span class="math inline">\(H_{t-1}\)</span> and the next weak learner as <span class="math inline">\(f_{t}\)</span>.</p>
+<p>Now the loss function we want to minimize is:</p>
+<p><span class="math display">\[\ell(H_{t})=\ell(H_{t-1}+\alpha f_{t}) = \sum^{n}_{i=1}\ell(y_i,\hat{y}_i^{(t-1)}+\alpha f_{t}(x_i))\]</span></p>
+<p>To minimize a loss function, it’s usually easier to minimize its approximation than the original loss function. We can approximate <span class="math inline">\(\ell(H_{t})\)</span> by its 1st-degree Taylor Approximation.</p>
+<p>Since the loss function is the sum of all individual losses, we can examine the Taylor approximation of the loss function for each individual observation:</p>
+<p><span class="math display">\[\ell(y_i,\hat{y}_i^{(t-1)}+\alpha f_{t}(x_i)) = \ell(y_i,\hat{y}_i^{(t-1)}) +\alpha\dfrac{\partial \ell}{\partial \hat{y}_i^{(t-1)}}f_{t}(x_i)\]</span></p>
+<p>where <span class="math inline">\(\dfrac{\partial \ell}{\partial \hat{y}_i^{(t-1)}}\)</span> is the gradient of the loss function with respect to the predicted value for the <span class="math inline">\(i\)</span>th observation. Hence the name, “Gradient Boosting”.</p>
+<p>Since <span class="math inline">\(\ell(y_i,\hat{y}_i^{(t-1)})\)</span> and <span class="math inline">\(\alpha\)</span> are constants, we can ignore them when minimizing the loss function. Summing up individual loss functions for all observations, we get the approximate loss function to minimize:</p>
+<p><span class="math display">\[\sum^n_{i=1}\dfrac{\partial \ell}{\partial \hat{y}_i^{(t-1)}}f_{t}(x_i)\]</span></p>
+<p>How do we go about the minimization?</p>
+<p>For convenience, let’s denote <span class="math inline">\(\dfrac{\partial \ell}{\partial \hat{y}_i^{(t-1)}}\)</span> as <span class="math inline">\(g_i\)</span>; and let <span class="math inline">\(r_i = -g_i\)</span>.</p>
+<p>Now we want to minimize:</p>
+<p><span class="math display">\[-\sum^n_{i=1}r_if_{t}(x_i)\]</span></p>
+<p>which is equivalent to minimizing:</p>
+<p><span class="math display">\[-2\sum^n_{i=1}r_if_{t}(x_i)\]</span></p>
+<p>Now we add two constants:</p>
+<p><span class="math inline">\(\sum^n_{i=1}r_i^2\)</span>: This part is a constant because it is independent of <span class="math inline">\(f_t(x_i)\)</span>, so it doesn’t affect the minimization.</p>
+<p><span class="math inline">\(\sum^n_{i=1}f^2(x_i)\)</span>: We can think of the squared Euclidean length (sum of all elements squared) of the output vector as fixed. Since we are combining multiple weak learners sequentially, it is the direction of the output vector that matters, not its length. So we can treat this part as a constant as well.</p>
+<p>Adding all parts together, we want to minimize:</p>
+<p><span class="math display">\[\sum^n_{i=1}[f^2(x_i)-2r_if_{t}(x_i)+r_i^2] = \sum^n_{i=1}(f_{t}(x_i)-r_i)^2\]</span></p>
+<p>To recap, <span class="math inline">\(r_i\)</span> is the negative gradient of the loss function with respect to the predicted value for the <span class="math inline">\(i\)</span>th observation. In fact, for both regression and classification tasks, <span class="math inline">\(r_i = -g_i = y_i-\hat{y}_i^{(t-1)}\)</span>, which is the residual of the <span class="math inline">\(i\)</span>th prediction. Therefore, minimizing the loss function is equivalent to fitting a new model to the residuals.</p>
 </section>
-<section id="a-code-example-because-every-dev-blog-needs-one" class="level2">
-<h2 class="anchored" data-anchor-id="a-code-example-because-every-dev-blog-needs-one">A code example, because every dev blog needs one</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> greet(name: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="ss">f"Hello, </span><span class="sc">{</span>name<span class="sc">}</span><span class="ss">!"</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(greet(<span class="st">"world"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>More soon.</p>
+<section id="gradient-boosted-tree" class="level3">
+<h3 class="anchored" data-anchor-id="gradient-boosted-tree">Gradient Boosted Tree</h3>
+<p>So far we have been talking about the general idea of gradient boosting, which is about iteratively improving a model by fitting new weak learners to the residuals of the current model. One thing to point out is that there are actually more than one way to fit a base learner to the current residuals. For example, one can use a linear model. However, linear base learners collapse to a single linear model, which is not very powerful. On the other hand, decision trees are more flexible and can capture non-linear relationships in the data. Therefore, gradient boosted decision trees is the most common type of base learner used in boosting.</p>
+<p>For gradient boosted trees, since the loss function is the sum of all individual losses on the leaves of the tree structure, we can express the loss function by summing up individual losses leaf by leaf. Define <span class="math inline">\(I_j\)</span> as the indicator function that an observation is on the leaf <span class="math inline">\(j\)</span>.</p>
+<p>Our goal is to find the best next weak tree <span class="math inline">\(f_t\)</span> that minimizes the loss function:</p>
+<p><span class="math display">\[\ell^{(t)} = \sum^J_{j=1}\left[\sum_{i\in j}\ell(y_i,\hat{y}_i^{(t-1)}+\alpha f_t(x_i))\right]\]</span></p>
+<p>The idea of minimization is identical to the gradient boosting method we discussed above, except that we are now minimizing the loss function for each leaf instead of the whole dataset.</p>
+<p>It can be thought of as a two-step process:</p>
+<ol type="1">
+<li><p>First we want an output value <span class="math inline">\(f_t(x)\)</span> that minimizes the loss function for each leaf: <span class="math inline">\(\sum_{i\in j}\ell(y_i,\hat{y}_i^{(t-1)}+\alpha f_t(x_i))\)</span>.</p></li>
+<li><p>Then we find the best tree structure (i.e., how to split the features) that minimizes the total loss function of all leaves.</p></li>
+</ol>
+<p>The algorithm is identical to the regression tree algorithm. We are just fitting a regression tree to the residuals instead of the original target variable.</p>
+</section>
+<section id="xgboost" class="level3">
+<h3 class="anchored" data-anchor-id="xgboost">XGBoost</h3>
+<p>XGBoost is an optimized implementation of gradient boosting. Compared to Gradient Boost, XGBoost has two major upgrades. The first is adding regularizing terms to the total loss function. The second is using 2nd-degree Taylor Approximation instead of 1st-degree Taylor Approximation to approximate the loss function.</p>
+<p>The loss function for XGBoost is:</p>
+<p><span class="math display">\[\ell^{(t)} = \sum^{n}_{i=1}\ell(y_i,\hat{y}_i^{(t-1)}+\alpha f_t(x_i))+\Omega(f_t)\]</span></p>
+<p>where <span class="math inline">\(\Omega(f_t)\)</span> is the regularization term.</p>
+<p>There are other improvements in terms of computational efficiency, such as parallelization and handling missing values, but we will focus on the mathematical improvements here.</p>
+<section id="tree-booster" class="level4">
+<h4 class="anchored" data-anchor-id="tree-booster">Tree Booster</h4>
+<p>For XGBoost trees, the regularization term is defined as:</p>
+<p><span class="math display">\[\Omega(f_t(x))=\gamma T+\alpha\sum^J_{j=1}|f_j(x)|+\dfrac{1}{2}\lambda\sum^J_{j=1}f^2_j(x)\]</span></p>
+<ul>
+<li><span class="math inline">\(\alpha\)</span> is the L1 regularization parameter.</li>
+<li><span class="math inline">\(\lambda\)</span> is the L2 regularization parameter.</li>
+<li><span class="math inline">\(\gamma\)</span> is a penalty term to encourage pruning.</li>
+<li><span class="math inline">\(T\)</span> is the number of leaves.</li>
+<li><span class="math inline">\(f_j(x)\)</span> is the output for leaf <span class="math inline">\(j\)</span>.</li>
+</ul>
+<p>In the original XGBoost paper, only L2 regularization term was used:</p>
+<p><span class="math display">\[\ell^{(t)} = \sum^{n}_{i=1}\ell(y_i,\hat{y}_i^{(t-1)}+\alpha f_t(x_i))+\dfrac{1}{2}\lambda\sum^J_{j=1}f^2_j(x)+\gamma T\]</span></p>
+<p>Applying the 2nd-degree Taylor Approximation to the individual loss function:</p>
+<p><span class="math display">\[\ell(y_i,\hat{y}_i^{(t-1)}+\alpha f_t(x_i)) \approx \ell(y_i,\hat{y}_i^{(t-1)}) + g_i f_t(x_i) + \dfrac{1}{2}h_i f^2_t(x_i)\]</span></p>
+<p>where <span class="math inline">\(g_i = \dfrac{\partial \ell}{\partial \hat{y}_i^{(t-1)}}\)</span> is the gradient and <span class="math inline">\(h_i = \dfrac{\partial^2 \ell}{\partial (\hat{y}_i^{(t-1)})^2}\)</span> is the hessian of the loss function.</p>
+<p>Summing up individual loss functions for all observations on leaf <span class="math inline">\(j\)</span> and adding the regularization term:</p>
+<p><span class="math display">\[\tilde{\ell}^{(t)} \approx \sum^J_{j=1}\left[\left(\sum_{i\in j}g_i\right)f_j(x)+\dfrac{1}{2}\left(\sum_{i\in j}h_i+\lambda\right)f^2_j(x)\right]+\gamma T\]</span></p>
+<p>Taking the derivative with respect to <span class="math inline">\(f_j(x)\)</span> and setting it to zero, the optimal output for leaf <span class="math inline">\(j\)</span> is:</p>
+<p><span class="math display">\[f_j^*(x) = -\dfrac{\sum_{i\in j}g_i}{\sum_{i\in j}h_i+\lambda}\]</span></p>
+<p>Plugging in <span class="math inline">\(f^*_j(x)\)</span> we get the minimum loss function for leaf <span class="math inline">\(j\)</span>:</p>
+<p><span class="math display">\[\tilde{\ell}^{(t)}_{i\in j} \approx -\dfrac{1}{2}\dfrac{(\sum_{i \in j}g_i)^2}{\sum_{i \in j}h_i}\]</span></p>
+<p>This value is used to calculate the gain of a split, which is the reduction in loss function after the split:</p>
+<p><span class="math display">\[Gain = \dfrac{1}{2}\left[\dfrac{(\sum_{i\in j_L}g_i)^2}{\sum_{i\in j_L}h_i+\lambda}+\dfrac{(\sum_{i\in j_R}g_i)^2}{\sum_{i\in j_R}h_i+\lambda}-\dfrac{(\sum_{i\in j}g_i)^2}{\sum_{i\in j}h_i+\lambda}\right] - \gamma\]</span></p>
+<p>where <span class="math inline">\(j_L\)</span> and <span class="math inline">\(j_R\)</span> are the left and right child nodes after the split, respectively.</p>
+<p>It can be seen that the parameter <span class="math inline">\(\gamma\)</span> is a pruning threshold. A split will be made only if the gain of a split is greater than <span class="math inline">\(\gamma\)</span>.</p>
+<p>One lingering question is: Where do the gradients and hessians come from? It depends on the prediction task.</p>
+<p>The loss function for the regression task is:</p>
+<p><span class="math display">\[\ell(y_i,\hat{y}_i) =\dfrac{1}{2}(y_i-\hat{y}_i)^2\]</span></p>
+<p>The gradient is: <span class="math inline">\(g_i = -(y_i-\hat{y}_i)\)</span></p>
+<p>The hessian is: <span class="math inline">\(h_i = 1\)</span></p>
+<p>The loss function for the classification task is:</p>
+<p><span class="math display">\[\ell(y_i,\hat{y}_i) = -[y_i\log(\hat{y}_i)+(1-y_i)\log(1-\hat{y}_i)]\]</span></p>
+<p>The gradient is: <span class="math inline">\(g_i = -(y_i-\hat{y}_i)\)</span></p>
+<p>The hessian is: <span class="math inline">\(h_i = \hat{y}_i(1-\hat{y}_i)\)</span></p>
+<p>Here, <span class="math inline">\(\hat{y}_i\)</span> is the predicted probability for the <span class="math inline">\(i\)</span>th observation.</p>
+</section>
+<section id="linear-and-dart-booster" class="level4">
+<h4 class="anchored" data-anchor-id="linear-and-dart-booster">Linear and Dart Booster</h4>
+<p>The XGBoost Python package also supports two other types of boosters: linear booster and dart booster.</p>
+<p>Counterintuitively, the linear booster of XGBoost is actually not many linear models combined together. It fits an Elastic Net linear model with regularization terms to the residuals using the coordinate descent algorithm. In other words, each round of boosting does not generate a new linear model, but rather updates the coefficients of the existing linear model.</p>
+<p>The dart booster is a variant of the tree booster that randomly drops out trees during training to prevent overfitting.</p>
+<p>The details of the linear and dart boosters are beyond the scope of this blog, but you can find more information in the XGBoost GitHub repository.</p>
+</section>
+</section>
+<section id="xgboost-parameters" class="level3">
+<h3 class="anchored" data-anchor-id="xgboost-parameters">XGBoost Parameters</h3>
+<p>Now with the mathematical principles of XGBoost in mind, we can map the parameters of the XGBoost Python library to the concepts we discussed above.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Concept</th>
+<th>xgboost Parameter</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Tree depth</td>
+<td><code>max_depth</code></td>
+<td>Controls how deep the trees can grow</td>
+</tr>
+<tr class="even">
+<td>Min samples in leaf</td>
+<td><code>min_child_weight</code></td>
+<td>Controls the minimum sum of hessians in a leaf</td>
+</tr>
+<tr class="odd">
+<td>Row sampling</td>
+<td><code>subsample</code></td>
+<td>Controls the fraction of data used for each tree</td>
+</tr>
+<tr class="even">
+<td>Column sampling</td>
+<td><code>colsample_bytree</code></td>
+<td>Controls the fraction of features used for each tree</td>
+</tr>
+<tr class="odd">
+<td>Column sampling</td>
+<td><code>colsample_bylevel</code></td>
+<td>Controls the fraction of features used for each level</td>
+</tr>
+<tr class="even">
+<td>Column sampling</td>
+<td><code>colsample_bynode</code></td>
+<td>Controls the fraction of features used for each node</td>
+</tr>
+<tr class="odd">
+<td>Tree method</td>
+<td><code>tree_method</code></td>
+<td>Controls how trees are constructed</td>
+</tr>
+<tr class="even">
+<td>Min split gain</td>
+<td><code>gamma</code></td>
+<td>Controls the minimum loss reduction required to make a split</td>
+</tr>
+<tr class="odd">
+<td>Booster type</td>
+<td><code>booster</code></td>
+<td>Controls the type of booster to use (gbtree, gblinear, dart)</td>
+</tr>
+<tr class="even">
+<td>Class imbalance</td>
+<td><code>scale_pos_weight</code></td>
+<td>Gives more weight to the positive class</td>
+</tr>
+<tr class="odd">
+<td>Learning rate</td>
+<td><code>learning_rate</code></td>
+<td>Controls the weight of each new tree in the ensemble</td>
+</tr>
+<tr class="even">
+<td>Number of trees</td>
+<td><code>n_estimators</code></td>
+<td>Controls the total number of trees in the model</td>
+</tr>
+<tr class="odd">
+<td>Early stopping</td>
+<td><code>early_stopping_rounds</code></td>
+<td>Stops training early if no improvement in the evaluation metric</td>
+</tr>
+<tr class="even">
+<td>Evaluation metric</td>
+<td><code>eval_metric</code></td>
+<td>Controls the metric used for evaluation during training</td>
+</tr>
+<tr class="odd">
+<td>L1 regularization</td>
+<td><code>reg_alpha</code></td>
+<td>Controls the amount of L1 regularization</td>
+</tr>
+<tr class="even">
+<td>L2 regularization</td>
+<td><code>reg_lambda</code></td>
+<td>Controls the amount of L2 regularization</td>
+</tr>
+</tbody>
+</table>
+<p>Some notes on the parameters:</p>
+<p><strong><code>colsample_bylevel</code> vs.&nbsp;<code>colsample_bytree</code> vs.&nbsp;<code>colsample_bynode</code></strong></p>
+<p>These parameters control the fraction of features used for each tree, level, or node, respectively. The difference is in the granularity of feature sampling.</p>
+<p>With <code>colsample_bytree</code>, each tree gets its own random subset of features:</p>
+<pre><code>Tree 1:  sample once → {f1, f2, f4, f6, f7, f9}   ← all nodes in Tree 1 use these 6
+Tree 2:  sample once → {f1, f3, f4, f5, f8, f10}  ← all nodes in Tree 2 use these 6
+Tree 3:  sample once → {f2, f3, f5, f6, f7, f10}  ← all nodes in Tree 3 use these 6</code></pre>
+<p>With <code>colsample_bylevel</code>, each level gets its own random subset of features:</p>
+<pre><code>Depth 0 (root):  features sampled   → {f1, f3, f5, f7}
+Depth 1:         features resampled → {f2, f3, f6, f8}
+Depth 2:         features resampled → {f1, f4, f5, f8}</code></pre>
+<p>With <code>colsample_bynode</code>, each node gets its own random subset of features:</p>
+<pre><code>Depth 0 (root):   features sampled   → {f1, f3, f5, f7}
+Depth 1, Node 1:  features resampled → {f2, f3, f6, f8}
+Depth 1, Node 2:  features resampled → {f1, f4, f5, f8}
+Depth 2, Node 1:  features resampled → {f1, f3, f5, f7}</code></pre>
+<p><strong><code>tree_method</code></strong></p>
+<p>The <code>tree_method</code> parameter controls how trees are constructed. The options are:</p>
+<ul>
+<li><code>exact</code>: Enumerates all possible splits across all features.</li>
+<li><code>approx</code>: Uses a weighted quantile sketch to bucket continuous features into candidate split points.</li>
+<li><code>hist</code>: Builds a histogram of feature values — bins data into discrete buckets first.</li>
+</ul>
+<p>A good reference is <a href="https://www.youtube.com/watch?v=oRrKeUCEbq8">StatsQuest: Cool Crazy Optimizations</a>.</p>
+<p><strong><code>min_child_weight</code></strong></p>
+<p>The <code>min_child_weight</code> parameter controls the minimum sum of hessians in a leaf to prevent overfitting.</p>
+<p>For regression problems, the hessian is always 1, so <code>min_child_weight</code> is equivalent to the minimum number of samples in a leaf. You are telling the model to stop splitting a leaf if the number of samples in that leaf goes below a threshold.</p>
+<p>For classification problems, the hessian is the predicted probability of the positive class multiplied by the predicted probability of the negative class — <span class="math inline">\(\hat{p}(1-\hat{p})\)</span>. Therefore, you are telling the model to stop trying to split once you reach a certain degree of purity in a node.</p>
+</section>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+<ul>
+<li>Jerome H. Friedman. <a href="https://projecteuclid.org/journals/annals-of-statistics/volume-29/issue-5/Greedy-function-approximation-A-gradient-boosting-machine/10.1214/aos/1013203451.full">Greedy function approximation: A gradient boosting machine.</a> 2002.</li>
+<li>T. Chen, C. Guestrin. <a href="https://arxiv.org/abs/1603.02754">XGBoost: A Scalable Tree Boosting System.</a> 2016.</li>
+<li>P. Seeburger. <a href="https://math.libretexts.org/Bookshelves/Calculus/Supplemental_Modules_(Calculus)/Multivariable_Calculus/3%3A_Topics_in_Partial_Derivatives/Taylor__Polynomials_of_Functions_of_Two_Variables">Taylor Polynomials of Functions of Two Variables.</a> 2025.</li>
+<li>Geeksforgeeks. <a href="https://www.geeksforgeeks.org/machine-learning/xgboost-parameters/">XGBoost Parameters.</a> 2025.</li>
+<li>K. Weinberger. <a href="https://www.cs.cornell.edu/courses/cs4780/2018fa/lectures/lecturenote19.html">XGBoost Tutorial.</a> 2018.</li>
+<li>Analytics Vidhya. <a href="https://www.analyticsvidhya.com/blog/2016/03/complete-guide-parameter-tuning-xgboost-with-codes-python/">Complete Guide to Parameter Tuning in XGBoost with Codes in Python.</a> 2016.</li>
+<li>XGBoost GitHub. <a href="https://github.com/dmlc/xgboost/blob/master/src/gbm/gblinear.cc">Linear Booster.</a> 2025.</li>
+<li>XGBoost GitHub. <a href="https://github.com/dmlc/xgboost/blob/master/src/linear/updater_shotgun.cc">Linear Updater.</a> 2025.</li>
+<li>Stack Exchange. <a href="https://stats.stackexchange.com/questions/317073/explanation-of-min-child-weight-in-xgboost-algorithm">Explanation of min_child_weight in xgboost algorithm.</a> 2017.</li>
+</ul>
 
 
 </section>
 
 <a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" id="quarto-reuse"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></div></div></section><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-wang2026" class="csl-entry quarto-appendix-citeas" role="listitem">
-Wang, Ray. 2026. <span>“Hello, World.”</span> May 24. <a href="https://changruiraywang.com/blog/2026-05-24-hello-world/">https://changruiraywang.com/blog/2026-05-24-hello-world/</a>.
+Wang, Ray. 2026. <span>“Boosting Methods - Gradient Boost and
+XGBoost.”</span> May 27. <a href="https://changruiraywang.com/blog/2026-05-27-boosting-methods/">https://changruiraywang.com/blog/2026-05-27-boosting-methods/</a>.
 </div></div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
