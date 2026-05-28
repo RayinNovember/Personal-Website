@@ -1,0 +1,269 @@
+---
+title: "Boosting Methods - Gradient Boost and XGBoost"
+author: Ray Wang
+date: "2025-07-11"
+description: "A walkthrough of the mathematical principles behind Gradient Boost and XGBoost, with a map of XGBoost parameters to the underlying concepts."
+categories: [machine learning, boosting, XGBoost]
+image: sidebar.jpg
+draft: false
+---
+
+## Introduction
+
+Boosting methods are the Swiss Army knife for tabular data — they can be used for both regression and classification tasks, and they often outperform other algorithms. There's no shortage of boosting hashtags: Gradient Boost, AdaBoost are two older, classical methods; XGBoost, LightGBM and CatBoost are more recent developments. They are like a famous family whose members show up at every party you go to, but you never really know what they do. You just know they are popular and everyone seems to like them.
+
+In my learning journey, I have seen many articles, lectures and tutorials on Boosting methods, with a focus on either the mathematical principles or the code implementation. I have not come across a resource that connects the two together. With this blog, I intend to go over the mathematical principles of boosting methods, and map the parameters of the XGBoost Python library to the concepts we discuss.
+
+The story of the Boosting family starts with a simple idea: Can we combine multiple weak learners to create a strong learner? The answer is yes. At its core, Boosting is a powerful ensemble method that combines multiple weak learners to create a strong learner. The idea is to sequentially add weak learners to the ensemble, where each new learner focuses on correcting the errors made by the previous learners.
+
+### Gradient Boost
+
+Gradient Boost is the granddaddy of all boosting methods. It is a general boosting algorithm that can be applied to any differentiable loss function.
+
+Suppose we start with T weak learners, denoted as $f_1(x), f_2(x), ..., f_T(x)$. The combined model, or the strong model, $H_{t}$, is a weighted sum of these weak learners:
+
+$$H_{t} = \sum^T_{t=1}\alpha f_t(x)$$
+
+where $\alpha$ is the learning rate that controls the contribution of each weak learner to the final model.
+
+The total loss function of this learner is:
+
+$$\ell(H_{t}) = \sum^n_{i=1}\ell(y_i,\hat{y}_i^{(t)})$$
+
+where $y_i$ is the observed value for the $i$th observation, and $\hat{y}_i^{(t)}$ is the predicted value for the $i$th observation by the combined model $H_{t}$.
+
+The goal of boosting is to find the best next weak learner $f_t(x)$ that minimizes the total loss function of the next model.
+
+$$\ell(H_{t+1})=\ell(H_{t}+\alpha f_{t+1}) = \sum^{n}_{i=1}\ell(y_i,\hat{y}_i^{(t)}+\alpha f_{t+1}(x_i))$$
+
+where $H_{t}$ is the current combined model, and $f_{t+1}$ is the next weak learner we want to add to the ensemble.
+
+For convenience, we denote the current combined model as $H_{t-1}$ and the next weak learner as $f_{t}$.
+
+Now the loss function we want to minimize is:
+
+$$\ell(H_{t})=\ell(H_{t-1}+\alpha f_{t}) = \sum^{n}_{i=1}\ell(y_i,\hat{y}_i^{(t-1)}+\alpha f_{t}(x_i))$$
+
+To minimize a loss function, it's usually easier to minimize its approximation than the original loss function. We can approximate $\ell(H_{t})$ by its 1st-degree Taylor Approximation.
+
+Since the loss function is the sum of all individual losses, we can examine the Taylor approximation of the loss function for each individual observation:
+
+$$\ell(y_i,\hat{y}_i^{(t-1)}+\alpha f_{t}(x_i)) = \ell(y_i,\hat{y}_i^{(t-1)}) +\alpha\dfrac{\partial \ell}{\partial \hat{y}_i^{(t-1)}}f_{t}(x_i)$$
+
+where $\dfrac{\partial \ell}{\partial \hat{y}_i^{(t-1)}}$ is the gradient of the loss function with respect to the predicted value for the $i$th observation. Hence the name, "Gradient Boosting".
+
+Since $\ell(y_i,\hat{y}_i^{(t-1)})$ and $\alpha$ are constants, we can ignore them when minimizing the loss function. Summing up individual loss functions for all observations, we get the approximate loss function to minimize:
+
+$$\sum^n_{i=1}\dfrac{\partial \ell}{\partial \hat{y}_i^{(t-1)}}f_{t}(x_i)$$
+
+How do we go about the minimization?
+
+For convenience, let's denote $\dfrac{\partial \ell}{\partial \hat{y}_i^{(t-1)}}$ as $g_i$; and let $r_i = -g_i$.
+
+Now we want to minimize:
+
+$$-\sum^n_{i=1}r_if_{t}(x_i)$$
+
+which is equivalent to minimizing:
+
+$$-2\sum^n_{i=1}r_if_{t}(x_i)$$
+
+Now we add two constants:
+
+$\sum^n_{i=1}r_i^2$: This part is a constant because it is independent of $f_t(x_i)$, so it doesn't affect the minimization.
+
+$\sum^n_{i=1}f^2(x_i)$: We can think of the squared Euclidean length (sum of all elements squared) of the output vector as fixed. Since we are combining multiple weak learners sequentially, it is the direction of the output vector that matters, not its length. So we can treat this part as a constant as well.
+
+Adding all parts together, we want to minimize:
+
+$$\sum^n_{i=1}[f^2(x_i)-2r_if_{t}(x_i)+r_i^2] = \sum^n_{i=1}(f_{t}(x_i)-r_i)^2$$
+
+To recap, $r_i$ is the negative gradient of the loss function with respect to the predicted value for the $i$th observation. In fact, for both regression and classification tasks, $r_i = -g_i = y_i-\hat{y}_i^{(t-1)}$, which is the residual of the $i$th prediction. Therefore, minimizing the loss function is equivalent to fitting a new model to the residuals.
+
+### Gradient Boosted Tree
+
+So far we have been talking about the general idea of gradient boosting, which is about iteratively improving a model by fitting new weak learners to the residuals of the current model. One thing to point out is that there are actually more than one way to fit a base learner to the current residuals. For example, one can use a linear model. However, linear base learners collapse to a single linear model, which is not very powerful. On the other hand, decision trees are more flexible and can capture non-linear relationships in the data. Therefore, gradient boosted decision trees is the most common type of base learner used in boosting.
+
+For gradient boosted trees, since the loss function is the sum of all individual losses on the leaves of the tree structure, we can express the loss function by summing up individual losses leaf by leaf. Define $I_j$ as the indicator function that an observation is on the leaf $j$.
+
+Our goal is to find the best next weak tree $f_t$ that minimizes the loss function:
+
+$$\ell^{(t)} = \sum^J_{j=1}\left[\sum_{i\in j}\ell(y_i,\hat{y}_i^{(t-1)}+\alpha f_t(x_i))\right]$$
+
+The idea of minimization is identical to the gradient boosting method we discussed above, except that we are now minimizing the loss function for each leaf instead of the whole dataset.
+
+It can be thought of as a two-step process:
+
+1. First we want an output value $f_t(x)$ that minimizes the loss function for each leaf: $\sum_{i\in j}\ell(y_i,\hat{y}_i^{(t-1)}+\alpha f_t(x_i))$.
+
+2. Then we find the best tree structure (i.e., how to split the features) that minimizes the total loss function of all leaves.
+
+The algorithm is identical to the regression tree algorithm. We are just fitting a regression tree to the residuals instead of the original target variable.
+
+### XGBoost
+
+XGBoost is an optimized implementation of gradient boosting. Compared to Gradient Boost, XGBoost has two major upgrades. The first is adding regularizing terms to the total loss function. The second is using 2nd-degree Taylor Approximation instead of 1st-degree Taylor Approximation to approximate the loss function.
+
+The loss function for XGBoost is:
+
+$$\ell^{(t)} = \sum^{n}_{i=1}\ell(y_i,\hat{y}_i^{(t-1)}+\alpha f_t(x_i))+\Omega(f_t)$$
+
+where $\Omega(f_t)$ is the regularization term.
+
+There are other improvements in terms of computational efficiency, such as parallelization and handling missing values, but we will focus on the mathematical improvements here.
+
+#### Tree Booster
+
+For XGBoost trees, the regularization term is defined as:
+
+$$\Omega(f_t(x))=\gamma T+\alpha\sum^J_{j=1}|f_j(x)|+\dfrac{1}{2}\lambda\sum^J_{j=1}f^2_j(x)$$
+
+- $\alpha$ is the L1 regularization parameter.
+- $\lambda$ is the L2 regularization parameter.
+- $\gamma$ is a penalty term to encourage pruning.
+- $T$ is the number of leaves.
+- $f_j(x)$ is the output for leaf $j$.
+
+In the original XGBoost paper, only L2 regularization term was used:
+
+$$\ell^{(t)} = \sum^{n}_{i=1}\ell(y_i,\hat{y}_i^{(t-1)}+\alpha f_t(x_i))+\dfrac{1}{2}\lambda\sum^J_{j=1}f^2_j(x)+\gamma T$$
+
+Applying the 2nd-degree Taylor Approximation to the individual loss function:
+
+$$\ell(y_i,\hat{y}_i^{(t-1)}+\alpha f_t(x_i)) \approx \ell(y_i,\hat{y}_i^{(t-1)}) + g_i f_t(x_i) + \dfrac{1}{2}h_i f^2_t(x_i)$$
+
+where $g_i = \dfrac{\partial \ell}{\partial \hat{y}_i^{(t-1)}}$ is the gradient and $h_i = \dfrac{\partial^2 \ell}{\partial (\hat{y}_i^{(t-1)})^2}$ is the hessian of the loss function.
+
+Summing up individual loss functions for all observations on leaf $j$ and adding the regularization term:
+
+$$\tilde{\ell}^{(t)} \approx \sum^J_{j=1}\left[\left(\sum_{i\in j}g_i\right)f_j(x)+\dfrac{1}{2}\left(\sum_{i\in j}h_i+\lambda\right)f^2_j(x)\right]+\gamma T$$
+
+Taking the derivative with respect to $f_j(x)$ and setting it to zero, the optimal output for leaf $j$ is:
+
+$$f_j^*(x) = -\dfrac{\sum_{i\in j}g_i}{\sum_{i\in j}h_i+\lambda}$$
+
+Plugging in $f^*_j(x)$ we get the minimum loss function for leaf $j$:
+
+$$\tilde{\ell}^{(t)}_{i\in j} \approx -\dfrac{1}{2}\dfrac{(\sum_{i \in j}g_i)^2}{\sum_{i \in j}h_i}$$
+
+This value is used to calculate the gain of a split, which is the reduction in loss function after the split:
+
+$$Gain = \dfrac{1}{2}\left[\dfrac{(\sum_{i\in j_L}g_i)^2}{\sum_{i\in j_L}h_i+\lambda}+\dfrac{(\sum_{i\in j_R}g_i)^2}{\sum_{i\in j_R}h_i+\lambda}-\dfrac{(\sum_{i\in j}g_i)^2}{\sum_{i\in j}h_i+\lambda}\right] - \gamma$$
+
+where $j_L$ and $j_R$ are the left and right child nodes after the split, respectively.
+
+It can be seen that the parameter $\gamma$ is a pruning threshold. A split will be made only if the gain of a split is greater than $\gamma$.
+
+One lingering question is: Where do the gradients and hessians come from? It depends on the prediction task.
+
+The loss function for the regression task is:
+
+$$\ell(y_i,\hat{y}_i) =\dfrac{1}{2}(y_i-\hat{y}_i)^2$$
+
+The gradient is: $g_i = -(y_i-\hat{y}_i)$
+
+The hessian is: $h_i = 1$
+
+The loss function for the classification task is:
+
+$$\ell(y_i,\hat{y}_i) = -[y_i\log(\hat{y}_i)+(1-y_i)\log(1-\hat{y}_i)]$$
+
+The gradient is: $g_i = -(y_i-\hat{y}_i)$
+
+The hessian is: $h_i = \hat{y}_i(1-\hat{y}_i)$
+
+Here, $\hat{y}_i$ is the predicted probability for the $i$th observation.
+
+#### Linear and Dart Booster
+
+The XGBoost Python package also supports two other types of boosters: linear booster and dart booster.
+
+Counterintuitively, the linear booster of XGBoost is actually not many linear models combined together. It fits an Elastic Net linear model with regularization terms to the residuals using the coordinate descent algorithm. In other words, each round of boosting does not generate a new linear model, but rather updates the coefficients of the existing linear model.
+
+The dart booster is a variant of the tree booster that randomly drops out trees during training to prevent overfitting.
+
+The details of the linear and dart boosters are beyond the scope of this blog, but you can find more information in the XGBoost GitHub repository.
+
+### XGBoost Parameters
+
+Now with the mathematical principles of XGBoost in mind, we can map the parameters of the XGBoost Python library to the concepts we discussed above.
+
+| Concept | xgboost Parameter | What it does |
+|---|---|---|
+| Tree depth | `max_depth` | Controls how deep the trees can grow |
+| Min samples in leaf | `min_child_weight` | Controls the minimum sum of hessians in a leaf |
+| Row sampling | `subsample` | Controls the fraction of data used for each tree |
+| Column sampling | `colsample_bytree` | Controls the fraction of features used for each tree |
+| Column sampling | `colsample_bylevel` | Controls the fraction of features used for each level |
+| Column sampling | `colsample_bynode` | Controls the fraction of features used for each node |
+| Tree method | `tree_method` | Controls how trees are constructed |
+| Min split gain | `gamma` | Controls the minimum loss reduction required to make a split |
+| Booster type | `booster` | Controls the type of booster to use (gbtree, gblinear, dart) |
+| Class imbalance | `scale_pos_weight` | Gives more weight to the positive class |
+| Learning rate | `learning_rate` | Controls the weight of each new tree in the ensemble |
+| Number of trees | `n_estimators` | Controls the total number of trees in the model |
+| Early stopping | `early_stopping_rounds` | Stops training early if no improvement in the evaluation metric |
+| Evaluation metric | `eval_metric` | Controls the metric used for evaluation during training |
+| L1 regularization | `reg_alpha` | Controls the amount of L1 regularization |
+| L2 regularization | `reg_lambda` | Controls the amount of L2 regularization |
+
+Some notes on the parameters:
+
+**`colsample_bylevel` vs. `colsample_bytree` vs. `colsample_bynode`**
+
+These parameters control the fraction of features used for each tree, level, or node, respectively. The difference is in the granularity of feature sampling.
+
+With `colsample_bytree`, each tree gets its own random subset of features:
+
+```
+Tree 1:  sample once → {f1, f2, f4, f6, f7, f9}   ← all nodes in Tree 1 use these 6
+Tree 2:  sample once → {f1, f3, f4, f5, f8, f10}  ← all nodes in Tree 2 use these 6
+Tree 3:  sample once → {f2, f3, f5, f6, f7, f10}  ← all nodes in Tree 3 use these 6
+```
+
+With `colsample_bylevel`, each level gets its own random subset of features:
+
+```
+Depth 0 (root):  features sampled   → {f1, f3, f5, f7}
+Depth 1:         features resampled → {f2, f3, f6, f8}
+Depth 2:         features resampled → {f1, f4, f5, f8}
+```
+
+With `colsample_bynode`, each node gets its own random subset of features:
+
+```
+Depth 0 (root):   features sampled   → {f1, f3, f5, f7}
+Depth 1, Node 1:  features resampled → {f2, f3, f6, f8}
+Depth 1, Node 2:  features resampled → {f1, f4, f5, f8}
+Depth 2, Node 1:  features resampled → {f1, f3, f5, f7}
+```
+
+**`tree_method`**
+
+The `tree_method` parameter controls how trees are constructed. The options are:
+
+- `exact`: Enumerates all possible splits across all features.
+- `approx`: Uses a weighted quantile sketch to bucket continuous features into candidate split points.
+- `hist`: Builds a histogram of feature values — bins data into discrete buckets first.
+
+A good reference is [StatsQuest: Cool Crazy Optimizations](https://www.youtube.com/watch?v=oRrKeUCEbq8).
+
+**`min_child_weight`**
+
+The `min_child_weight` parameter controls the minimum sum of hessians in a leaf to prevent overfitting.
+
+For regression problems, the hessian is always 1, so `min_child_weight` is equivalent to the minimum number of samples in a leaf. You are telling the model to stop splitting a leaf if the number of samples in that leaf goes below a threshold.
+
+For classification problems, the hessian is the predicted probability of the positive class multiplied by the predicted probability of the negative class — $\hat{p}(1-\hat{p})$. Therefore, you are telling the model to stop trying to split once you reach a certain degree of purity in a node.
+
+## References
+
+- Jerome H. Friedman. [Greedy function approximation: A gradient boosting machine.](https://projecteuclid.org/journals/annals-of-statistics/volume-29/issue-5/Greedy-function-approximation-A-gradient-boosting-machine/10.1214/aos/1013203451.full) 2002.
+- T. Chen, C. Guestrin. [XGBoost: A Scalable Tree Boosting System.](https://arxiv.org/abs/1603.02754) 2016.
+- P. Seeburger. [Taylor Polynomials of Functions of Two Variables.](https://math.libretexts.org/Bookshelves/Calculus/Supplemental_Modules_(Calculus)/Multivariable_Calculus/3%3A_Topics_in_Partial_Derivatives/Taylor__Polynomials_of_Functions_of_Two_Variables) 2025.
+- Geeksforgeeks. [XGBoost Parameters.](https://www.geeksforgeeks.org/machine-learning/xgboost-parameters/) 2025.
+- K. Weinberger. [XGBoost Tutorial.](https://www.cs.cornell.edu/courses/cs4780/2018fa/lectures/lecturenote19.html) 2018.
+- Analytics Vidhya. [Complete Guide to Parameter Tuning in XGBoost with Codes in Python.](https://www.analyticsvidhya.com/blog/2016/03/complete-guide-parameter-tuning-xgboost-with-codes-python/) 2016.
+- XGBoost GitHub. [Linear Booster.](https://github.com/dmlc/xgboost/blob/master/src/gbm/gblinear.cc) 2025.
+- XGBoost GitHub. [Linear Updater.](https://github.com/dmlc/xgboost/blob/master/src/linear/updater_shotgun.cc) 2025.
+- Stack Exchange. [Explanation of min_child_weight in xgboost algorithm.](https://stats.stackexchange.com/questions/317073/explanation-of-min-child-weight-in-xgboost-algorithm) 2017.

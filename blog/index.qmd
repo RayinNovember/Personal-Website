@@ -1,8 +1,7 @@
 ---
 title: "Blog"
 description: |
-  Notes and write-ups from my data and Python learning journey.<br>
-  Half tutorials for future-me, half things I wish I'd known sooner.
+  Writing makes an exact man.
 listing:
   contents:
     - "**/index.qmd"
