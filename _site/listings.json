@@ -9,6 +9,7 @@
   {
     "listing": "/blog/index.html",
     "items": [
+      "/blog/2026-05-30-bayesian-regularization/index.html",
       "/blog/2026-05-27-boosting-methods/index.html",
       "/blog/2025-07-11-kernel-methods-and-svm/index.html"
     ]
@@ -16,6 +17,7 @@
   {
     "listing": "/about/index.html",
     "items": [
+      "/blog/2026-05-30-bayesian-regularization/index.html",
       "/blog/2026-05-27-boosting-methods/index.html",
       "/blog/2025-07-11-kernel-methods-and-svm/index.html",
       "/project/2026-05-24-example-project/index.html",

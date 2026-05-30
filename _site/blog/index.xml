@@ -11,7 +11,1108 @@
 <description>Writing makes an exact man.
 </description>
 <generator>quarto-1.9.36</generator>
-<lastBuildDate>Wed, 27 May 2026 04:00:00 GMT</lastBuildDate>
+<lastBuildDate>Sat, 30 May 2026 04:00:00 GMT</lastBuildDate>
+<item>
+  <title>Regularization: Bayesian’s Perspective</title>
+  <dc:creator>Ray Wang</dc:creator>
+  <link>https://changruiraywang.com/blog/2026-05-30-bayesian-regularization/</link>
+  <description><![CDATA[ 
+
+
+<!-- source: https://github.com/gadenbuie/garrickadenbuie-com/blob/main/_partials/title-block-link-buttons/title-block.html -->
+<!-- 
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title"> 
+-->
+<!-- <header id="title-block-header" class="quarto-title-block default page-columns"> -->
+<!-- <div class="quarto-title page-columns page-full featured-image p-4" style="background-image: url(featured.png), url(featured.jpg), url(../featured.jpg);"> -->
+
+
+
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>Regularization is a fundamental concept in machine learning that helps prevent overfitting by adding a penalty term to the loss function. The most common types of regularization are Lasso (L1), Ridge (L2), and Elastic Net (a combination of L1 and L2).</p>
+<p>Suppose we have a linear regression model:</p>
+<p><img src="https://latex.codecogs.com/png.latex?y_i%20=%20X_i%5ET%5Cbeta%20+%20%5Cepsilon_i"> where <img src="https://latex.codecogs.com/png.latex?%5Cepsilon_i%20%5Csim%20%5Cmathcal%7BN%7D(0,%20%5Csigma%5E2)">.</p>
+<p>Lasso (L1) Regularization is formulated as:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Cmin_%7B%5Cmathbf%7B%5Cbeta%7D%7D%20%5Cfrac%7B1%7D%7Bn%7D%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20(%5Cmathbf%7B%5Cbeta%7D%5E%5Cintercal%20x_i%20-%20y_i)%5E2%20+%20%5Clambda%20%5C%7C%5Cmathbf%7B%5Cbeta%7D%5C%7C_1"></p>
+<p>where <img src="https://latex.codecogs.com/png.latex?%5C%7C%5Cmathbf%7B%5Cbeta%7D%5C%7C_1%20=%20%5Csum_%7Bj=1%7D%5E%7Bp%7D%20%7C%5Cbeta_j%7C"> is the L1 norm of the weight vector; <img src="https://latex.codecogs.com/png.latex?%5Clambda"> is the regularization parameter that controls the strength of the penalty.</p>
+<p>Ridge (L2) Regularization:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Cmin_%7B%5Cmathbf%7B%5Cbeta%7D%7D%20%5Cfrac%7B1%7D%7Bn%7D%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20(%5Cmathbf%7B%5Cbeta%7D%5E%5Cintercal%20x_i%20-%20y_i)%5E2%20+%20%5Clambda%20%5C%7C%5Cmathbf%7B%5Cbeta%7D%5C%7C_2%5E2"></p>
+<p>where <img src="https://latex.codecogs.com/png.latex?%5C%7C%5Cmathbf%7B%5Cbeta%7D%5C%7C_2%5E2%20=%20%5Csum_%7Bj=1%7D%5E%7Bp%7D%20%5Cbeta_j%5E2"> is the L2 norm of the weight vector; <img src="https://latex.codecogs.com/png.latex?%5Clambda"> is the regularization parameter that controls the strength of the penalty.</p>
+<p>Elastic Net:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Cmin_%7B%5Cmathbf%7B%5Cbeta%7D%7D%20%5Cfrac%7B1%7D%7Bn%7D%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20(%5Cmathbf%7B%5Cbeta%7D%5E%5Cintercal%20x_i%20-%20y_i)%5E2%20+%20%5Clambda_1%20%5C%7C%5Cmathbf%7B%5Cbeta%7D%5C%7C_1%20+%20%5Clambda_2%20%5C%7C%5Cmathbf%7B%5Cbeta%7D%5C%7C_2%5E2"></p>
+<p>where the penalty terms are a combination of L1 and L2 norms, with <img src="https://latex.codecogs.com/png.latex?%5Clambda_1"> and <img src="https://latex.codecogs.com/png.latex?%5Clambda_2"> controlling the strength of each penalty.</p>
+<p>When I first learned the concept and saw the formulations, the word ‘penalty’ made conceptual sense but little mathematical sense. I understand the intent to ‘penalize’ the model to help prevent overfitting. But why is it done by adding a penalty term consisting of the norm of the coefficients? How does it work mathematically?</p>
+<p>When searching for L1 and L2 regularization, one usually comes aross the following graph that shows the constraint regions for L1 and L2 regularization:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="regularization.jpg" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="L1 and L2 regularization graphically represented. Source: Wikimedia Commons"><img src="https://changruiraywang.com/blog/2026-05-30-bayesian-regularization/regularization.jpg" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:80.0%" alt="L1 and L2 regularization graphically represented. Source: Wikimedia Commons"></a></p>
+</figure>
+</div>
+<figcaption>L1 and L2 regularization graphically represented. Source: <a href="https://commons.wikimedia.org/wiki/File:Regularization.jpg">Wikimedia Commons</a></figcaption>
+</figure>
+</div>
+<p>The idea is the regularization term controls the values the coefficients can take. For L1 regularization, the constraint is a diamond-shaped region (the L1 norm), while for L2 regularization, the constraint is a circular region (the L2 norm). And because the L1 constraint has corners, it encourages sparsity in the coefficients, while the L2 constraint encourages small but non-zero coefficients.</p>
+<p>Where do the constraint shapes come from? It turns out that according to optimization theory, the minimization problem with regularization terms can be reformulated as a constrained optimization problem. For example, the L1 regularization problem:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Cmin_%7B%5Cmathbf%7B%5Cbeta%7D%7D%20%5Cfrac%7B1%7D%7Bn%7D%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20(%5Cmathbf%7B%5Cbeta%7D%5E%5Cintercal%20x_i%20-%20y_i)%5E2%20+%20%5Clambda%20%5C%7C%5Cmathbf%7B%5Cbeta%7D%5C%7C_1"></p>
+<p>can be rewritten as:</p>
+<p>$<em>{} </em>{i=1}^{n} (^x_i - y_i)^2 $</p>
+<p>subject to <img src="https://latex.codecogs.com/png.latex?%5C%7C%5Cmathbf%7B%5Cbeta%7D%5C%7C_1%20%5Cleq%20B"></p>
+<p>where <img src="https://latex.codecogs.com/png.latex?B"> is a constant that depends on <img src="https://latex.codecogs.com/png.latex?%5Clambda">. This means that the regularization term can be interpreted as a constraint on the coefficients, which leads to the specific shapes of the constraint regions.</p>
+<p>The interpretation makes mathematical sense now. But the chain of thought - adding penalty terms -&gt; reformulating as constrained optimization -&gt; specific shapes of constraint regions - is long and not intuitive. For a long time, I try to remember the steps but still feel it’s a bit of a stretch. Until I came across the Bayesian interpretation of regularization.</p>
+</section>
+<section id="bayesian-rethinking" class="level2">
+<h2 class="anchored" data-anchor-id="bayesian-rethinking">Bayesian Rethinking</h2>
+<p>The idea of bayesian interpretation of regularization is simple: we are just telling the model, “Hey, let’s not get too excited about the data.”</p>
+<p>The paradigm of Bayesian inference is about jointly considering the likelihood of the data and the prior beliefs of the coefficients, mathematically expressed as:</p>
+<p><img src="https://latex.codecogs.com/png.latex?P(%5Cmathbf%7B%5Cbeta%7D%20%7C%20%5Cmathbf%7BX%7D,%20%5Cmathbf%7By%7D)%20%5Cpropto%20P(%5Cmathbf%7By%7D%20%7C%20%5Cmathbf%7BX%7D,%20%5Cmathbf%7B%5Cbeta%7D)%20P(%5Cmathbf%7B%5Cbeta%7D)"></p>
+<p>where <img src="https://latex.codecogs.com/png.latex?P(%5Cmathbf%7B%5Cbeta%7D%20%7C%20%5Cmathbf%7BX%7D,%20%5Cmathbf%7By%7D)"> is the posterior distribution over the coefficients given the data, <img src="https://latex.codecogs.com/png.latex?P(%5Cmathbf%7By%7D%20%7C%20%5Cmathbf%7BX%7D,%20%5Cmathbf%7B%5Cbeta%7D)"> is the likelihood of the data given the coefficients, <img src="https://latex.codecogs.com/png.latex?P(%5Cmathbf%7B%5Cbeta%7D)"> is the prior distribution over the coefficients.</p>
+<p>Frequentists let the data speak for itself and find the best regression coefficients based on the likelihood function (a method called maximum likelihood estimation); whereas bayesians consider both the likelihood function and the prior distribution, saying, “Let’s not get too excited by the data, we put some boundaries on the coefficients based on our prior beliefs.” In fact, Frequentists’ approach is actually equivalent to using a uniform prior distribution in Bayesian’s framework, which means the coefficients are weighted equally and can take any value without any preference.</p>
+<p>Why the ‘let the data speak for itself’ and ‘all coefficients are created equal’ approach is not ideal? Because the data can be noisy, and if we rely solely on the likelihood function, we might end up with coefficients that are too large or too small, or coefficientsthat only fit well with the dataset at hand but do not generalize well to new data. By incorporating a prior distribution that’s not uniform distribution, we have a leash to pull the coefficients back towards more reasonable values.</p>
+<p>As shown on Figure.1, the uniform distribution, the probability of the coefficient being somewhere between -0.5 and 0.5 is the same as the probability of it being somewhere between 2 and 3. In contrast, the Gaussian distribution concentrates more probability mass around zero, which means we are saying, “We believe the coefficients should be near zero, but we are open to them being larger or smaller if the data strongly suggests it.”</p>
+<div id="cell-fig-uniform-vs-gaussian" class="cell" data-execution_count="1">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> np</span>
+<span id="cb1-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> plt</span>
+<span id="cb1-3"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> scipy.stats <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> norm</span>
+<span id="cb1-4"></span>
+<span id="cb1-5">x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.linspace(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1000</span>)</span>
+<span id="cb1-6"></span>
+<span id="cb1-7">uniform <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.where((x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;=</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&amp;</span> (x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&lt;=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>), <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">6</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>)</span>
+<span id="cb1-8">gaussian <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> norm.pdf(x, scale<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.0</span>)</span>
+<span id="cb1-9"></span>
+<span id="cb1-10">fig, ax <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> plt.subplots(figsize<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">8</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4.5</span>))</span>
+<span id="cb1-11"></span>
+<span id="cb1-12">ax.plot(x, uniform,  color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"#E07B54"</span>, lw<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2.5</span>, label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Uniform  — all β equally likely"</span>)</span>
+<span id="cb1-13">ax.fill_between(x, uniform,  alpha<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.10</span>, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"#E07B54"</span>)</span>
+<span id="cb1-14"></span>
+<span id="cb1-15">ax.plot(x, gaussian, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"#7F77DD"</span>, lw<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2.5</span>, label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Gaussian (σ=1)  — β near zero preferred"</span>)</span>
+<span id="cb1-16">ax.fill_between(x, gaussian, alpha<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.10</span>, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"#7F77DD"</span>)</span>
+<span id="cb1-17"></span>
+<span id="cb1-18">ax.annotate(</span>
+<span id="cb1-19">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Frequentists: Any value — no preference"</span>,</span>
+<span id="cb1-20">    xy<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>(<span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2.2</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">6</span>), xytext<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>(<span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3.0</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.28</span>),</span>
+<span id="cb1-21">    fontsize<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"#E07B54"</span>,</span>
+<span id="cb1-22">    arrowprops<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">dict</span>(arrowstyle<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"-&gt;"</span>, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"#E07B54"</span>),</span>
+<span id="cb1-23">)</span>
+<span id="cb1-24">ax.annotate(</span>
+<span id="cb1-25">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Bayesians: Concentrated at zero"</span>,</span>
+<span id="cb1-26">    xy<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, norm.pdf(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, scale<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.0</span>)), xytext<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>(<span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.5</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.44</span>),</span>
+<span id="cb1-27">    fontsize<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"#7F77DD"</span>,</span>
+<span id="cb1-28">    arrowprops<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">dict</span>(arrowstyle<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"-&gt;"</span>, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"#7F77DD"</span>),</span>
+<span id="cb1-29">)</span>
+<span id="cb1-30"></span>
+<span id="cb1-31">ax.set_xlabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"β"</span>, fontsize<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">12</span>)</span>
+<span id="cb1-32">ax.set_ylabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"p(β)"</span>, fontsize<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">12</span>)</span>
+<span id="cb1-33">ax.set_title(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Uniform vs Gaussian prior: equal vs weighted beliefs over β"</span>, fontsize<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">12</span>)</span>
+<span id="cb1-34">ax.legend(fontsize<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>, framealpha<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.4</span>)</span>
+<span id="cb1-35">ax.set_xlim(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>)</span>
+<span id="cb1-36">ax.set_ylim(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.55</span>)</span>
+<span id="cb1-37">ax.spines[[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"top"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"right"</span>]].set_visible(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">False</span>)</span>
+<span id="cb1-38"></span>
+<span id="cb1-39">plt.tight_layout()</span>
+<span id="cb1-40">plt.show()</span></code></pre></div></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-uniform-vs-gaussian" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Uniform and Gaussian distributions on the same axes, showing how the Gaussian concentrates probability mass near zero while the uniform treats all values equally">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-uniform-vs-gaussian-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="index_files/figure-html/fig-uniform-vs-gaussian-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;1: Uniform vs Gaussian prior: equal vs weighted beliefs over β"><img src="https://changruiraywang.com/blog/2026-05-30-bayesian-regularization/index_files/figure-html/fig-uniform-vs-gaussian-output-1.png" alt="Uniform and Gaussian distributions on the same axes, showing how the Gaussian concentrates probability mass near zero while the uniform treats all values equally" width="770" height="422" class="figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-uniform-vs-gaussian-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Uniform vs Gaussian prior: equal vs weighted beliefs over β
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The shape of the prior distribution corresponds to the type of regularization we are applying. For example, a Laplace prior leads to L1 regularization. On the other hand, a Gaussian prior leads to L2 regularization.</p>
+<section id="posterior-formulation" class="level3">
+<h3 class="anchored" data-anchor-id="posterior-formulation">Posterior Formulation</h3>
+<p>The likelihood function for linear regression is given by:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BL%7D(Y%7CX,%20%5Cbeta)%20=%20%5Cprod_%7Bi=1%7D%5E%7Bn%7D%20%5Cfrac%7B1%7D%7B%5Csqrt%7B2%5Cpi%7D%5Csigma%7D%20%5Cexp%5Cleft(-%5Cfrac%7B%5Cepsilon_i%5E2%7D%7B2%5Csigma%5E2%7D%5Cright)%20=%20%5Cleft(%5Cfrac%7B1%7D%7B%5Csqrt%7B2%5Cpi%7D%5Csigma%7D%5Cright)%5En%20%5Cexp%5Cleft(-%5Cfrac%7B1%7D%7B2%5Csigma%5E2%7D%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Cepsilon_i%5E2%5Cright)"></p>
+<p>The prior distribution over the coefficients <img src="https://latex.codecogs.com/png.latex?%5Cbeta"> can be defined as:</p>
+<p><img src="https://latex.codecogs.com/png.latex?P(%5Cbeta)%20=%20%5Cprod_%7Bj=1%7D%5E%7Bp%7D%20P(%5Cbeta_j)"></p>
+<p>where <img src="https://latex.codecogs.com/png.latex?P(%5Cbeta_j)"> is the prior distribution for each coefficient <img src="https://latex.codecogs.com/png.latex?%5Cbeta_j">.</p>
+<p>The posterior distribution over the coefficients is then:</p>
+<p><img src="https://latex.codecogs.com/png.latex?P(%5Cbeta%20%7C%20X,%20Y)%20%5Cpropto%20%5Cmathcal%7BL%7D(Y%20%7C%20X,%20%5Cbeta)%20P(%5Cbeta)"></p>
+<p><img src="https://latex.codecogs.com/png.latex?=%5Cleft(%5Cfrac%7B1%7D%7B%5Csqrt%7B2%5Cpi%7D%5Csigma%7D%5Cright)%5En%20%5Cexp%5Cleft(-%5Cfrac%7B1%7D%7B2%5Csigma%5E2%7D%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Cepsilon_i%5E2%5Cright)*%5Cprod_%7Bj=1%7D%5E%7Bp%7D%20P(%5Cbeta_j)"></p>
+<p>Now we plug in the specific prior distributions for Lasso, Ridge, and Elastic Net to see how the posterior distribution leads to the regularization terms in the optimization problem.</p>
+</section>
+<section id="lasso" class="level3">
+<h3 class="anchored" data-anchor-id="lasso">Lasso</h3>
+<p>Lasso corresponds to a Laplace prior distribution:</p>
+<p><img src="https://latex.codecogs.com/png.latex?P(%5Cbeta)%20=%20%5Cfrac%7B1%7D%7B2b%7D%20%5Cexp%5Cleft(-%5Cfrac%7B%7C%5Cbeta%7C%7D%7Bb%7D%5Cright)"></p>
+<p>where <img src="https://latex.codecogs.com/png.latex?b"> is a scale parameter, <img src="https://latex.codecogs.com/png.latex?%7C%5Cbeta%7C"> is the absolute value of the coefficient.</p>
+<div id="cell-fig-laplace" class="cell" data-execution_count="2">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> np</span>
+<span id="cb2-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> plt</span>
+<span id="cb2-3"></span>
+<span id="cb2-4">x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.linspace(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1000</span>)</span>
+<span id="cb2-5"></span>
+<span id="cb2-6">params <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [</span>
+<span id="cb2-7">    {<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"b"</span>: <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.5</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"color"</span>: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"#E07B54"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"label"</span>: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"b = 0.5  (tight, sparse)"</span>},</span>
+<span id="cb2-8">    {<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"b"</span>: <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.0</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"color"</span>: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"#1D9E75"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"label"</span>: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"b = 1.0  (default)"</span>},</span>
+<span id="cb2-9">    {<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"b"</span>: <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2.0</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"color"</span>: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"#7F77DD"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"label"</span>: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"b = 2.0  (flat, less sparse)"</span>},</span>
+<span id="cb2-10">]</span>
+<span id="cb2-11"></span>
+<span id="cb2-12">fig, ax <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> plt.subplots(figsize<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">7</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>))</span>
+<span id="cb2-13"></span>
+<span id="cb2-14"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> p <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> params:</span>
+<span id="cb2-15">    b <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> p[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"b"</span>]</span>
+<span id="cb2-16">    density <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> b)) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> np.exp(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span>np.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">abs</span>(x) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> b)</span>
+<span id="cb2-17">    ax.plot(x, density, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>p[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"color"</span>], lw<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2.5</span>, label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>p[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"label"</span>])</span>
+<span id="cb2-18">    ax.fill_between(x, density, alpha<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.08</span>, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>p[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"color"</span>])</span>
+<span id="cb2-19"></span>
+<span id="cb2-20">ax.axvline(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"#888780"</span>, lw<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, linestyle<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"--"</span>, alpha<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.5</span>)</span>
+<span id="cb2-21"></span>
+<span id="cb2-22">ax.set_xlabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"β"</span>, fontsize<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">12</span>)</span>
+<span id="cb2-23">ax.set_ylabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"p(β)"</span>, fontsize<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">12</span>)</span>
+<span id="cb2-24">ax.set_title(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Laplace prior across different scale parameters b"</span>, fontsize<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">12</span>)</span>
+<span id="cb2-25">ax.legend(fontsize<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>, framealpha<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.4</span>)</span>
+<span id="cb2-26">ax.spines[[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"top"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"right"</span>]].set_visible(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">False</span>)</span>
+<span id="cb2-27">ax.grid(axis<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"y"</span>, alpha<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.25</span>)</span>
+<span id="cb2-28"></span>
+<span id="cb2-29">plt.tight_layout()</span>
+<span id="cb2-30">plt.show()</span></code></pre></div></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-laplace" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Three Laplace distributions with scale parameters b=0.5, b=1, and b=2, showing how larger b leads to a flatter, more spread out distribution while smaller b produces a sharper peak at zero">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-laplace-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="index_files/figure-html/fig-laplace-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;2: Laplace (double exponential) prior for b = 0.5, 1, 2"><img src="https://changruiraywang.com/blog/2026-05-30-bayesian-regularization/index_files/figure-html/fig-laplace-output-1.png" alt="Three Laplace distributions with scale parameters b=0.5, b=1, and b=2, showing how larger b leads to a flatter, more spread out distribution while smaller b produces a sharper peak at zero" width="663" height="374" class="figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-laplace-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Laplace (double exponential) prior for b = 0.5, 1, 2
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The joint prior distribution over all coefficients is:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Cprod_%7Bj=1%7D%5E%7Bp%7D%20P(%5Cbeta_j)%20=%20%5Cprod_%7Bj=1%7D%5E%7Bp%7D%20%5Cfrac%7B1%7D%7B2b%7D%20%5Cexp%5Cleft(-%5Cfrac%7B%7C%5Cbeta_j%7C%7D%7Bb%7D%5Cright)"></p>
+<p><img src="https://latex.codecogs.com/png.latex?=%20%5Cleft(%5Cfrac%7B1%7D%7B2b%7D%5Cright)%5Ep%20%5Cexp%5Cleft(-%5Cfrac%7B1%7D%7Bb%7D%5Csum_%7Bj=1%7D%5E%7Bp%7D%20%7C%5Cbeta_j%7C%5Cright)"></p>
+<p>Plugging this into the posterior distribution, we get:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BL%7D(Y%20%7C%20X,%20%5Cbeta)%20P(%5Cbeta)%20=%20%5Cleft(%5Cfrac%7B1%7D%7B%5Csqrt%7B2%5Cpi%7D%5Csigma%7D%5Cright)%5En%20%5Cexp%5Cleft(-%5Cfrac%7B1%7D%7B2%5Csigma%5E2%7D%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Cepsilon_i%5E2%5Cright)%20*%20%5Cleft(%5Cfrac%7B1%7D%7B2b%7D%5Cright)%5Ep%20%5Cexp%5Cleft(-%5Cfrac%7B1%7D%7Bb%7D%5Csum_%7Bj=1%7D%5E%7Bp%7D%20%7C%5Cbeta_j%7C%5Cright)"></p>
+<p>= <img src="https://latex.codecogs.com/png.latex?%5Cleft(%5Cfrac%7B1%7D%7B%5Csqrt%7B2%5Cpi%7D%5Csigma%7D%5Cright)%5En%20%5Cleft(%5Cfrac%7B1%7D%7B2b%7D%5Cright)%5Ep%20%5Cexp%5Cleft(-%5Cfrac%7B1%7D%7B2%5Csigma%5E2%7D%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Cepsilon_i%5E2%20-%20%5Cfrac%7B1%7D%7Bb%7D%5Csum_%7Bj=1%7D%5E%7Bp%7D%20%7C%5Cbeta_j%7C%5Cright)"></p>
+<p>Now to find the maximum a posteriori (MAP) estimate of <img src="https://latex.codecogs.com/png.latex?%5Cbeta">, we take the log of the posterior distribution:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Cunderbrace%7B%5Cunderbrace%7Bnlog(%5Cfrac%7B1%7D%7B%5Csqrt%7B2%5Cpi%7D%5Csigma%7D)%20+%20plog(%5Cfrac%7B1%7D%7B2b%7D)%7D_%7BConstant%7D%20-%20%5Cunderbrace%7B(%5Cfrac%7B1%7D%7B2%5Csigma%5E2%7D%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Cepsilon_i%5E2%20+%20%5Cfrac%7B1%7D%7Bb%7D%5Csum_%7Bj=1%7D%5E%7Bp%7D%20%7C%5Cbeta_j%7C)%7D_%7BMinimize%20this%7D%7D_%7BIn%5C%20order%5C%20to%5C%20maximize%5C%20this%7D"></p>
+<p>Now the problem becomes:</p>
+<p><img src="https://latex.codecogs.com/png.latex?arg%5Cmin_%7B%5Cbeta%7D%20%5Cleft(%20%5Cfrac%7B1%7D%7B2%5Csigma%5E2%7D%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Cepsilon_i%5E2%20+%20%5Cfrac%7B1%7D%7Bb%7D%5Csum_%7Bj=1%7D%5E%7Bp%7D%20%7C%5Cbeta_j%7C%20%5Cright)"></p>
+<p><img src="https://latex.codecogs.com/png.latex?=arg%5Cmin_%7B%5Cbeta%7D%20%5Cfrac%7B1%7D%7B2%5Csigma%5E2%7D%5Cleft(%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Cepsilon_i%5E2%20+%20%5Cfrac%7B2%5Csigma%5E2%7D%7Bb%7D%5Csum_%7Bj=1%7D%5E%7Bp%7D%20%7C%5Cbeta_j%7C%20%5Cright)"></p>
+<p>Since both <img src="https://latex.codecogs.com/png.latex?%5Csigma"> and <img src="https://latex.codecogs.com/png.latex?b"> are constants, we can ignore the <img src="https://latex.codecogs.com/png.latex?%5Cfrac%7B1%7D%7B2%5Csigma%5E2%7D"> term outside the brackets and use a new constant <img src="https://latex.codecogs.com/png.latex?%5Clambda"> to replace the term: <img src="https://latex.codecogs.com/png.latex?%5Clambda%20=%20%5Cfrac%7B2%5Csigma%5E2%7D%7Bb%7D">.</p>
+<p>Now we have:</p>
+<p><img src="https://latex.codecogs.com/png.latex?arg%5Cmin_%7B%5Cbeta%7D%20%5Cleft(%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Cepsilon_i%5E2%20+%20%5Clambda%5Csum_%7Bj=1%7D%5E%7Bp%7D%20%7C%5Cbeta_j%7C%20%5Cright)"></p>
+<p><img src="https://latex.codecogs.com/png.latex?=arg%5Cmin_%7B%5Cbeta%7D%20%5Cleft(%20RSS%20+%20%5Clambda%5Csum_%7Bj=1%7D%5E%7Bp%7D%20%7C%5Cbeta_j%7C%20%5Cright)"></p>
+<p>which is exactly the Lasso regularization formulation, with <img src="https://latex.codecogs.com/png.latex?%5Clambda%20=%20%5Cfrac%7B2%5Csigma%5E2%7D%7Bb%7D">.</p>
+<p>Therefore, the Lasso solutions are actually the maximum a posteriori (MAP) estimates of the coefficients under a Laplace prior distribution.</p>
+<p>As we can see from Figure.2, the smaller <img src="https://latex.codecogs.com/png.latex?b"> gets, or equivamently, the larger <img src="https://latex.codecogs.com/png.latex?%5Clambda"> gets, the distribution gets a sharper peak at 0. In other words, the strongger the regularization parameter gets, the more the coefficients get pushed towards zero, encouraging sparsity in the coefficients.</p>
+</section>
+<section id="ridge" class="level3">
+<h3 class="anchored" data-anchor-id="ridge">Ridge</h3>
+<p>Ridge regularization corresponds to a Gaussian prior distribution for the coefficients:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0AP(%5Cbeta)%20=%20%5Cfrac%7B1%7D%7B%5Csqrt%7B2%5Cpi%7D%20%5Ctau%7D%20%5Cexp%5Cleft(-%5Cfrac%7B%5Cbeta%5E2%7D%7B2%5Ctau%5E2%7D%5Cright)%0A"></p>
+<p>where <img src="https://latex.codecogs.com/png.latex?%5Ctau%5E2"> is the variance parameter.</p>
+<div id="cell-fig-gaussian" class="cell" data-execution_count="3">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> np</span>
+<span id="cb3-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> plt</span>
+<span id="cb3-3"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> scipy.stats <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> norm</span>
+<span id="cb3-4"></span>
+<span id="cb3-5">x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.linspace(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1000</span>)</span>
+<span id="cb3-6"></span>
+<span id="cb3-7">params <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [</span>
+<span id="cb3-8">    {<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"sigma"</span>: <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.5</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"color"</span>: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"#E07B54"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"label"</span>: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"σ = 0.5  (tight, strong regularization)"</span>},</span>
+<span id="cb3-9">    {<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"sigma"</span>: <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.0</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"color"</span>: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"#1D9E75"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"label"</span>: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"σ = 1.0  (default)"</span>},</span>
+<span id="cb3-10">    {<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"sigma"</span>: <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2.0</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"color"</span>: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"#7F77DD"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"label"</span>: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"σ = 2.0  (flat, weak regularization)"</span>},</span>
+<span id="cb3-11">]</span>
+<span id="cb3-12"></span>
+<span id="cb3-13">fig, ax <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> plt.subplots(figsize<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">7</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>))</span>
+<span id="cb3-14"></span>
+<span id="cb3-15"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> p <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> params:</span>
+<span id="cb3-16">    density <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> norm.pdf(x, scale<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>p[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"sigma"</span>])</span>
+<span id="cb3-17">    ax.plot(x, density, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>p[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"color"</span>], lw<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2.5</span>, label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>p[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"label"</span>])</span>
+<span id="cb3-18">    ax.fill_between(x, density, alpha<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.08</span>, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>p[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"color"</span>])</span>
+<span id="cb3-19"></span>
+<span id="cb3-20">ax.axvline(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"#888780"</span>, lw<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, linestyle<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"--"</span>, alpha<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.5</span>)</span>
+<span id="cb3-21"></span>
+<span id="cb3-22">ax.set_xlabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"β"</span>, fontsize<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">12</span>)</span>
+<span id="cb3-23">ax.set_ylabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"p(β)"</span>, fontsize<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">12</span>)</span>
+<span id="cb3-24">ax.set_title(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Gaussian prior across different scale parameters σ"</span>, fontsize<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">12</span>)</span>
+<span id="cb3-25">ax.legend(fontsize<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>, framealpha<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.4</span>)</span>
+<span id="cb3-26">ax.spines[[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"top"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"right"</span>]].set_visible(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">False</span>)</span>
+<span id="cb3-27">ax.grid(axis<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"y"</span>, alpha<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.25</span>)</span>
+<span id="cb3-28"></span>
+<span id="cb3-29">plt.tight_layout()</span>
+<span id="cb3-30">plt.show()</span></code></pre></div></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-gaussian" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Three Gaussian distributions with scale parameters sigma=0.5, sigma=1, and sigma=2, showing how larger sigma leads to a flatter, more spread out distribution while smaller sigma produces a sharper peak at zero">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-gaussian-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="index_files/figure-html/fig-gaussian-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Figure&nbsp;3: Gaussian prior for σ = 0.5, 1, 2"><img src="https://changruiraywang.com/blog/2026-05-30-bayesian-regularization/index_files/figure-html/fig-gaussian-output-1.png" alt="Three Gaussian distributions with scale parameters sigma=0.5, sigma=1, and sigma=2, showing how larger sigma leads to a flatter, more spread out distribution while smaller sigma produces a sharper peak at zero" width="663" height="374" class="figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-gaussian-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Gaussian prior for σ = 0.5, 1, 2
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>With the same posterior formulation as in Lasso, we can plug in the Gaussian prior to get:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BL%7D(Y%20%7C%20X,%20%5Cbeta)%20P(%5Cbeta)%20=%20%5Cleft(%5Cfrac%7B1%7D%7B%5Csqrt%7B2%5Cpi%7D%5Csigma%7D%5Cright)%5En%20%5Cexp%5Cleft(-%5Cfrac%7B1%7D%7B2%5Csigma%5E2%7D%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Cepsilon_i%5E2%5Cright)%20*%20%5Cleft(%5Cfrac%7B1%7D%7B%5Csqrt%7B2%5Cpi%7D%20%5Ctau%7D%5Cright)%5Ep%20%5Cexp%5Cleft(-%5Cfrac%7B1%7D%7B2%5Ctau%5E2%7D%5Csum_%7Bj=1%7D%5E%7Bp%7D%20%5Cbeta_j%5E2%5Cright)"></p>
+<p>To get the MAP estimate, we take the log of the posterior distribution:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Cunderbrace%7B%5Cunderbrace%7Bnlog(%5Cfrac%7B1%7D%7B%5Csqrt%7B2%5Cpi%7D%5Csigma%7D)%20+%20plog(%5Cfrac%7B1%7D%7B%5Csqrt%7B2%5Cpi%7D%20%5Ctau%7D)%7D_%7BConstant%7D%20-%20%5Cunderbrace%7B(%5Cfrac%7B1%7D%7B2%5Csigma%5E2%7D%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Cepsilon_i%5E2%20+%20%5Cfrac%7B1%7D%7B2%5Ctau%5E2%7D%5Csum_%7Bj=1%7D%5E%7Bp%7D%20%5Cbeta_j%5E2)%7D_%7BMinimize%20this%7D%7D_%7BIn%5C%20order%5C%20to%5C%20maximize%5C%20this%7D"></p>
+<p>Now the problem becomes:</p>
+<p><img src="https://latex.codecogs.com/png.latex?arg%5Cmin_%7B%5Cbeta%7D%20%5Cleft(%20%5Cfrac%7B1%7D%7B2%5Csigma%5E2%7D%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Cepsilon_i%5E2%20+%20%5Cfrac%7B1%7D%7B2%5Ctau%5E2%7D%5Csum_%7Bj=1%7D%5E%7Bp%7D%20%5Cbeta_j%5E2%20%5Cright)"></p>
+<p><img src="https://latex.codecogs.com/png.latex?=arg%5Cmin_%7B%5Cbeta%7D%20%5Cfrac%7B1%7D%7B2%5Csigma%5E2%7D%5Cleft(%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Cepsilon_i%5E2%20+%20%5Cfrac%7B%5Csigma%5E2%7D%7B%5Ctau%5E2%7D%5Csum_%7Bj=1%7D%5E%7Bp%7D%20%5Cbeta_j%5E2%20%5Cright)"></p>
+<p>which is equivalent to:</p>
+<p><img src="https://latex.codecogs.com/png.latex?arg%5Cmin_%7B%5Cbeta%7D%20%5Cleft(%20RSS%20+%20%5Clambda%5Csum_%7Bj=1%7D%5E%7Bp%7D%20%5Cbeta_j%5E2%20%5Cright)"></p>
+<p>where <img src="https://latex.codecogs.com/png.latex?%5Clambda%20=%20%5Cfrac%7B%5Csigma%5E2%7D%7B%5Ctau%5E2%7D">.</p>
+<p>Therefore, the Ridge solutions are the maximum a posteriori (MAP) estimates under a Gaussian prior.</p>
+<p>From Figure.3, we can see that the smaller <img src="https://latex.codecogs.com/png.latex?%5Csigma"> gets, or equivalently, the larger <img src="https://latex.codecogs.com/png.latex?%5Clambda"> gets, the distribution gets more concentrated around zero.</p>
+</section>
+<section id="elastic-net" class="level3">
+<h3 class="anchored" data-anchor-id="elastic-net">Elastic Net</h3>
+<p>Elastic Net regularization, we use the product of Laplace and Gaussian prior distributions for the coefficients:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0AP(%5Cbeta)%20=%20%5Cfrac%7B1%7D%7B2b%7D%20%5Cexp%5Cleft(-%5Cfrac%7B%7C%5Cbeta%7C%7D%7Bb%7D%5Cright)%20*%20%5Cfrac%7B1%7D%7B%5Csqrt%7B2%5Cpi%7D%20%5Ctau%7D%20%5Cexp%5Cleft(-%5Cfrac%7B%5Cbeta%5E2%7D%7B2%5Ctau%5E2%7D%5Cright)%0A"></p>
+<p><img src="https://latex.codecogs.com/png.latex?P(%5Cbeta)%20%5Cpropto%20%5Cexp%5Cleft(-%5Cfrac%7B%7C%5Cbeta%7C%7D%7Bb%7D-%5Cfrac%7B%5Cbeta%5E2%7D%7B2%5Ctau%5E2%7D%5Cright)"></p>
+<div id="cell-fig-elastic-net" class="cell" data-execution_count="4">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> np</span>
+<span id="cb4-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> plt</span>
+<span id="cb4-3"></span>
+<span id="cb4-4">x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.linspace(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1000</span>)</span>
+<span id="cb4-5">dx <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> x[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> x[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]</span>
+<span id="cb4-6"></span>
+<span id="cb4-7"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> elastic_net_prior(x, lambda1, lambda2):</span>
+<span id="cb4-8">    unnorm <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.exp(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span>lambda1 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> np.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">abs</span>(x) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> lambda2 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> x<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">**</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>)</span>
+<span id="cb4-9">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> unnorm <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> (unnorm.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">sum</span>() <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> dx)</span>
+<span id="cb4-10"></span>
+<span id="cb4-11">params <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [</span>
+<span id="cb4-12">    {<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"lambda1"</span>: <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2.0</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"lambda2"</span>: <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.2</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"color"</span>: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"#E07B54"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"label"</span>: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"λ₁=2.0, λ₂=0.2  (Lasso-like)"</span>},</span>
+<span id="cb4-13">    {<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"lambda1"</span>: <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.0</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"lambda2"</span>: <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.0</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"color"</span>: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"#1D9E75"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"label"</span>: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"λ₁=1.0, λ₂=1.0  (balanced)"</span>},</span>
+<span id="cb4-14">    {<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"lambda1"</span>: <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.2</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"lambda2"</span>: <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2.0</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"color"</span>: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"#7F77DD"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"label"</span>: <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"λ₁=0.2, λ₂=2.0  (Ridge-like)"</span>},</span>
+<span id="cb4-15">]</span>
+<span id="cb4-16"></span>
+<span id="cb4-17">fig, ax <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> plt.subplots(figsize<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">7</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>))</span>
+<span id="cb4-18"></span>
+<span id="cb4-19"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> p <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> params:</span>
+<span id="cb4-20">    density <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> elastic_net_prior(x, p[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"lambda1"</span>], p[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"lambda2"</span>])</span>
+<span id="cb4-21">    ax.plot(x, density, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>p[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"color"</span>], lw<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2.5</span>, label<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>p[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"label"</span>])</span>
+<span id="cb4-22">    ax.fill_between(x, density, alpha<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.08</span>, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>p[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"color"</span>])</span>
+<span id="cb4-23"></span>
+<span id="cb4-24">ax.axvline(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"#888780"</span>, lw<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, linestyle<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"--"</span>, alpha<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.5</span>)</span>
+<span id="cb4-25"></span>
+<span id="cb4-26">ax.set_xlabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"β"</span>, fontsize<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">12</span>)</span>
+<span id="cb4-27">ax.set_ylabel(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"p(β)"</span>, fontsize<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">12</span>)</span>
+<span id="cb4-28">ax.set_title(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Elastic Net prior across different λ₁ and λ₂ combinations"</span>, fontsize<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">12</span>)</span>
+<span id="cb4-29">ax.legend(fontsize<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>, framealpha<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.4</span>)</span>
+<span id="cb4-30">ax.spines[[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"top"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"right"</span>]].set_visible(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">False</span>)</span>
+<span id="cb4-31">ax.grid(axis<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"y"</span>, alpha<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.25</span>)</span>
+<span id="cb4-32"></span>
+<span id="cb4-33">plt.tight_layout()</span>
+<span id="cb4-34">plt.show()</span></code></pre></div></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-elastic-net" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Four Elastic Net distributions showing how varying lambda1 and lambda2 shifts the prior between Laplace-like and Gaussian-like behaviour">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-elastic-net-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="index_files/figure-html/fig-elastic-net-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="Figure&nbsp;4: Elastic Net prior for different λ₁ and λ₂ combinations"><img src="https://changruiraywang.com/blog/2026-05-30-bayesian-regularization/index_files/figure-html/fig-elastic-net-output-1.png" alt="Four Elastic Net distributions showing how varying lambda1 and lambda2 shifts the prior between Laplace-like and Gaussian-like behaviour" width="663" height="374" class="figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-elastic-net-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Elastic Net prior for different λ₁ and λ₂ combinations
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>We proceed the same way as in Lasso and Ridge to get the MAP estimate of <img src="https://latex.codecogs.com/png.latex?%5Cbeta"> under the Elastic Net prior, which leads to the minimarzation problem:</p>
+<p><img src="https://latex.codecogs.com/png.latex?arg%5Cmin_%7B%5Cbeta%7D%20%5Cfrac%7B1%7D%7B2%5Csigma%5E2%7D%5Cleft(%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Cepsilon_i%5E2%20+%20%5Cfrac%7B2%5Csigma%5E2%7D%7Bb%7D%5Csum_%7Bj=1%7D%5E%7Bp%7D%20%7C%5Cbeta_j%7C%20+%20%5Cfrac%7B%5Csigma%5E2%7D%7B%5Ctau%5E2%7D%5Csum_%7Bj=1%7D%5E%7Bp%7D%20%5Cbeta_j%5E2%20%5Cright)"></p>
+<p><img src="https://latex.codecogs.com/png.latex?=arg%5Cmin_%7B%5Cbeta%7D%5Cleft(RSS%20+%20%5Clambda_1%5Csum_%7Bj=1%7D%5E%7Bp%7D%20%7C%5Cbeta_j%7C%20+%20%5Clambda_2%5Csum_%7Bj=1%7D%5E%7Bp%7D%20%5Cbeta_j%5E2%20%5Cright)"></p>
+<p>where <img src="https://latex.codecogs.com/png.latex?%5Clambda_1%20=%20%5Cfrac%7B2%5Csigma%5E2%7D%7Bb%7D"> and <img src="https://latex.codecogs.com/png.latex?%5Clambda_2%20=%20%5Cfrac%7B%5Csigma%5E2%7D%7B%5Ctau%5E2%7D"> are the regularization parameters for the L1 and L2 penalties, respectively.</p>
+</section>
+<section id="conclusion" class="level3">
+<h3 class="anchored" data-anchor-id="conclusion">Conclusion</h3>
+<p>We have shown how the regularization terms in Lasso, Ridge, and Elastic Net can be derived from a Bayesian perspective by considering different prior distributions over the coefficients. For me, the Bayesian perspective provides a more intuitive understanding of regularization: it allows us to make the model less sensitive to the data by pre-specifying a shape for the coefficient distributions.</p>
+</section>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+<ul>
+<li><p>E. Kamperi. <a href="https://ekamperi.github.io/mathematics/2020/08/02/bayesian-connection-to-lasso-and-ridge-regression.html">Bayesian connection to Lasso and Ridge regression.</a> 2020.</p></li>
+<li><p>Q. Li and N. Lin. <a href="https://doi.org/10.1214/10-BA506">The Bayesian Elastic Net.</a> <em>Bayesian Analysis</em>, 5(1), 151–170. 2010.</p></li>
+<li><p>K. Weinberger. <a href="https://www.cs.cornell.edu/courses/cs4780/2018fa/lectures/lecturenote10.html">Empirical Risk Minimization.</a> 2018.</p></li>
+</ul>
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" id="quarto-reuse"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></div></div></section><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-wang2026" class="csl-entry quarto-appendix-citeas">
+Wang, Ray. 2026. <span>“Regularization: Bayesian’s Perspective.”</span>
+May 30. <a href="https://changruiraywang.com/blog/2026-05-30-bayesian-regularization/">https://changruiraywang.com/blog/2026-05-30-bayesian-regularization/</a>.
+</div></div></section></div> ]]></description>
+  <category>machine learning</category>
+  <category>Bayesian</category>
+  <category>regularization</category>
+  <guid>https://changruiraywang.com/blog/2026-05-30-bayesian-regularization/</guid>
+  <pubDate>Sat, 30 May 2026 04:00:00 GMT</pubDate>
+  <media:content url="https://changruiraywang.com/blog/2026-05-30-bayesian-regularization/sidebar.jpg" medium="image" type="image/jpeg"/>
+</item>
 <item>
   <title>Boosting Methods - Gradient Boost and XGBoost</title>
   <dc:creator>Ray Wang</dc:creator>
