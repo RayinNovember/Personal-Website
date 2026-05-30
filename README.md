@@ -16,4 +16,17 @@ quarto preview
 quarto render
 ```
 
+## Save Updates
+
+```powershell
+powershell -ExecutionPolicy Bypass -File render.ps1
+```
+
+```bash
+git add .
+git commit -m "update accent color"
+git push
+```
+
+
 Output is written to `_site/`.
