@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Ray Wang">
-<meta name="dcterms.date" content="2025-07-11">
-<meta name="description" content="An introduction to kernel methods, the kernel trick, and how kernels power Support Vector Machines.">
+<meta name="dcterms.date" content="2026-06-01">
+<meta name="description" content="An introduction to kernel methods, the kernel trick, and how kernels power Machine Learning.">
 
 <title>Kernel Methods and SVM – Ray Wang</title>
 <style>
@@ -52,6 +52,9 @@ ul.task-list li input[type="checkbox"] {
 <link href="../../site_libs/bootstrap/bootstrap-2128be2227ba7e96272c6d2d49cea99e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <link href="../../site_libs/quarto-contrib/fontawesome6-1.2.0/all.min.css" rel="stylesheet">
 <link href="../../site_libs/quarto-contrib/fontawesome6-1.2.0/latex-fontsize.css" rel="stylesheet">
+<script src="../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -325,7 +328,7 @@ window.Quarto = {
 
 <div>
   <div id="title-block-title-desc" class="description pt-4">
-    An introduction to kernel methods, the kernel trick, and how kernels power Support Vector Machines.
+    An introduction to kernel methods, the kernel trick, and how kernels power Machine Learning.
   </div>
 </div>
 
@@ -342,7 +345,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">July 11, 2025</p>
+      <p class="date">June 1, 2026</p>
     </div>
   </div>
   
@@ -360,17 +363,23 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#why-kernels" id="toc-why-kernels" class="nav-link active" data-scroll-target="#why-kernels">Why Kernels?</a></li>
-  <li><a href="#what-are-kernels" id="toc-what-are-kernels" class="nav-link" data-scroll-target="#what-are-kernels">What are Kernels?</a>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#what-are-kernels" id="toc-what-are-kernels" class="nav-link" data-scroll-target="#what-are-kernels">What are Kernels?</a></li>
+  <li><a href="#why-kernels" id="toc-why-kernels" class="nav-link" data-scroll-target="#why-kernels">Why Kernels?</a>
+  <ul class="collapse">
+  <li><a href="#kernelized-linear-regression" id="toc-kernelized-linear-regression" class="nav-link" data-scroll-target="#kernelized-linear-regression">Kernelized Linear Regression</a></li>
+  <li><a href="#computational-convenience" id="toc-computational-convenience" class="nav-link" data-scroll-target="#computational-convenience">Computational Convenience</a></li>
+  </ul></li>
+  <li><a href="#types-of-kernels" id="toc-types-of-kernels" class="nav-link" data-scroll-target="#types-of-kernels">Types of Kernels</a>
   <ul class="collapse">
   <li><a href="#polynomial-kernel" id="toc-polynomial-kernel" class="nav-link" data-scroll-target="#polynomial-kernel">Polynomial Kernel</a></li>
   <li><a href="#the-radial-basis-function-rbf-kernel" id="toc-the-radial-basis-function-rbf-kernel" class="nav-link" data-scroll-target="#the-radial-basis-function-rbf-kernel">The Radial Basis Function (RBF) Kernel</a></li>
   </ul></li>
-  <li><a href="#kernelized-algorithms" id="toc-kernelized-algorithms" class="nav-link" data-scroll-target="#kernelized-algorithms">Kernelized Algorithms</a>
+  <li><a href="#kernelized-support-vector-machines-ksvm" id="toc-kernelized-support-vector-machines-ksvm" class="nav-link" data-scroll-target="#kernelized-support-vector-machines-ksvm">Kernelized Support Vector Machines (KSVM)</a>
   <ul class="collapse">
-  <li><a href="#kernelized-linear-regression" id="toc-kernelized-linear-regression" class="nav-link" data-scroll-target="#kernelized-linear-regression">Kernelized Linear Regression</a></li>
-  <li><a href="#support-vector-machine" id="toc-support-vector-machine" class="nav-link" data-scroll-target="#support-vector-machine">Support Vector Machine</a></li>
+  <li><a href="#svm-as-a-smart-nearest-neighbor" id="toc-svm-as-a-smart-nearest-neighbor" class="nav-link" data-scroll-target="#svm-as-a-smart-nearest-neighbor">SVM as a Smart Nearest Neighbor</a></li>
   </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
   <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   </ul>
 </nav>
@@ -389,42 +398,117 @@ window.Quarto = {
 
 
 
-<section id="why-kernels" class="level2">
-<h2 class="anchored" data-anchor-id="why-kernels">Why Kernels?</h2>
-<p>Adding non-linear features is a typical approach to reducing bias when building a machine learning model. Such features include two-way, three-way or even higher interaction terms.</p>
-<p>With the focus of machine learning models being prediction accuracy instead of model interpretability, one can add as many non-linear terms as possible, in the hope that the practice reveals hidden relationships among the data. However, when there are many original features, the non-linear terms can quickly become computationally expensive.</p>
-<p>Consider a d-dimensional feature vector <span class="math inline">\(\mathbf{x}\)</span>:</p>
-<p><span class="math display">\[\mathbf{x} = \begin{pmatrix} x_1 \\ \vdots \\ x_d \end{pmatrix}\]</span></p>
-<p>where <span class="math inline">\(x_1\)</span> through <span class="math inline">\(x_d\)</span> represent the features of an observation. For example, if <span class="math inline">\(\mathbf{x}\)</span> represents the feature vector of a house, <span class="math inline">\(x_1\)</span> through <span class="math inline">\(x_d\)</span> could be area, year built, number of bedrooms, and other features of the house.</p>
-<p>To add as many interaction terms as possible, we can have a transformation <span class="math inline">\(\phi(x)\)</span> such that:</p>
-<p><span class="math display">\[\phi(x) = \begin{pmatrix} x_1 \\ \vdots \\ x_d \\ x_1x_2 \\ \vdots \\ x_{d-1}x_d \end{pmatrix}\]</span></p>
-<p>With a feature vector of length <span class="math inline">\(d\)</span>, a transformation <span class="math inline">\(\phi(x)\)</span> that contains all possible interaction terms is of length <span class="math inline">\(2^d\)</span>. As a result, the dimension of the transformed features becomes high and if we calculate the higher-dimension terms one by one, the training of the model may become slow or even unfeasible.</p>
-<p>So one may ask: is there an easier way to include the non-linear terms in a model in a cost-effective manner?</p>
-<p>The answer is something called the <strong>kernel trick</strong>. It allows us to build models with transformed features using the original features only, without ever having to calculate the actual high-dimension features.</p>
-<p>The kernel trick takes a two-step detour:</p>
-<ol type="1">
-<li>Find a kernel function that takes low-dimension features and returns the <strong>inner products</strong> of high-dimension features.</li>
-<li>Find a machine learning model that takes the <strong>inner products</strong> of features among pairs of observations as input.</li>
-</ol>
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>Just like backpropagation is the primitive mathematical engine of AI, kernels are the underlying mechanism of many powerful machine learning algorithms. In fact, the concept of kernels is so fundamental that it can still be found in today’s AI applications, although in a more implicit way.</p>
+<p>Despite its importance, the concept of kernels is probably one of the most confusing and thus most underappreciated topics in machine learning. Most data practitioners, like myself, first learned of kernels in the context of Support Vector Machines (SVM), which itself is another hard topic. On the other hand, if you try to learn kernel from its mathematical definition which involves Hilbert spaces, you will easily get lost.</p>
+<p>One of the most common interpretation one can find online is that kernels are a way to implicitly map data into a high-dimensional feature space, which allows us to capture complex relationships in the data (shown as Figure.1). While this interpretation is intuitive, it only explains the necessity to go to high-dimension, but does not explain what role kernels have to play in the process.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="kernel-trick.jpg" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Kernel trick illustration. Source: Medium"><img src="kernel-trick.jpg" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:80.0%" alt="Kernel trick illustration. Source: Medium"></a></p>
+</figure>
+</div>
+<figcaption>Kernel trick illustration. Source: <a href="https://medium.com/@zxr.nju/what-is-the-kernel-trick-why-is-it-important-98a98db0961d">Medium</a></figcaption>
+</figure>
+</div>
+<p>In this blog, I try to retell the story of kernels based on my learning notes of many amazing resources, explaining what they are, why they are important, and how they work in the context of machine learning algorithms.</p>
 </section>
 <section id="what-are-kernels" class="level2">
 <h2 class="anchored" data-anchor-id="what-are-kernels">What are Kernels?</h2>
-<p>Kernel functions take low-dimension features <span class="math inline">\(x = \begin{pmatrix} x_1 \\ \vdots \\ x_d \end{pmatrix}\)</span> as input and return the inner product of high-dimension features.</p>
-<p>Kernels often appear in the context of similarity, since the similarity of two observations is usually calculated as the inner product of their feature vectors.</p>
-<p>As a toy example, consider two observations with feature vectors <span class="math inline">\((180, 70)\)</span> and <span class="math inline">\((160, 50)\)</span>.</p>
-<p>To calculate their similarity, we take the inner product:</p>
-<p><span class="math display">\[\langle \mathbf{x}, \mathbf{z} \rangle = 180 \times 160 + 70 \times 50\]</span></p>
-<p>Now suppose we wish to better represent the similarity by adding a non-linear transformation:</p>
+<p>Intuitively speaking, a kernel function <span class="math inline">\(K(x,y)\)</span> is a similarity function. It takes two data points as input and returns a number that measures the similarity between the two data points. The similarity measure is calculated based on the inner product of the features of the two data points. The more similar the two data points are, the higher the kernel value. Moreover, which is more important, the similarity is achieved very cost-effectively.</p>
+<p>So kernels do only one thing, and they do it extremely well: measuring similarities between two data points with minimal computational overhead.</p>
+<p>As a toy example, consider a person’s height and weight as a two-dimension feature vector:</p>
+<p><span class="math inline">\(\mathbf{x}=(x_1,\ x_2)\)</span></p>
+<p>where <span class="math inline">\(x_1\)</span> is height and <span class="math inline">\(x_2\)</span> is weight.</p>
+<p>Suppose we have two people <span class="math inline">\(\mathbf{x}\)</span> and <span class="math inline">\(\mathbf{z}\)</span> with feature vectors <span class="math inline">\((180, 70)\)</span> and <span class="math inline">\((160, 50)\)</span>, and we want to calculate their similarity:</p>
+<p><span class="math inline">\(\langle \mathbf{x},\mathbf{z} \rangle= x_1*z_1+x_2*z_2 = 180 \times 160 + 70 \times 50\)</span></p>
+<p>Now suppose there is a non-linear, high-dimension feature vector transformed from the original feature vector, that measures the similarity in a more complex way by including the square and interaction terms:</p>
 <p><span class="math display">\[\phi(\mathbf{x}) = (x_1^2,\ x_2^2,\ \sqrt{2}\,x_1 x_2)\]</span></p>
-<p>The inner product of two transformed vectors becomes:</p>
-<p><span class="math display">\[\langle \phi(\mathbf{x}), \phi(\mathbf{z}) \rangle = 180^2 \cdot 160^2 + 70^2 \cdot 50^2 + \sqrt{2} \cdot 180 \cdot 70 \cdot \sqrt{2} \cdot 160 \cdot 50 = 1{,}043{,}290{,}000\]</span></p>
-<p>This requires computing <span class="math inline">\(\sqrt{2}\,x_1 x_2\)</span> first — 11 multiplications and 2 summations in total.</p>
-<p>However, using the kernel function <span class="math inline">\(K(\mathbf{x}, \mathbf{z}) = (\langle \mathbf{x}, \mathbf{z} \rangle)^2\)</span>:</p>
-<p><span class="math display">\[K(\mathbf{x}, \mathbf{z}) = (x_1 z_1 + x_2 z_2)^2 = (180 \times 160 + 70 \times 50)^2 = 1{,}043{,}290{,}000\]</span></p>
-<p>Only 3 multiplications and 1 summation — same result, far less computation. This demonstrates that kernel functions give us the inner product of high-dimensional features without ever computing those features directly.</p>
+<p>where <span class="math inline">\(\phi(\mathbf{x})\)</span> is the transformed feature vector.</p>
+<p>The inner product of two feature vectors becomes:</p>
+<p><span class="math display">\[\langle \mathbf{x}, \mathbf{z} \rangle = 180^2 \cdot 160^2 + 70^2 \cdot 50^2 + \sqrt{2} \cdot 180 \cdot 70 \cdot \sqrt{2} \cdot 160 \cdot 50 = 1{,}043{,}290{,}000\]</span></p>
+<p>Notice that this computation calculates the transformed non-linear terms first, then add them up, which is 11 multiplications and 2 summations in total.</p>
+<p>However, there actually exists a function that does not require the actual calculation of the transformed high-dimension features and thus makes the computation easier:</p>
+<p><span class="math display">\[K(\mathbf{x}, \mathbf{z}) = (\langle \mathbf{x}, \mathbf{z} \rangle)^2 = (x_1 z_1 + x_2 z_2)^2 = (180 \times 160 + 70 \times 50)^2 = 1{,}043{,}290{,}000\]</span></p>
+<p>The function takes the inner product of the original feature vector and returns the same value. It only takes 3 multiplications and 1 summation — same result, far less computation.</p>
+<p>To recap, with the first approach, we have to square and multiply the high-dimension terms: <span class="math inline">\(x_1^2,x_2^2,z_1^2,z_2^2,x_1 x_2 z_1 z_2\)</span>. However, with the second approach, we don’t need such high-dimension terms. We only need the low-dimension terms: <span class="math inline">\(x_1x_2,z_1z_2\)</span>. The two approaches give the same result, but the second approach is much more computationally efficient.</p>
+<p>In math’s language, the function <span class="math inline">\(K\)</span> is called a kernel function. It takes low-dimension features as input and returns the inner product of high-dimension features, skipping the step of calculating high-dimension features and their inner product. As an illustration, the kernel approach vs the non-kernel approach can be visualized as:</p>
+<p>Low-dimension feature → kernel function with low-dimension features → high-dimension inner product</p>
+<p>Low-dimension feature → high-dimension features → high-dimension inner product</p>
+<p>The fact that the kernel function allows us to access high-dimension inner product using only low-dimension features is called the ‘Kernel Trick’.</p>
+</section>
+<section id="why-kernels" class="level2">
+<h2 class="anchored" data-anchor-id="why-kernels">Why Kernels?</h2>
+<p>The idea of efficient computation of inner products in high-dimension feature spaces is not just a mathematical curiosity. It has profound implications for machine learning algorithms.</p>
+<p>In Machine Learning, it is a common feature engineering practice to create more features from existing features. Think of all the non-linear interaction terms: two-way interactions, three-way interactions, and even higher way interactions. To take it to the extreme, one could add as many non-linear terms as possible, with the hope that the practice reveals hidden relationships among the data. That is where Kernels come into play.</p>
+<p>Two facts make kernels extremely powerful in machine learning:</p>
+<p>(1). Computational Convenience - The transformation of data from low dimension to high dimension in the form of <strong>inner products</strong> of data points.</p>
+<p>(2). Kernelized Algorithms - Some machine learning algorithms can actually take <strong>inner products</strong> of data points as input, making it possible to benefit from the computational effectiveness offered by kernels.</p>
+<p>We go through the example of linear regression to illustrate both points.</p>
+<section id="kernelized-linear-regression" class="level3">
+<h3 class="anchored" data-anchor-id="kernelized-linear-regression">Kernelized Linear Regression</h3>
+<p>It turns out that the conventional linear regression model can be re-expressed as a linear combination of inner products of input feature vectors.</p>
+<p>Imagine a linear regression model with p features. Denote the regression parameter vector as <span class="math inline">\(\mathbf{w}\)</span>. The loss function is:</p>
+<p><span class="math display">\[\ell(\mathbf{w}) = \sum_{i=1}^{n} (\mathbf{w}^T x_i - y_i)^2\]</span></p>
+<p>where <span class="math inline">\(x_i\)</span> is the <strong>feature vector</strong> of the ith observation, e.g.&nbsp;<span class="math display">\[\begin{pmatrix} x_{i1} \\ x_{i2} \\ \vdots \\ x_{ip} \end{pmatrix}\]</span>.</p>
+<p>Gradient descent updates <span class="math inline">\(\mathbf{w}\)</span> as:</p>
+<p><span class="math display">\[w_{t+1} = w_t - s \left(\frac{\partial \ell}{\partial \mathbf{w}}\right)\]</span></p>
+<p>where <span class="math inline">\(s\)</span> is the learning rate.</p>
+<p>Here, <span class="math inline">\(\frac{\partial \ell}{\partial \mathbf{w}} = 2\sum_{i=1}^{n}(\mathbf{w}^T \mathbf{x}_i - y_i)\)</span></p>
+<p>Therefore, the gradient can be expressed as a linear combination of input feature vectors:</p>
+<p><span class="math display">\[\frac{\partial \ell}{\partial \mathbf{w}} = \sum_{i=1}^{n} \underbrace{2(\mathbf{w}^T \mathbf{x}_i - y_i)}_{\gamma_i} \mathbf{x}_i = \sum_{i=1}^{n} \gamma_i \mathbf{x}_i\]</span></p>
+<p>Now that’s one tiny step along the gradient descent process. Since the parameters <span class="math inline">\(\mathbf{w}\)</span> are essentially many of those tiny steps added together, it’s intuitive to think of the parameters <span class="math inline">\(\mathbf{w}\)</span> as a linear combination of input feature vectors:</p>
+<p><span class="math display">\[\mathbf{w} = \sum^{J}_j\sum_{i=1}^{n} \gamma_i \mathbf{x}_i = \sum_{i=1}^{n} \alpha_i \mathbf{x}_i\]</span></p>
+<p>where <span class="math inline">\(J\)</span> is the total steps of gradient descent; <span class="math inline">\(\alpha_i\)</span> is the new weights of the ith feature vector <span class="math inline">\(x_i\)</span> after combining J rounds of <span class="math inline">\(\gamma_i\)</span>.</p>
+<p>The equation above is a very important representation of the linear regression model. It shows that the regression parameters <span class="math inline">\(\mathbf{w}\)</span> can be expressed as a linear combination of the input feature vectors:</p>
+<p>$$ _{i=1}^{n} _i _i=</p>
+<em>1 </em>{1st&nbsp;observation} + <em>2 </em>{2nd&nbsp;observation} + + <em>n </em>{nth&nbsp;observation} =
+<span class="math display">\[\begin{pmatrix} \hat{w}_1 \\ \hat{w}_2 \\ \vdots \\ \hat{w}_p \end{pmatrix}\]</span>
+<p>$$</p>
+<p>A huge benefit of the representation is that we can now just do the gradient descent in terms of <span class="math inline">\(\alpha\)</span>, which is of dimension <span class="math inline">\(n\times 1\)</span>:</p>
+<p><span class="math display">\[
+\mathbf{w}^1 = \sum_{i=1}^{n} \alpha_i^0 \mathbf{x}_i - s \sum_{i=1}^{n} \gamma_i^0 \mathbf{x}_i = \sum_{i=1}^{n} (\alpha_i^0 - s\gamma_i^0) \mathbf{x}_i = \sum_{i=1}^{n} \alpha_i^1 \mathbf{x}_i
+\]</span></p>
+<p>If we do gradient descent on the parameters themselves, the dimension could be as high as <span class="math inline">\(2^d \times 1\)</span>.</p>
+<p>Under the new representation, however, the regression model can be re-expressed as taking the inner product between data points as input:</p>
+<p><span class="math display">\[y_j = w^Tx_j + b = \sum_{i=1}^n\alpha_i \underbrace{x_ix_j^T}_{K_{ij}}+b\]</span></p>
+<p>where <span class="math inline">\({K_{ij}}\)</span> is the kernel function between the ith and jth observation.</p>
+<p>To recap, we’ve shown that the linear regression model can be rewritten as a function of inner products of pairs of observations.</p>
+<p>Now if we want to make a prediction for an observation <span class="math inline">\(\mathbf{z}\)</span>, the prediction can be made via:</p>
+<p><span class="math display">\[h(\mathbf{z}) = \mathbf{w}^T \mathbf{z} + b = \sum_{i=1}^{n} \alpha_i x_i^T \mathbf{z} + b\]</span></p>
+<p>where <span class="math inline">\(x_i^T \mathbf{z}\)</span> is the inner product between the ith observation’s feature vector <span class="math inline">\(x_i^T\)</span> <span class="math inline">\((1 \times p)\)</span> and the new observation’s feature vector <span class="math inline">\(\mathbf{z}\)</span> <span class="math inline">\((p \times 1)\)</span>.</p>
+<p>We are essentially taking the inner product between the new observation with each of the existing observations. And since <span class="math display">\[\underbrace{\mathbf{x}_i^\top}_{\scriptsize(1 \times p)} \underbrace{\vphantom{\mathbf{x}_i^\top}\mathbf{z}}_{\scriptsize(p \times 1)}\]</span> returns a number <span class="math inline">\(1 \times 1\)</span>, we add up the results according to their weights <span class="math inline">\(\alpha\)</span>.</p>
+</section>
+<section id="computational-convenience" class="level3">
+<h3 class="anchored" data-anchor-id="computational-convenience">Computational Convenience</h3>
+<p>Everything looks good so far. But why do we want to re-express the linear regression model as a function of inner products of pairs of observations?</p>
+<p>Well, with the original linear regression model, if we want to include as many non-linear features as possible, the number of features will grow exponentially with the number of original features, making it computationally expensive.</p>
+<p>Suppose we have a d-dimensional feature vector <span class="math inline">\(\mathbf{x}\)</span> to start with:</p>
+<p><span class="math display">\[\mathbf{x} = \begin{pmatrix} x_1 \\ \vdots \\ x_d \end{pmatrix}\]</span></p>
+<p>where <span class="math inline">\(x_1\)</span> through <span class="math inline">\(x_d\)</span> represent the features of an observation. For example, if an observation represents a house, <span class="math inline">\(x_1\)</span> could be area, <span class="math inline">\(x_2\)</span> could be year built, <span class="math inline">\(x_3\)</span> could be number of bedrooms, etc.</p>
+<p>To capture non-linear relationships, we can then have a transformation <span class="math inline">\(\phi(x)\)</span> such that:</p>
+<p><span class="math display">\[\phi(x) = \begin{pmatrix} x_1 \\ \vdots \\ x_d \\ x_1x_2 \\ \vdots \\ x_{d-1}x_d \end{pmatrix}\]</span></p>
+<p>With a feature vector of length <span class="math inline">\(d\)</span>, a transformation <span class="math inline">\(\phi(x)\)</span> that contains all possible interaction terms is of length <span class="math inline">\(2^d\)</span>. There are two problems with this approach:</p>
+<p>(1). The number of features grows exponentially with the number of original features, making it computationally expensive to calculate the regression parameters.</p>
+<p>(2). The inner product of two transformed observations <span class="math inline">\(\phi(\mathbf{x})^\top \phi(\mathbf{z})\)</span> is also computationally expensive to calculate, since the dimension of the transformed feature vector <span class="math inline">\(\phi(x)\)</span> is <span class="math inline">\(2^d\)</span>.</p>
+<p>The kernelized form of the linear regression model, however, allows us to bypass both problems.</p>
+<p>First, with the kernelized form, the number of regression parameters is just <span class="math inline">\(n\)</span>, since each observation gets their own weight <span class="math inline">\(\alpha_i\)</span>.</p>
+<p>Second, there is a kernel function that allows us to calculate the inner product of two transformed observations <span class="math inline">\(\phi(\mathbf{x})^\top \phi(\mathbf{z})\)</span> without actually calculating the transformed features:</p>
+<p><span class="math display">\[K(\mathbf{x}, \mathbf{z}) = \phi(\mathbf{x})^\top \phi(\mathbf{z}) = 1 \cdot 1 + x_1 z_1 + x_2 z_2 + \cdots + x_1 x_2 z_1 z_2 + \cdots + x_1 \cdots x_d z_1 \cdots z_d = \prod_{k=1}^{d} (1 + x_k z_k)\]</span></p>
+<p>So instead of calculating the high-dimension features one by one, we can directly get the inner product of the high-dimension features by calculating the kernel function with the original low-dimension features.</p>
+<p>Therefore, by re-expressing the linear regression model as a function of inner products of pairs of observations, we can not only estimate the parameters more efficiently but also capture complex non-linear relationships in the data.</p>
+</section>
+</section>
+<section id="types-of-kernels" class="level2">
+<h2 class="anchored" data-anchor-id="types-of-kernels">Types of Kernels</h2>
+<p>There are many types of kernels, and the choice of which kernel to use depends on the specific problem and data at hand. The most commonly used kernels are Polynomial and Radial Basis Function (RBF) Kernel.</p>
 <section id="polynomial-kernel" class="level3">
 <h3 class="anchored" data-anchor-id="polynomial-kernel">Polynomial Kernel</h3>
-<p>Suppose observation <span class="math inline">\(x\)</span> has two variables <span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_2\)</span>:</p>
+<p>The kernel from the linear regression example is actually a type of <strong>Polynomial</strong> kernel:</p>
+<p><span class="math display">\[\textbf{Polynomial:} \quad K(\mathbf{x}, \mathbf{z}) = (1 + \mathbf{x}^\top \mathbf{z})^d\]</span></p>
+<p>Suppose observation <span class="math inline">\(x\)</span> has two features <span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_2\)</span>:</p>
 <p><span class="math display">\[x = \begin{pmatrix} x_1 \\ x_2 \end{pmatrix}\]</span></p>
 <p>We want to add a bias term plus the square and interaction terms:</p>
 <p><span class="math display">\[\phi(x) = \begin{pmatrix} 1 \\ x_1 \\ x_2 \\ x_1 x_2 \\ x_1^2 \\ x_2^2 \end{pmatrix}\]</span></p>
@@ -440,9 +524,10 @@ window.Quarto = {
 </section>
 <section id="the-radial-basis-function-rbf-kernel" class="level3">
 <h3 class="anchored" data-anchor-id="the-radial-basis-function-rbf-kernel">The Radial Basis Function (RBF) Kernel</h3>
-<p>The RBF kernel is defined as:</p>
+<p>The <strong>Radial Basis Function</strong> kernel is defined as:</p>
 <p><span class="math display">\[K_{\text{RBF}}(x, z) = e^{-\frac{1}{2\sigma^2} \|x - z\|^2}\]</span></p>
-<p>It takes the idea of adding interaction terms to the extreme by considering an <strong>infinite</strong> number of interactions. To see why, expand the exponent:</p>
+<p>It expands the polynomial kernel to the extreme by considering an <strong>infinite</strong> number of interactions.</p>
+<p>To see why, expand the exponent:</p>
 <p><span class="math display">\[e^{-\frac{1}{2\sigma^2}(x-z)^T(x-z)} = e^{-\frac{1}{2\sigma^2}(x^T x - 2x^T z + z^T z)} = e^{-\frac{1}{2\sigma^2}(x^T x + z^T z)} \cdot e^{x^T z}\]</span></p>
 <p><span class="math display">\[= e^{-\frac{1}{2\sigma^2}(x^T x + z^T z)} \cdot e^{x^T z + 1} \cdot e^{-1}\]</span></p>
 <p>Gathering all terms except <span class="math inline">\(e^{x^T z + 1}\)</span> into a constant <span class="math inline">\(C\)</span>:</p>
@@ -450,46 +535,18 @@ window.Quarto = {
 <p>By definition, <span class="math inline">\(e^x = \sum_{n=0}^{\infty} \dfrac{x^n}{n!}\)</span>, so:</p>
 <p><span class="math display">\[e^{x^T z + 1} = \sum_{n=0}^{\infty} \frac{(1 + x^T z)^n}{n!}\]</span></p>
 <p>Notice that <span class="math inline">\((1 + \mathbf{x}^T \mathbf{z})^n\)</span> is exactly the <span class="math inline">\(n\)</span>-degree polynomial kernel <span class="math inline">\(K_{\text{poly}(n)}\)</span>. Therefore, the RBF kernel is an <strong>infinite sum of polynomial kernels</strong> from degree 1 to <span class="math inline">\(\infty\)</span>.</p>
+<p>The RBF kernel is a very powerful kernel because it can capture complex relationships in the data by considering an infinite number of interactions. It is also widely used in machine learning due to its flexibility and ability to handle non-linear data. The most famous example is Support Vector Machines (SVM) with RBF kernels.</p>
 </section>
 </section>
-<section id="kernelized-algorithms" class="level2">
-<h2 class="anchored" data-anchor-id="kernelized-algorithms">Kernelized Algorithms</h2>
-<p>Kernel functions efficiently capture high-dimensional information using low-dimensional data. But how do they connect to building a machine learning model?</p>
-<p>It turns out that many models can be re-expressed so that they depend only on the <strong>inner products</strong> of feature vectors between pairs of observations. Two key examples are Linear Regression and Support Vector Machines.</p>
-<section id="kernelized-linear-regression" class="level3">
-<h3 class="anchored" data-anchor-id="kernelized-linear-regression">Kernelized Linear Regression</h3>
-<p>The conventional linear regression model can be re-expressed as a linear combination of inner products of input feature vectors.</p>
-<p>Denote the regression parameter vector as <span class="math inline">\(\mathbf{w}\)</span>. The loss function is:</p>
-<p><span class="math display">\[\ell(\mathbf{w}) = \sum_{i=1}^{n} (\mathbf{w}^T x_i - y_i)^2\]</span></p>
-<p>Gradient descent updates <span class="math inline">\(\mathbf{w}\)</span> as:</p>
-<p><span class="math display">\[w_{t+1} = w_t - s \left(\frac{\partial \ell}{\partial \mathbf{w}}\right)\]</span></p>
-<p>where <span class="math inline">\(s\)</span> is the learning rate. The gradient can be expressed as a linear combination of input feature vectors:</p>
-<p><span class="math display">\[\frac{\partial \ell}{\partial \mathbf{w}} = \sum_{i=1}^{n} \underbrace{2(\mathbf{w}^T \mathbf{x}_i - y_i)}_{\gamma_i} \mathbf{x}_i = \sum_{i=1}^{n} \gamma_i \mathbf{x}_i\]</span></p>
-<p>By induction, if we express <span class="math inline">\(\mathbf{w}\)</span> as a linear combination of all input vectors:</p>
-<p><span class="math display">\[\mathbf{w} = \sum_{i=1}^{n} \alpha_i \mathbf{x}_i\]</span></p>
-<p>then gradient descent preserves this structure at every step:</p>
-<p><span class="math display">\[\mathbf{w}_1 = \sum_{i=1}^{n} \alpha_i^0 \mathbf{x}_i - s \sum_{i=1}^{n} \gamma_i^0 \mathbf{x}_i = \sum_{i=1}^{n} (\alpha_i^0 - s\gamma_i^0)\mathbf{x}_i = \sum_{i=1}^{n} \alpha_i^1 \mathbf{x}_i\]</span></p>
-<p>This means the prediction for the <span class="math inline">\(j\)</span>th observation can be written entirely in terms of inner products:</p>
-<p><span class="math display">\[h(x_j) = \mathbf{w}^T x_j + b = \sum_{i=1}^{n} \alpha_i x_i^T x_j + b\]</span></p>
-<p>And for a new observation <span class="math inline">\(\mathbf{z}\)</span>:</p>
-<p><span class="math display">\[h(\mathbf{z}) = \mathbf{w}^T \mathbf{z} + b = \sum_{i=1}^{n} \alpha_i x_i^T \mathbf{z} + b\]</span></p>
-<p>The prediction is a weighted sum of inner products between <span class="math inline">\(\mathbf{z}\)</span> and each training point <span class="math inline">\(x_i\)</span>.</p>
-</section>
-<section id="support-vector-machine" class="level3">
-<h3 class="anchored" data-anchor-id="support-vector-machine">Support Vector Machine</h3>
-<p><strong>Primal problem:</strong></p>
-<p><span class="math display">\[\min_{w,\, w_0} \frac{1}{2} w^T w \quad \text{s.t.} \quad \forall i: \ y_i(w^T x_i + w_0) \geq 1\]</span></p>
-<p><strong>Dual problem:</strong></p>
-<p><span class="math display">\[\min_{\alpha} \frac{1}{2} \sum_{i=1}^{n} \sum_{j=1}^{n} y_i y_j \alpha_i \alpha_j x_i^T x_j - \sum_{i=1}^{n} \alpha_i\]</span></p>
-<p><span class="math display">\[\text{s.t.} \quad 0 \leq \alpha_i \leq C, \quad \sum_{i=1}^{n} \alpha_i y_i = 0\]</span></p>
-<p>The optimization depends only on the inner products <span class="math inline">\(x_i^T x_j\)</span> between pairs of observations. Solving for <span class="math inline">\(w\)</span>:</p>
-<p><span class="math display">\[w = \sum_{i=1}^{n} \alpha_i y_i x_i\]</span></p>
-<p>The decision rule for a new observation <span class="math inline">\(\mathbf{z}\)</span> is:</p>
+<section id="kernelized-support-vector-machines-ksvm" class="level2">
+<h2 class="anchored" data-anchor-id="kernelized-support-vector-machines-ksvm">Kernelized Support Vector Machines (KSVM)</h2>
+<p>Support Vector Machines (SVM) is a powerful classification algorithm that finds the optimal hyperplane to separate data points of different classes. With all the mathematical details stripped out, the algorithm makes the classification decision based on the inner products between pairs of observations. The decision rule for a new observation <span class="math inline">\(\mathbf{z}\)</span> is:</p>
 <p><span class="math display">\[h(\mathbf{z}) = \text{sign}\!\left(\sum_{i=1}^{n} \alpha_i y_i\, k(x_i, \mathbf{z}) + b\right)\]</span></p>
-<p>where <span class="math inline">\(b\)</span> is solved using <span class="math inline">\(w\)</span>.</p>
-<section id="svm-as-a-smart-nearest-neighbor" class="level4">
-<h4 class="anchored" data-anchor-id="svm-as-a-smart-nearest-neighbor">SVM as a Smart Nearest Neighbor</h4>
-<p>The k-nearest neighbor algorithm classifies as:</p>
+<p>where <span class="math inline">\(x_i\)</span> is the feature vector of the ith training observation, <span class="math inline">\(y_i\)</span> is the label of the ith training observation, <span class="math inline">\(\alpha_i\)</span> is the weight of the ith training observation, <span class="math inline">\(k(x_i, \mathbf{z})\)</span> is the kernel function that computes the inner product between the ith training observation and the new observation <span class="math inline">\(\mathbf{z}\)</span>, and <span class="math inline">\(b\)</span> is the bias term.</p>
+<p>Since it takes inner products as input, the kernel trick can be applied. By using a kernel function, we can implicitly map the data into a high-dimensional feature space. This allows SVM to find a non-linear decision boundary in the original input space, which can lead to better classification performance on non-linearly separable data.</p>
+<section id="svm-as-a-smart-nearest-neighbor" class="level3">
+<h3 class="anchored" data-anchor-id="svm-as-a-smart-nearest-neighbor">SVM as a Smart Nearest Neighbor</h3>
+<p>An interesting way to understand SVM is to compare it with the k-nearest neighbor (KNN) algorithm. KNN classifies a new observation <span class="math inline">\(\mathbf{z}\)</span> based on the majority class of its <span class="math inline">\(k\)</span> nearest neighbors in the training data. The decision rule for KNN can be expressed as:</p>
 <p><span class="math display">\[h(\mathbf{z}) = \text{sign}\!\left(\sum_{i=1}^{n} y_i\, \delta^{nn}(x_i, \mathbf{z})\right)\]</span></p>
 <p>where <span class="math inline">\(\delta^{nn}(x_i, \mathbf{z}) = 1\)</span> if <span class="math inline">\(x_i\)</span> is among the <span class="math inline">\(k\)</span> nearest neighbors of <span class="math inline">\(\mathbf{z}\)</span>, and <span class="math inline">\(0\)</span> otherwise.</p>
 <p>SVM can be seen as a smarter version of KNN with three additional components: <span class="math inline">\(k(x_i, \mathbf{z}),\ \alpha_i,\ b\)</span>.</p>
@@ -498,23 +555,29 @@ window.Quarto = {
 <li><span class="math inline">\(\alpha_i\)</span> <strong>removes redundant training points</strong> that are already classified correctly (support vectors are the only ones with <span class="math inline">\(\alpha_i &gt; 0\)</span>).</li>
 <li><span class="math inline">\(b\)</span> is the <strong>bias term</strong>.</li>
 </ul>
+<p>Remember the kernel function is a similarity function, so the more similar (or closer) a training point is to the test point, the higher the kernel value, and thus the more influence it has on the classification decision. In the case of the RBF kernel, the influence of a training point decreases exponentially as the distance from the test point increases; whereas the k-nearest neighbor algorithm uses a fixed number of neighbors regardless of their distance, each training point’s influence is equal within the neighborhood.</p>
 </section>
 </section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>I hope this blog gives you a better understanding of what kernels are, why they are important, and how they work in the context of machine learning algorithms. Kernels are a powerful tool that allows us to capture complex relationships in the data without the computational burden of explicitly calculating high-dimensional features.</p>
 </section>
 <section id="references" class="level2">
 <h2 class="anchored" data-anchor-id="references">References</h2>
 <ul>
-<li>Cornell CS4780 Lecture 13: <a href="https://www.cs.cornell.edu/courses/cs4780/2018fa/lectures/lecturenote13.html" class="uri">https://www.cs.cornell.edu/courses/cs4780/2018fa/lectures/lecturenote13.html</a></li>
-<li>Cornell CS4780 Lecture 14: <a href="https://www.cs.cornell.edu/courses/cs4780/2018fa/lectures/lecturenote14.html" class="uri">https://www.cs.cornell.edu/courses/cs4780/2018fa/lectures/lecturenote14.html</a></li>
-<li>Lecture video (Kernel Methods): <a href="https://www.youtube.com/watch?v=RwF1esLCG4U" class="uri">https://www.youtube.com/watch?v=RwF1esLCG4U</a></li>
-<li>Lecture video (SVM): <a href="https://www.youtube.com/watch?v=_PwhiWxHK8o" class="uri">https://www.youtube.com/watch?v=_PwhiWxHK8o</a></li>
+<li>K. Weinberger. <a href="https://www.cs.cornell.edu/courses/cs4780/2018fa/lectures/lecturenote13.html">Kernel Methods.</a> Cornell CS4780 Lecture 13. 2018.</li>
+<li>K. Weinberger. <a href="https://www.cs.cornell.edu/courses/cs4780/2018fa/lectures/lecturenote14.html">Support Vector Machines.</a> Cornell CS4780 Lecture 14. 2018.</li>
+<li>K. Weinberger. <a href="https://www.youtube.com/watch?v=RwF1esLCG4U">Lecture video: Kernel Methods.</a> Cornell CS4780. 2018.</li>
+<li>K. Weinberger. <a href="https://www.youtube.com/watch?v=_PwhiWxHK8o">Lecture video: SVM.</a> Cornell CS4780. 2018.</li>
+<li>C. Wu. <a href="https://www.youtube.com/watch?v=b8P9EOJf1h8&amp;list=PLdk2fd27CQzQo1DEthJ5MDBHoC66_1aDN&amp;index=19">1st Lecture on Foundations of Kernel Methods.</a> Northeastern University.</li>
+<li>C. Wu. <a href="https://www.youtube.com/watch?v=qdL8kGnmIeo&amp;list=PLdk2fd27CQzQo1DEthJ5MDBHoC66_1aDN&amp;index=20">The 2nd Lecture on Kernels: Moore Aronszajn, Representer Theorems, Kernel Regression.</a> Northeastern University.</li>
 </ul>
 
 
 </section>
 
-<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" id="quarto-reuse"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></div></div></section><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-wang2025" class="csl-entry quarto-appendix-citeas" role="listitem">
-Wang, Ray. 2025. <span>“Kernel Methods and SVM.”</span> July 11. <a href="https://changruiraywang.com/blog/2025-07-11-kernel-methods-and-svm/">https://changruiraywang.com/blog/2025-07-11-kernel-methods-and-svm/</a>.
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" id="quarto-reuse"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></div></div></section><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-wang2026" class="csl-entry quarto-appendix-citeas" role="listitem">
+Wang, Ray. 2026. <span>“Kernel Methods and SVM.”</span> June 1. <a href="https://changruiraywang.com/blog/2025-06-01-kernel-methods-and-svm/">https://changruiraywang.com/blog/2025-06-01-kernel-methods-and-svm/</a>.
 </div></div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
@@ -965,6 +1028,38 @@ Wang, Ray. 2025. <span>“Kernel Methods and SVM.”</span> July 11. <a href="ht
     </div>
   </div>
 </footer>
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
 
 
 

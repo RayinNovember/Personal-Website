@@ -11,7 +11,210 @@
 <description>Writing makes an exact man.
 </description>
 <generator>quarto-1.9.36</generator>
-<lastBuildDate>Sat, 30 May 2026 04:00:00 GMT</lastBuildDate>
+<lastBuildDate>Mon, 01 Jun 2026 04:00:00 GMT</lastBuildDate>
+<item>
+  <title>Kernel Methods and SVM</title>
+  <dc:creator>Ray Wang</dc:creator>
+  <link>https://changruiraywang.com/blog/2025-06-01-kernel-methods-and-svm/</link>
+  <description><![CDATA[ 
+
+
+<!-- source: https://github.com/gadenbuie/garrickadenbuie-com/blob/main/_partials/title-block-link-buttons/title-block.html -->
+<!-- 
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title"> 
+-->
+<!-- <header id="title-block-header" class="quarto-title-block default page-columns"> -->
+<!-- <div class="quarto-title page-columns page-full featured-image p-4" style="background-image: url(featured.png), url(featured.jpg), url(../featured.jpg);"> -->
+
+
+
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>Just like backpropagation is the primitive mathematical engine of AI, kernels are the underlying mechanism of many powerful machine learning algorithms. In fact, the concept of kernels is so fundamental that it can still be found in today’s AI applications, although in a more implicit way.</p>
+<p>Despite its importance, the concept of kernels is probably one of the most confusing and thus most underappreciated topics in machine learning. Most data practitioners, like myself, first learned of kernels in the context of Support Vector Machines (SVM), which itself is another hard topic. On the other hand, if you try to learn kernel from its mathematical definition which involves Hilbert spaces, you will easily get lost.</p>
+<p>One of the most common interpretation one can find online is that kernels are a way to implicitly map data into a high-dimensional feature space, which allows us to capture complex relationships in the data (shown as Figure.1). While this interpretation is intuitive, it only explains the necessity to go to high-dimension, but does not explain what role kernels have to play in the process.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="kernel-trick.jpg" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Kernel trick illustration. Source: Medium"><img src="https://changruiraywang.com/blog/2025-06-01-kernel-methods-and-svm/kernel-trick.jpg" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:80.0%" alt="Kernel trick illustration. Source: Medium"></a></p>
+</figure>
+</div>
+<figcaption>Kernel trick illustration. Source: <a href="https://medium.com/@zxr.nju/what-is-the-kernel-trick-why-is-it-important-98a98db0961d">Medium</a></figcaption>
+</figure>
+</div>
+<p>In this blog, I try to retell the story of kernels based on my learning notes of many amazing resources, explaining what they are, why they are important, and how they work in the context of machine learning algorithms.</p>
+</section>
+<section id="what-are-kernels" class="level2">
+<h2 class="anchored" data-anchor-id="what-are-kernels">What are Kernels?</h2>
+<p>Intuitively speaking, a kernel function <img src="https://latex.codecogs.com/png.latex?K(x,y)"> is a similarity function. It takes two data points as input and returns a number that measures the similarity between the two data points. The similarity measure is calculated based on the inner product of the features of the two data points. The more similar the two data points are, the higher the kernel value. Moreover, which is more important, the similarity is achieved very cost-effectively.</p>
+<p>So kernels do only one thing, and they do it extremely well: measuring similarities between two data points with minimal computational overhead.</p>
+<p>As a toy example, consider a person’s height and weight as a two-dimension feature vector:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bx%7D=(x_1,%5C%20x_2)"></p>
+<p>where <img src="https://latex.codecogs.com/png.latex?x_1"> is height and <img src="https://latex.codecogs.com/png.latex?x_2"> is weight.</p>
+<p>Suppose we have two people <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bx%7D"> and <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bz%7D"> with feature vectors <img src="https://latex.codecogs.com/png.latex?(180,%2070)"> and <img src="https://latex.codecogs.com/png.latex?(160,%2050)">, and we want to calculate their similarity:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Clangle%20%5Cmathbf%7Bx%7D,%5Cmathbf%7Bz%7D%20%5Crangle=%20x_1*z_1+x_2*z_2%20=%20180%20%5Ctimes%20160%20+%2070%20%5Ctimes%2050"></p>
+<p>Now suppose there is a non-linear, high-dimension feature vector transformed from the original feature vector, that measures the similarity in a more complex way by including the square and interaction terms:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Cphi(%5Cmathbf%7Bx%7D)%20=%20(x_1%5E2,%5C%20x_2%5E2,%5C%20%5Csqrt%7B2%7D%5C,x_1%20x_2)"></p>
+<p>where <img src="https://latex.codecogs.com/png.latex?%5Cphi(%5Cmathbf%7Bx%7D)"> is the transformed feature vector.</p>
+<p>The inner product of two feature vectors becomes:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Clangle%20%5Cmathbf%7Bx%7D,%20%5Cmathbf%7Bz%7D%20%5Crangle%20=%20180%5E2%20%5Ccdot%20160%5E2%20+%2070%5E2%20%5Ccdot%2050%5E2%20+%20%5Csqrt%7B2%7D%20%5Ccdot%20180%20%5Ccdot%2070%20%5Ccdot%20%5Csqrt%7B2%7D%20%5Ccdot%20160%20%5Ccdot%2050%20=%201%7B,%7D043%7B,%7D290%7B,%7D000"></p>
+<p>Notice that this computation calculates the transformed non-linear terms first, then add them up, which is 11 multiplications and 2 summations in total.</p>
+<p>However, there actually exists a function that does not require the actual calculation of the transformed high-dimension features and thus makes the computation easier:</p>
+<p><img src="https://latex.codecogs.com/png.latex?K(%5Cmathbf%7Bx%7D,%20%5Cmathbf%7Bz%7D)%20=%20(%5Clangle%20%5Cmathbf%7Bx%7D,%20%5Cmathbf%7Bz%7D%20%5Crangle)%5E2%20=%20(x_1%20z_1%20+%20x_2%20z_2)%5E2%20=%20(180%20%5Ctimes%20160%20+%2070%20%5Ctimes%2050)%5E2%20=%201%7B,%7D043%7B,%7D290%7B,%7D000"></p>
+<p>The function takes the inner product of the original feature vector and returns the same value. It only takes 3 multiplications and 1 summation — same result, far less computation.</p>
+<p>To recap, with the first approach, we have to square and multiply the high-dimension terms: <img src="https://latex.codecogs.com/png.latex?x_1%5E2,x_2%5E2,z_1%5E2,z_2%5E2,x_1%20x_2%20z_1%20z_2">. However, with the second approach, we don’t need such high-dimension terms. We only need the low-dimension terms: <img src="https://latex.codecogs.com/png.latex?x_1x_2,z_1z_2">. The two approaches give the same result, but the second approach is much more computationally efficient.</p>
+<p>In math’s language, the function <img src="https://latex.codecogs.com/png.latex?K"> is called a kernel function. It takes low-dimension features as input and returns the inner product of high-dimension features, skipping the step of calculating high-dimension features and their inner product. As an illustration, the kernel approach vs the non-kernel approach can be visualized as:</p>
+<p>Low-dimension feature → kernel function with low-dimension features → high-dimension inner product</p>
+<p>Low-dimension feature → high-dimension features → high-dimension inner product</p>
+<p>The fact that the kernel function allows us to access high-dimension inner product using only low-dimension features is called the ‘Kernel Trick’.</p>
+</section>
+<section id="why-kernels" class="level2">
+<h2 class="anchored" data-anchor-id="why-kernels">Why Kernels?</h2>
+<p>The idea of efficient computation of inner products in high-dimension feature spaces is not just a mathematical curiosity. It has profound implications for machine learning algorithms.</p>
+<p>In Machine Learning, it is a common feature engineering practice to create more features from existing features. Think of all the non-linear interaction terms: two-way interactions, three-way interactions, and even higher way interactions. To take it to the extreme, one could add as many non-linear terms as possible, with the hope that the practice reveals hidden relationships among the data. That is where Kernels come into play.</p>
+<p>Two facts make kernels extremely powerful in machine learning:</p>
+<p>(1). Computational Convenience - The transformation of data from low dimension to high dimension in the form of <strong>inner products</strong> of data points.</p>
+<p>(2). Kernelized Algorithms - Some machine learning algorithms can actually take <strong>inner products</strong> of data points as input, making it possible to benefit from the computational effectiveness offered by kernels.</p>
+<p>We go through the example of linear regression to illustrate both points.</p>
+<section id="kernelized-linear-regression" class="level3">
+<h3 class="anchored" data-anchor-id="kernelized-linear-regression">Kernelized Linear Regression</h3>
+<p>It turns out that the conventional linear regression model can be re-expressed as a linear combination of inner products of input feature vectors.</p>
+<p>Imagine a linear regression model with p features. Denote the regression parameter vector as <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bw%7D">. The loss function is:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Cell(%5Cmathbf%7Bw%7D)%20=%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20(%5Cmathbf%7Bw%7D%5ET%20x_i%20-%20y_i)%5E2"></p>
+<p>where <img src="https://latex.codecogs.com/png.latex?x_i"> is the <strong>feature vector</strong> of the ith observation, e.g.&nbsp;<img src="https://latex.codecogs.com/png.latex?%5Cbegin%7Bpmatrix%7D%20x_%7Bi1%7D%20%5C%5C%20x_%7Bi2%7D%20%5C%5C%20%5Cvdots%20%5C%5C%20x_%7Bip%7D%20%5Cend%7Bpmatrix%7D">.</p>
+<p>Gradient descent updates <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bw%7D"> as:</p>
+<p><img src="https://latex.codecogs.com/png.latex?w_%7Bt+1%7D%20=%20w_t%20-%20s%20%5Cleft(%5Cfrac%7B%5Cpartial%20%5Cell%7D%7B%5Cpartial%20%5Cmathbf%7Bw%7D%7D%5Cright)"></p>
+<p>where <img src="https://latex.codecogs.com/png.latex?s"> is the learning rate.</p>
+<p>Here, <img src="https://latex.codecogs.com/png.latex?%5Cfrac%7B%5Cpartial%20%5Cell%7D%7B%5Cpartial%20%5Cmathbf%7Bw%7D%7D%20=%202%5Csum_%7Bi=1%7D%5E%7Bn%7D(%5Cmathbf%7Bw%7D%5ET%20%5Cmathbf%7Bx%7D_i%20-%20y_i)"></p>
+<p>Therefore, the gradient can be expressed as a linear combination of input feature vectors:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Cfrac%7B%5Cpartial%20%5Cell%7D%7B%5Cpartial%20%5Cmathbf%7Bw%7D%7D%20=%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Cunderbrace%7B2(%5Cmathbf%7Bw%7D%5ET%20%5Cmathbf%7Bx%7D_i%20-%20y_i)%7D_%7B%5Cgamma_i%7D%20%5Cmathbf%7Bx%7D_i%20=%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Cgamma_i%20%5Cmathbf%7Bx%7D_i"></p>
+<p>Now that’s one tiny step along the gradient descent process. Since the parameters <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bw%7D"> are essentially many of those tiny steps added together, it’s intuitive to think of the parameters <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bw%7D"> as a linear combination of input feature vectors:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bw%7D%20=%20%5Csum%5E%7BJ%7D_j%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Cgamma_i%20%5Cmathbf%7Bx%7D_i%20=%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Calpha_i%20%5Cmathbf%7Bx%7D_i"></p>
+<p>where <img src="https://latex.codecogs.com/png.latex?J"> is the total steps of gradient descent; <img src="https://latex.codecogs.com/png.latex?%5Calpha_i"> is the new weights of the ith feature vector <img src="https://latex.codecogs.com/png.latex?x_i"> after combining J rounds of <img src="https://latex.codecogs.com/png.latex?%5Cgamma_i">.</p>
+<p>The equation above is a very important representation of the linear regression model. It shows that the regression parameters <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bw%7D"> can be expressed as a linear combination of the input feature vectors:</p>
+<p>$$ _{i=1}^{n} _i _i=</p>
+<em>1 </em>{1st&nbsp;observation} + <em>2 </em>{2nd&nbsp;observation} + + <em>n </em>{nth&nbsp;observation} =
+<img src="https://latex.codecogs.com/png.latex?%5Cbegin%7Bpmatrix%7D%20%5Chat%7Bw%7D_1%20%5C%5C%20%5Chat%7Bw%7D_2%20%5C%5C%20%5Cvdots%20%5C%5C%20%5Chat%7Bw%7D_p%20%5Cend%7Bpmatrix%7D">
+<p>$$</p>
+<p>A huge benefit of the representation is that we can now just do the gradient descent in terms of <img src="https://latex.codecogs.com/png.latex?%5Calpha">, which is of dimension <img src="https://latex.codecogs.com/png.latex?n%5Ctimes%201">:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cmathbf%7Bw%7D%5E1%20=%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Calpha_i%5E0%20%5Cmathbf%7Bx%7D_i%20-%20s%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Cgamma_i%5E0%20%5Cmathbf%7Bx%7D_i%20=%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20(%5Calpha_i%5E0%20-%20s%5Cgamma_i%5E0)%20%5Cmathbf%7Bx%7D_i%20=%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Calpha_i%5E1%20%5Cmathbf%7Bx%7D_i%0A"></p>
+<p>If we do gradient descent on the parameters themselves, the dimension could be as high as <img src="https://latex.codecogs.com/png.latex?2%5Ed%20%5Ctimes%201">.</p>
+<p>Under the new representation, however, the regression model can be re-expressed as taking the inner product between data points as input:</p>
+<p><img src="https://latex.codecogs.com/png.latex?y_j%20=%20w%5ETx_j%20+%20b%20=%20%5Csum_%7Bi=1%7D%5En%5Calpha_i%20%5Cunderbrace%7Bx_ix_j%5ET%7D_%7BK_%7Bij%7D%7D+b"></p>
+<p>where <img src="https://latex.codecogs.com/png.latex?%7BK_%7Bij%7D%7D"> is the kernel function between the ith and jth observation.</p>
+<p>To recap, we’ve shown that the linear regression model can be rewritten as a function of inner products of pairs of observations.</p>
+<p>Now if we want to make a prediction for an observation <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bz%7D">, the prediction can be made via:</p>
+<p><img src="https://latex.codecogs.com/png.latex?h(%5Cmathbf%7Bz%7D)%20=%20%5Cmathbf%7Bw%7D%5ET%20%5Cmathbf%7Bz%7D%20+%20b%20=%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Calpha_i%20x_i%5ET%20%5Cmathbf%7Bz%7D%20+%20b"></p>
+<p>where <img src="https://latex.codecogs.com/png.latex?x_i%5ET%20%5Cmathbf%7Bz%7D"> is the inner product between the ith observation’s feature vector <img src="https://latex.codecogs.com/png.latex?x_i%5ET"> <img src="https://latex.codecogs.com/png.latex?(1%20%5Ctimes%20p)"> and the new observation’s feature vector <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bz%7D"> <img src="https://latex.codecogs.com/png.latex?(p%20%5Ctimes%201)">.</p>
+<p>We are essentially taking the inner product between the new observation with each of the existing observations. And since <img src="https://latex.codecogs.com/png.latex?%5Cunderbrace%7B%5Cmathbf%7Bx%7D_i%5E%5Ctop%7D_%7B%5Cscriptsize(1%20%5Ctimes%20p)%7D%20%5Cunderbrace%7B%5Cvphantom%7B%5Cmathbf%7Bx%7D_i%5E%5Ctop%7D%5Cmathbf%7Bz%7D%7D_%7B%5Cscriptsize(p%20%5Ctimes%201)%7D"> returns a number <img src="https://latex.codecogs.com/png.latex?1%20%5Ctimes%201">, we add up the results according to their weights <img src="https://latex.codecogs.com/png.latex?%5Calpha">.</p>
+</section>
+<section id="computational-convenience" class="level3">
+<h3 class="anchored" data-anchor-id="computational-convenience">Computational Convenience</h3>
+<p>Everything looks good so far. But why do we want to re-express the linear regression model as a function of inner products of pairs of observations?</p>
+<p>Well, with the original linear regression model, if we want to include as many non-linear features as possible, the number of features will grow exponentially with the number of original features, making it computationally expensive.</p>
+<p>Suppose we have a d-dimensional feature vector <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bx%7D"> to start with:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bx%7D%20=%20%5Cbegin%7Bpmatrix%7D%20x_1%20%5C%5C%20%5Cvdots%20%5C%5C%20x_d%20%5Cend%7Bpmatrix%7D"></p>
+<p>where <img src="https://latex.codecogs.com/png.latex?x_1"> through <img src="https://latex.codecogs.com/png.latex?x_d"> represent the features of an observation. For example, if an observation represents a house, <img src="https://latex.codecogs.com/png.latex?x_1"> could be area, <img src="https://latex.codecogs.com/png.latex?x_2"> could be year built, <img src="https://latex.codecogs.com/png.latex?x_3"> could be number of bedrooms, etc.</p>
+<p>To capture non-linear relationships, we can then have a transformation <img src="https://latex.codecogs.com/png.latex?%5Cphi(x)"> such that:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Cphi(x)%20=%20%5Cbegin%7Bpmatrix%7D%20x_1%20%5C%5C%20%5Cvdots%20%5C%5C%20x_d%20%5C%5C%20x_1x_2%20%5C%5C%20%5Cvdots%20%5C%5C%20x_%7Bd-1%7Dx_d%20%5Cend%7Bpmatrix%7D"></p>
+<p>With a feature vector of length <img src="https://latex.codecogs.com/png.latex?d">, a transformation <img src="https://latex.codecogs.com/png.latex?%5Cphi(x)"> that contains all possible interaction terms is of length <img src="https://latex.codecogs.com/png.latex?2%5Ed">. There are two problems with this approach:</p>
+<p>(1). The number of features grows exponentially with the number of original features, making it computationally expensive to calculate the regression parameters.</p>
+<p>(2). The inner product of two transformed observations <img src="https://latex.codecogs.com/png.latex?%5Cphi(%5Cmathbf%7Bx%7D)%5E%5Ctop%20%5Cphi(%5Cmathbf%7Bz%7D)"> is also computationally expensive to calculate, since the dimension of the transformed feature vector <img src="https://latex.codecogs.com/png.latex?%5Cphi(x)"> is <img src="https://latex.codecogs.com/png.latex?2%5Ed">.</p>
+<p>The kernelized form of the linear regression model, however, allows us to bypass both problems.</p>
+<p>First, with the kernelized form, the number of regression parameters is just <img src="https://latex.codecogs.com/png.latex?n">, since each observation gets their own weight <img src="https://latex.codecogs.com/png.latex?%5Calpha_i">.</p>
+<p>Second, there is a kernel function that allows us to calculate the inner product of two transformed observations <img src="https://latex.codecogs.com/png.latex?%5Cphi(%5Cmathbf%7Bx%7D)%5E%5Ctop%20%5Cphi(%5Cmathbf%7Bz%7D)"> without actually calculating the transformed features:</p>
+<p><img src="https://latex.codecogs.com/png.latex?K(%5Cmathbf%7Bx%7D,%20%5Cmathbf%7Bz%7D)%20=%20%5Cphi(%5Cmathbf%7Bx%7D)%5E%5Ctop%20%5Cphi(%5Cmathbf%7Bz%7D)%20=%201%20%5Ccdot%201%20+%20x_1%20z_1%20+%20x_2%20z_2%20+%20%5Ccdots%20+%20x_1%20x_2%20z_1%20z_2%20+%20%5Ccdots%20+%20x_1%20%5Ccdots%20x_d%20z_1%20%5Ccdots%20z_d%20=%20%5Cprod_%7Bk=1%7D%5E%7Bd%7D%20(1%20+%20x_k%20z_k)"></p>
+<p>So instead of calculating the high-dimension features one by one, we can directly get the inner product of the high-dimension features by calculating the kernel function with the original low-dimension features.</p>
+<p>Therefore, by re-expressing the linear regression model as a function of inner products of pairs of observations, we can not only estimate the parameters more efficiently but also capture complex non-linear relationships in the data.</p>
+</section>
+</section>
+<section id="types-of-kernels" class="level2">
+<h2 class="anchored" data-anchor-id="types-of-kernels">Types of Kernels</h2>
+<p>There are many types of kernels, and the choice of which kernel to use depends on the specific problem and data at hand. The most commonly used kernels are Polynomial and Radial Basis Function (RBF) Kernel.</p>
+<section id="polynomial-kernel" class="level3">
+<h3 class="anchored" data-anchor-id="polynomial-kernel">Polynomial Kernel</h3>
+<p>The kernel from the linear regression example is actually a type of <strong>Polynomial</strong> kernel:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Ctextbf%7BPolynomial:%7D%20%5Cquad%20K(%5Cmathbf%7Bx%7D,%20%5Cmathbf%7Bz%7D)%20=%20(1%20+%20%5Cmathbf%7Bx%7D%5E%5Ctop%20%5Cmathbf%7Bz%7D)%5Ed"></p>
+<p>Suppose observation <img src="https://latex.codecogs.com/png.latex?x"> has two features <img src="https://latex.codecogs.com/png.latex?x_1"> and <img src="https://latex.codecogs.com/png.latex?x_2">:</p>
+<p><img src="https://latex.codecogs.com/png.latex?x%20=%20%5Cbegin%7Bpmatrix%7D%20x_1%20%5C%5C%20x_2%20%5Cend%7Bpmatrix%7D"></p>
+<p>We want to add a bias term plus the square and interaction terms:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Cphi(x)%20=%20%5Cbegin%7Bpmatrix%7D%201%20%5C%5C%20x_1%20%5C%5C%20x_2%20%5C%5C%20x_1%20x_2%20%5C%5C%20x_1%5E2%20%5C%5C%20x_2%5E2%20%5Cend%7Bpmatrix%7D"></p>
+<p>The inner product of two transformed observations is:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Clangle%20%5Cphi(%5Cmathbf%7Bx%7D),%20%5Cphi(%5Cmathbf%7Bz%7D)%20%5Crangle%20=%201%20+%20x_1%20z_1%20+%20x_2%20z_2%20+%20x_1%20x_2%20z_1%20z_2%20+%20x_1%5E2%20z_1%5E2%20+%20x_2%5E2%20z_2%5E2"></p>
+<p>This is equivalent to the 2nd degree polynomial kernel:</p>
+<p><img src="https://latex.codecogs.com/png.latex?K_%7B%5Ctext%7Bpoly%7D(2)%7D(%5Cmathbf%7Bx%7D,%20%5Cmathbf%7Bz%7D)%20=%20(1%20+%20%5Cmathbf%7Bx%7D%5ET%20%5Cmathbf%7Bz%7D)%5E2"></p>
+<p>To verify, expand the squared term:</p>
+<p><img src="https://latex.codecogs.com/png.latex?(1%20+%20x_1%20z_1%20+%20x_2%20z_2)%5E2%20=%201%20+%20x_1%20z_1%20+%20x_2%20z_2%20+%20x_1%20x_2%20z_1%20z_2%20+%20x_1%5E2%20z_1%5E2%20+%20x_2%5E2%20z_2%5E2"></p>
+<p>In general, the <img src="https://latex.codecogs.com/png.latex?n">-degree polynomial kernel is defined as:</p>
+<p><img src="https://latex.codecogs.com/png.latex?K_%7B%5Ctext%7Bpoly%7D(n)%7D(%5Cmathbf%7Bx%7D,%20%5Cmathbf%7Bz%7D)%20=%20(1%20+%20%5Cmathbf%7Bx%7D%5ET%20%5Cmathbf%7Bz%7D)%5En"></p>
+<p>Polynomial kernels are building blocks of the most powerful kernel — the radial basis function kernel.</p>
+</section>
+<section id="the-radial-basis-function-rbf-kernel" class="level3">
+<h3 class="anchored" data-anchor-id="the-radial-basis-function-rbf-kernel">The Radial Basis Function (RBF) Kernel</h3>
+<p>The <strong>Radial Basis Function</strong> kernel is defined as:</p>
+<p><img src="https://latex.codecogs.com/png.latex?K_%7B%5Ctext%7BRBF%7D%7D(x,%20z)%20=%20e%5E%7B-%5Cfrac%7B1%7D%7B2%5Csigma%5E2%7D%20%5C%7Cx%20-%20z%5C%7C%5E2%7D"></p>
+<p>It expands the polynomial kernel to the extreme by considering an <strong>infinite</strong> number of interactions.</p>
+<p>To see why, expand the exponent:</p>
+<p><img src="https://latex.codecogs.com/png.latex?e%5E%7B-%5Cfrac%7B1%7D%7B2%5Csigma%5E2%7D(x-z)%5ET(x-z)%7D%20=%20e%5E%7B-%5Cfrac%7B1%7D%7B2%5Csigma%5E2%7D(x%5ET%20x%20-%202x%5ET%20z%20+%20z%5ET%20z)%7D%20=%20e%5E%7B-%5Cfrac%7B1%7D%7B2%5Csigma%5E2%7D(x%5ET%20x%20+%20z%5ET%20z)%7D%20%5Ccdot%20e%5E%7Bx%5ET%20z%7D"></p>
+<p><img src="https://latex.codecogs.com/png.latex?=%20e%5E%7B-%5Cfrac%7B1%7D%7B2%5Csigma%5E2%7D(x%5ET%20x%20+%20z%5ET%20z)%7D%20%5Ccdot%20e%5E%7Bx%5ET%20z%20+%201%7D%20%5Ccdot%20e%5E%7B-1%7D"></p>
+<p>Gathering all terms except <img src="https://latex.codecogs.com/png.latex?e%5E%7Bx%5ET%20z%20+%201%7D"> into a constant <img src="https://latex.codecogs.com/png.latex?C">:</p>
+<p><img src="https://latex.codecogs.com/png.latex?=%20C%20%5Ccdot%20e%5E%7Bx%5ET%20z%20+%201%7D"></p>
+<p>By definition, <img src="https://latex.codecogs.com/png.latex?e%5Ex%20=%20%5Csum_%7Bn=0%7D%5E%7B%5Cinfty%7D%20%5Cdfrac%7Bx%5En%7D%7Bn!%7D">, so:</p>
+<p><img src="https://latex.codecogs.com/png.latex?e%5E%7Bx%5ET%20z%20+%201%7D%20=%20%5Csum_%7Bn=0%7D%5E%7B%5Cinfty%7D%20%5Cfrac%7B(1%20+%20x%5ET%20z)%5En%7D%7Bn!%7D"></p>
+<p>Notice that <img src="https://latex.codecogs.com/png.latex?(1%20+%20%5Cmathbf%7Bx%7D%5ET%20%5Cmathbf%7Bz%7D)%5En"> is exactly the <img src="https://latex.codecogs.com/png.latex?n">-degree polynomial kernel <img src="https://latex.codecogs.com/png.latex?K_%7B%5Ctext%7Bpoly%7D(n)%7D">. Therefore, the RBF kernel is an <strong>infinite sum of polynomial kernels</strong> from degree 1 to <img src="https://latex.codecogs.com/png.latex?%5Cinfty">.</p>
+<p>The RBF kernel is a very powerful kernel because it can capture complex relationships in the data by considering an infinite number of interactions. It is also widely used in machine learning due to its flexibility and ability to handle non-linear data. The most famous example is Support Vector Machines (SVM) with RBF kernels.</p>
+</section>
+</section>
+<section id="kernelized-support-vector-machines-ksvm" class="level2">
+<h2 class="anchored" data-anchor-id="kernelized-support-vector-machines-ksvm">Kernelized Support Vector Machines (KSVM)</h2>
+<p>Support Vector Machines (SVM) is a powerful classification algorithm that finds the optimal hyperplane to separate data points of different classes. With all the mathematical details stripped out, the algorithm makes the classification decision based on the inner products between pairs of observations. The decision rule for a new observation <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bz%7D"> is:</p>
+<p><img src="https://latex.codecogs.com/png.latex?h(%5Cmathbf%7Bz%7D)%20=%20%5Ctext%7Bsign%7D%5C!%5Cleft(%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Calpha_i%20y_i%5C,%20k(x_i,%20%5Cmathbf%7Bz%7D)%20+%20b%5Cright)"></p>
+<p>where <img src="https://latex.codecogs.com/png.latex?x_i"> is the feature vector of the ith training observation, <img src="https://latex.codecogs.com/png.latex?y_i"> is the label of the ith training observation, <img src="https://latex.codecogs.com/png.latex?%5Calpha_i"> is the weight of the ith training observation, <img src="https://latex.codecogs.com/png.latex?k(x_i,%20%5Cmathbf%7Bz%7D)"> is the kernel function that computes the inner product between the ith training observation and the new observation <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bz%7D">, and <img src="https://latex.codecogs.com/png.latex?b"> is the bias term.</p>
+<p>Since it takes inner products as input, the kernel trick can be applied. By using a kernel function, we can implicitly map the data into a high-dimensional feature space. This allows SVM to find a non-linear decision boundary in the original input space, which can lead to better classification performance on non-linearly separable data.</p>
+<section id="svm-as-a-smart-nearest-neighbor" class="level3">
+<h3 class="anchored" data-anchor-id="svm-as-a-smart-nearest-neighbor">SVM as a Smart Nearest Neighbor</h3>
+<p>An interesting way to understand SVM is to compare it with the k-nearest neighbor (KNN) algorithm. KNN classifies a new observation <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bz%7D"> based on the majority class of its <img src="https://latex.codecogs.com/png.latex?k"> nearest neighbors in the training data. The decision rule for KNN can be expressed as:</p>
+<p><img src="https://latex.codecogs.com/png.latex?h(%5Cmathbf%7Bz%7D)%20=%20%5Ctext%7Bsign%7D%5C!%5Cleft(%5Csum_%7Bi=1%7D%5E%7Bn%7D%20y_i%5C,%20%5Cdelta%5E%7Bnn%7D(x_i,%20%5Cmathbf%7Bz%7D)%5Cright)"></p>
+<p>where <img src="https://latex.codecogs.com/png.latex?%5Cdelta%5E%7Bnn%7D(x_i,%20%5Cmathbf%7Bz%7D)%20=%201"> if <img src="https://latex.codecogs.com/png.latex?x_i"> is among the <img src="https://latex.codecogs.com/png.latex?k"> nearest neighbors of <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bz%7D">, and <img src="https://latex.codecogs.com/png.latex?0"> otherwise.</p>
+<p>SVM can be seen as a smarter version of KNN with three additional components: <img src="https://latex.codecogs.com/png.latex?k(x_i,%20%5Cmathbf%7Bz%7D),%5C%20%5Calpha_i,%5C%20b">.</p>
+<ul>
+<li><img src="https://latex.codecogs.com/png.latex?k(x_i,%20%5Cmathbf%7Bz%7D)"> acts as a <strong>distance-based weight</strong> — with the RBF kernel, the test point places a Gaussian around itself and weighs nearby points more heavily.</li>
+<li><img src="https://latex.codecogs.com/png.latex?%5Calpha_i"> <strong>removes redundant training points</strong> that are already classified correctly (support vectors are the only ones with <img src="https://latex.codecogs.com/png.latex?%5Calpha_i%20%3E%200">).</li>
+<li><img src="https://latex.codecogs.com/png.latex?b"> is the <strong>bias term</strong>.</li>
+</ul>
+<p>Remember the kernel function is a similarity function, so the more similar (or closer) a training point is to the test point, the higher the kernel value, and thus the more influence it has on the classification decision. In the case of the RBF kernel, the influence of a training point decreases exponentially as the distance from the test point increases; whereas the k-nearest neighbor algorithm uses a fixed number of neighbors regardless of their distance, each training point’s influence is equal within the neighborhood.</p>
+</section>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>I hope this blog gives you a better understanding of what kernels are, why they are important, and how they work in the context of machine learning algorithms. Kernels are a powerful tool that allows us to capture complex relationships in the data without the computational burden of explicitly calculating high-dimensional features.</p>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+<ul>
+<li>K. Weinberger. <a href="https://www.cs.cornell.edu/courses/cs4780/2018fa/lectures/lecturenote13.html">Kernel Methods.</a> Cornell CS4780 Lecture 13. 2018.</li>
+<li>K. Weinberger. <a href="https://www.cs.cornell.edu/courses/cs4780/2018fa/lectures/lecturenote14.html">Support Vector Machines.</a> Cornell CS4780 Lecture 14. 2018.</li>
+<li>K. Weinberger. <a href="https://www.youtube.com/watch?v=RwF1esLCG4U">Lecture video: Kernel Methods.</a> Cornell CS4780. 2018.</li>
+<li>K. Weinberger. <a href="https://www.youtube.com/watch?v=_PwhiWxHK8o">Lecture video: SVM.</a> Cornell CS4780. 2018.</li>
+<li>C. Wu. <a href="https://www.youtube.com/watch?v=b8P9EOJf1h8&amp;list=PLdk2fd27CQzQo1DEthJ5MDBHoC66_1aDN&amp;index=19">1st Lecture on Foundations of Kernel Methods.</a> Northeastern University.</li>
+<li>C. Wu. <a href="https://www.youtube.com/watch?v=qdL8kGnmIeo&amp;list=PLdk2fd27CQzQo1DEthJ5MDBHoC66_1aDN&amp;index=20">The 2nd Lecture on Kernels: Moore Aronszajn, Representer Theorems, Kernel Regression.</a> Northeastern University.</li>
+</ul>
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" id="quarto-reuse"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></div></div></section><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-wang2026" class="csl-entry quarto-appendix-citeas">
+Wang, Ray. 2026. <span>“Kernel Methods and SVM.”</span> June 1. <a href="https://changruiraywang.com/blog/2025-06-01-kernel-methods-and-svm/">https://changruiraywang.com/blog/2025-06-01-kernel-methods-and-svm/</a>.
+</div></div></section></div> ]]></description>
+  <category>machine learning</category>
+  <category>SVM</category>
+  <category>kernels</category>
+  <guid>https://changruiraywang.com/blog/2025-06-01-kernel-methods-and-svm/</guid>
+  <pubDate>Mon, 01 Jun 2026 04:00:00 GMT</pubDate>
+  <media:content url="https://changruiraywang.com/blog/2025-06-01-kernel-methods-and-svm/sidebar.jpg" medium="image" type="image/jpeg"/>
+</item>
 <item>
   <title>Regularization: Bayesian’s Perspective</title>
   <dc:creator>Ray Wang</dc:creator>
@@ -1391,157 +1594,6 @@ XGBoost.”</span> May 27. <a href="https://changruiraywang.com/blog/2026-05-27-
   <guid>https://changruiraywang.com/blog/2026-05-27-boosting-methods/</guid>
   <pubDate>Wed, 27 May 2026 04:00:00 GMT</pubDate>
   <media:content url="https://changruiraywang.com/blog/2026-05-27-boosting-methods/sidebar.jpg" medium="image" type="image/jpeg"/>
-</item>
-<item>
-  <title>Kernel Methods and SVM</title>
-  <dc:creator>Ray Wang</dc:creator>
-  <link>https://changruiraywang.com/blog/2025-07-11-kernel-methods-and-svm/</link>
-  <description><![CDATA[ 
-
-
-<!-- source: https://github.com/gadenbuie/garrickadenbuie-com/blob/main/_partials/title-block-link-buttons/title-block.html -->
-<!-- 
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title"> 
--->
-<!-- <header id="title-block-header" class="quarto-title-block default page-columns"> -->
-<!-- <div class="quarto-title page-columns page-full featured-image p-4" style="background-image: url(featured.png), url(featured.jpg), url(../featured.jpg);"> -->
-
-
-
-<section id="why-kernels" class="level2">
-<h2 class="anchored" data-anchor-id="why-kernels">Why Kernels?</h2>
-<p>Adding non-linear features is a typical approach to reducing bias when building a machine learning model. Such features include two-way, three-way or even higher interaction terms.</p>
-<p>With the focus of machine learning models being prediction accuracy instead of model interpretability, one can add as many non-linear terms as possible, in the hope that the practice reveals hidden relationships among the data. However, when there are many original features, the non-linear terms can quickly become computationally expensive.</p>
-<p>Consider a d-dimensional feature vector <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bx%7D">:</p>
-<p><img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bx%7D%20=%20%5Cbegin%7Bpmatrix%7D%20x_1%20%5C%5C%20%5Cvdots%20%5C%5C%20x_d%20%5Cend%7Bpmatrix%7D"></p>
-<p>where <img src="https://latex.codecogs.com/png.latex?x_1"> through <img src="https://latex.codecogs.com/png.latex?x_d"> represent the features of an observation. For example, if <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bx%7D"> represents the feature vector of a house, <img src="https://latex.codecogs.com/png.latex?x_1"> through <img src="https://latex.codecogs.com/png.latex?x_d"> could be area, year built, number of bedrooms, and other features of the house.</p>
-<p>To add as many interaction terms as possible, we can have a transformation <img src="https://latex.codecogs.com/png.latex?%5Cphi(x)"> such that:</p>
-<p><img src="https://latex.codecogs.com/png.latex?%5Cphi(x)%20=%20%5Cbegin%7Bpmatrix%7D%20x_1%20%5C%5C%20%5Cvdots%20%5C%5C%20x_d%20%5C%5C%20x_1x_2%20%5C%5C%20%5Cvdots%20%5C%5C%20x_%7Bd-1%7Dx_d%20%5Cend%7Bpmatrix%7D"></p>
-<p>With a feature vector of length <img src="https://latex.codecogs.com/png.latex?d">, a transformation <img src="https://latex.codecogs.com/png.latex?%5Cphi(x)"> that contains all possible interaction terms is of length <img src="https://latex.codecogs.com/png.latex?2%5Ed">. As a result, the dimension of the transformed features becomes high and if we calculate the higher-dimension terms one by one, the training of the model may become slow or even unfeasible.</p>
-<p>So one may ask: is there an easier way to include the non-linear terms in a model in a cost-effective manner?</p>
-<p>The answer is something called the <strong>kernel trick</strong>. It allows us to build models with transformed features using the original features only, without ever having to calculate the actual high-dimension features.</p>
-<p>The kernel trick takes a two-step detour:</p>
-<ol type="1">
-<li>Find a kernel function that takes low-dimension features and returns the <strong>inner products</strong> of high-dimension features.</li>
-<li>Find a machine learning model that takes the <strong>inner products</strong> of features among pairs of observations as input.</li>
-</ol>
-</section>
-<section id="what-are-kernels" class="level2">
-<h2 class="anchored" data-anchor-id="what-are-kernels">What are Kernels?</h2>
-<p>Kernel functions take low-dimension features <img src="https://latex.codecogs.com/png.latex?x%20=%20%5Cbegin%7Bpmatrix%7D%20x_1%20%5C%5C%20%5Cvdots%20%5C%5C%20x_d%20%5Cend%7Bpmatrix%7D"> as input and return the inner product of high-dimension features.</p>
-<p>Kernels often appear in the context of similarity, since the similarity of two observations is usually calculated as the inner product of their feature vectors.</p>
-<p>As a toy example, consider two observations with feature vectors <img src="https://latex.codecogs.com/png.latex?(180,%2070)"> and <img src="https://latex.codecogs.com/png.latex?(160,%2050)">.</p>
-<p>To calculate their similarity, we take the inner product:</p>
-<p><img src="https://latex.codecogs.com/png.latex?%5Clangle%20%5Cmathbf%7Bx%7D,%20%5Cmathbf%7Bz%7D%20%5Crangle%20=%20180%20%5Ctimes%20160%20+%2070%20%5Ctimes%2050"></p>
-<p>Now suppose we wish to better represent the similarity by adding a non-linear transformation:</p>
-<p><img src="https://latex.codecogs.com/png.latex?%5Cphi(%5Cmathbf%7Bx%7D)%20=%20(x_1%5E2,%5C%20x_2%5E2,%5C%20%5Csqrt%7B2%7D%5C,x_1%20x_2)"></p>
-<p>The inner product of two transformed vectors becomes:</p>
-<p><img src="https://latex.codecogs.com/png.latex?%5Clangle%20%5Cphi(%5Cmathbf%7Bx%7D),%20%5Cphi(%5Cmathbf%7Bz%7D)%20%5Crangle%20=%20180%5E2%20%5Ccdot%20160%5E2%20+%2070%5E2%20%5Ccdot%2050%5E2%20+%20%5Csqrt%7B2%7D%20%5Ccdot%20180%20%5Ccdot%2070%20%5Ccdot%20%5Csqrt%7B2%7D%20%5Ccdot%20160%20%5Ccdot%2050%20=%201%7B,%7D043%7B,%7D290%7B,%7D000"></p>
-<p>This requires computing <img src="https://latex.codecogs.com/png.latex?%5Csqrt%7B2%7D%5C,x_1%20x_2"> first — 11 multiplications and 2 summations in total.</p>
-<p>However, using the kernel function <img src="https://latex.codecogs.com/png.latex?K(%5Cmathbf%7Bx%7D,%20%5Cmathbf%7Bz%7D)%20=%20(%5Clangle%20%5Cmathbf%7Bx%7D,%20%5Cmathbf%7Bz%7D%20%5Crangle)%5E2">:</p>
-<p><img src="https://latex.codecogs.com/png.latex?K(%5Cmathbf%7Bx%7D,%20%5Cmathbf%7Bz%7D)%20=%20(x_1%20z_1%20+%20x_2%20z_2)%5E2%20=%20(180%20%5Ctimes%20160%20+%2070%20%5Ctimes%2050)%5E2%20=%201%7B,%7D043%7B,%7D290%7B,%7D000"></p>
-<p>Only 3 multiplications and 1 summation — same result, far less computation. This demonstrates that kernel functions give us the inner product of high-dimensional features without ever computing those features directly.</p>
-<section id="polynomial-kernel" class="level3">
-<h3 class="anchored" data-anchor-id="polynomial-kernel">Polynomial Kernel</h3>
-<p>Suppose observation <img src="https://latex.codecogs.com/png.latex?x"> has two variables <img src="https://latex.codecogs.com/png.latex?x_1"> and <img src="https://latex.codecogs.com/png.latex?x_2">:</p>
-<p><img src="https://latex.codecogs.com/png.latex?x%20=%20%5Cbegin%7Bpmatrix%7D%20x_1%20%5C%5C%20x_2%20%5Cend%7Bpmatrix%7D"></p>
-<p>We want to add a bias term plus the square and interaction terms:</p>
-<p><img src="https://latex.codecogs.com/png.latex?%5Cphi(x)%20=%20%5Cbegin%7Bpmatrix%7D%201%20%5C%5C%20x_1%20%5C%5C%20x_2%20%5C%5C%20x_1%20x_2%20%5C%5C%20x_1%5E2%20%5C%5C%20x_2%5E2%20%5Cend%7Bpmatrix%7D"></p>
-<p>The inner product of two transformed observations is:</p>
-<p><img src="https://latex.codecogs.com/png.latex?%5Clangle%20%5Cphi(%5Cmathbf%7Bx%7D),%20%5Cphi(%5Cmathbf%7Bz%7D)%20%5Crangle%20=%201%20+%20x_1%20z_1%20+%20x_2%20z_2%20+%20x_1%20x_2%20z_1%20z_2%20+%20x_1%5E2%20z_1%5E2%20+%20x_2%5E2%20z_2%5E2"></p>
-<p>This is equivalent to the 2nd degree polynomial kernel:</p>
-<p><img src="https://latex.codecogs.com/png.latex?K_%7B%5Ctext%7Bpoly%7D(2)%7D(%5Cmathbf%7Bx%7D,%20%5Cmathbf%7Bz%7D)%20=%20(1%20+%20%5Cmathbf%7Bx%7D%5ET%20%5Cmathbf%7Bz%7D)%5E2"></p>
-<p>To verify, expand the squared term:</p>
-<p><img src="https://latex.codecogs.com/png.latex?(1%20+%20x_1%20z_1%20+%20x_2%20z_2)%5E2%20=%201%20+%20x_1%20z_1%20+%20x_2%20z_2%20+%20x_1%20x_2%20z_1%20z_2%20+%20x_1%5E2%20z_1%5E2%20+%20x_2%5E2%20z_2%5E2"></p>
-<p>In general, the <img src="https://latex.codecogs.com/png.latex?n">-degree polynomial kernel is defined as:</p>
-<p><img src="https://latex.codecogs.com/png.latex?K_%7B%5Ctext%7Bpoly%7D(n)%7D(%5Cmathbf%7Bx%7D,%20%5Cmathbf%7Bz%7D)%20=%20(1%20+%20%5Cmathbf%7Bx%7D%5ET%20%5Cmathbf%7Bz%7D)%5En"></p>
-<p>Polynomial kernels are building blocks of the most powerful kernel — the radial basis function kernel.</p>
-</section>
-<section id="the-radial-basis-function-rbf-kernel" class="level3">
-<h3 class="anchored" data-anchor-id="the-radial-basis-function-rbf-kernel">The Radial Basis Function (RBF) Kernel</h3>
-<p>The RBF kernel is defined as:</p>
-<p><img src="https://latex.codecogs.com/png.latex?K_%7B%5Ctext%7BRBF%7D%7D(x,%20z)%20=%20e%5E%7B-%5Cfrac%7B1%7D%7B2%5Csigma%5E2%7D%20%5C%7Cx%20-%20z%5C%7C%5E2%7D"></p>
-<p>It takes the idea of adding interaction terms to the extreme by considering an <strong>infinite</strong> number of interactions. To see why, expand the exponent:</p>
-<p><img src="https://latex.codecogs.com/png.latex?e%5E%7B-%5Cfrac%7B1%7D%7B2%5Csigma%5E2%7D(x-z)%5ET(x-z)%7D%20=%20e%5E%7B-%5Cfrac%7B1%7D%7B2%5Csigma%5E2%7D(x%5ET%20x%20-%202x%5ET%20z%20+%20z%5ET%20z)%7D%20=%20e%5E%7B-%5Cfrac%7B1%7D%7B2%5Csigma%5E2%7D(x%5ET%20x%20+%20z%5ET%20z)%7D%20%5Ccdot%20e%5E%7Bx%5ET%20z%7D"></p>
-<p><img src="https://latex.codecogs.com/png.latex?=%20e%5E%7B-%5Cfrac%7B1%7D%7B2%5Csigma%5E2%7D(x%5ET%20x%20+%20z%5ET%20z)%7D%20%5Ccdot%20e%5E%7Bx%5ET%20z%20+%201%7D%20%5Ccdot%20e%5E%7B-1%7D"></p>
-<p>Gathering all terms except <img src="https://latex.codecogs.com/png.latex?e%5E%7Bx%5ET%20z%20+%201%7D"> into a constant <img src="https://latex.codecogs.com/png.latex?C">:</p>
-<p><img src="https://latex.codecogs.com/png.latex?=%20C%20%5Ccdot%20e%5E%7Bx%5ET%20z%20+%201%7D"></p>
-<p>By definition, <img src="https://latex.codecogs.com/png.latex?e%5Ex%20=%20%5Csum_%7Bn=0%7D%5E%7B%5Cinfty%7D%20%5Cdfrac%7Bx%5En%7D%7Bn!%7D">, so:</p>
-<p><img src="https://latex.codecogs.com/png.latex?e%5E%7Bx%5ET%20z%20+%201%7D%20=%20%5Csum_%7Bn=0%7D%5E%7B%5Cinfty%7D%20%5Cfrac%7B(1%20+%20x%5ET%20z)%5En%7D%7Bn!%7D"></p>
-<p>Notice that <img src="https://latex.codecogs.com/png.latex?(1%20+%20%5Cmathbf%7Bx%7D%5ET%20%5Cmathbf%7Bz%7D)%5En"> is exactly the <img src="https://latex.codecogs.com/png.latex?n">-degree polynomial kernel <img src="https://latex.codecogs.com/png.latex?K_%7B%5Ctext%7Bpoly%7D(n)%7D">. Therefore, the RBF kernel is an <strong>infinite sum of polynomial kernels</strong> from degree 1 to <img src="https://latex.codecogs.com/png.latex?%5Cinfty">.</p>
-</section>
-</section>
-<section id="kernelized-algorithms" class="level2">
-<h2 class="anchored" data-anchor-id="kernelized-algorithms">Kernelized Algorithms</h2>
-<p>Kernel functions efficiently capture high-dimensional information using low-dimensional data. But how do they connect to building a machine learning model?</p>
-<p>It turns out that many models can be re-expressed so that they depend only on the <strong>inner products</strong> of feature vectors between pairs of observations. Two key examples are Linear Regression and Support Vector Machines.</p>
-<section id="kernelized-linear-regression" class="level3">
-<h3 class="anchored" data-anchor-id="kernelized-linear-regression">Kernelized Linear Regression</h3>
-<p>The conventional linear regression model can be re-expressed as a linear combination of inner products of input feature vectors.</p>
-<p>Denote the regression parameter vector as <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bw%7D">. The loss function is:</p>
-<p><img src="https://latex.codecogs.com/png.latex?%5Cell(%5Cmathbf%7Bw%7D)%20=%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20(%5Cmathbf%7Bw%7D%5ET%20x_i%20-%20y_i)%5E2"></p>
-<p>Gradient descent updates <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bw%7D"> as:</p>
-<p><img src="https://latex.codecogs.com/png.latex?w_%7Bt+1%7D%20=%20w_t%20-%20s%20%5Cleft(%5Cfrac%7B%5Cpartial%20%5Cell%7D%7B%5Cpartial%20%5Cmathbf%7Bw%7D%7D%5Cright)"></p>
-<p>where <img src="https://latex.codecogs.com/png.latex?s"> is the learning rate. The gradient can be expressed as a linear combination of input feature vectors:</p>
-<p><img src="https://latex.codecogs.com/png.latex?%5Cfrac%7B%5Cpartial%20%5Cell%7D%7B%5Cpartial%20%5Cmathbf%7Bw%7D%7D%20=%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Cunderbrace%7B2(%5Cmathbf%7Bw%7D%5ET%20%5Cmathbf%7Bx%7D_i%20-%20y_i)%7D_%7B%5Cgamma_i%7D%20%5Cmathbf%7Bx%7D_i%20=%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Cgamma_i%20%5Cmathbf%7Bx%7D_i"></p>
-<p>By induction, if we express <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bw%7D"> as a linear combination of all input vectors:</p>
-<p><img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bw%7D%20=%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Calpha_i%20%5Cmathbf%7Bx%7D_i"></p>
-<p>then gradient descent preserves this structure at every step:</p>
-<p><img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bw%7D_1%20=%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Calpha_i%5E0%20%5Cmathbf%7Bx%7D_i%20-%20s%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Cgamma_i%5E0%20%5Cmathbf%7Bx%7D_i%20=%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20(%5Calpha_i%5E0%20-%20s%5Cgamma_i%5E0)%5Cmathbf%7Bx%7D_i%20=%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Calpha_i%5E1%20%5Cmathbf%7Bx%7D_i"></p>
-<p>This means the prediction for the <img src="https://latex.codecogs.com/png.latex?j">th observation can be written entirely in terms of inner products:</p>
-<p><img src="https://latex.codecogs.com/png.latex?h(x_j)%20=%20%5Cmathbf%7Bw%7D%5ET%20x_j%20+%20b%20=%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Calpha_i%20x_i%5ET%20x_j%20+%20b"></p>
-<p>And for a new observation <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bz%7D">:</p>
-<p><img src="https://latex.codecogs.com/png.latex?h(%5Cmathbf%7Bz%7D)%20=%20%5Cmathbf%7Bw%7D%5ET%20%5Cmathbf%7Bz%7D%20+%20b%20=%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Calpha_i%20x_i%5ET%20%5Cmathbf%7Bz%7D%20+%20b"></p>
-<p>The prediction is a weighted sum of inner products between <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bz%7D"> and each training point <img src="https://latex.codecogs.com/png.latex?x_i">.</p>
-</section>
-<section id="support-vector-machine" class="level3">
-<h3 class="anchored" data-anchor-id="support-vector-machine">Support Vector Machine</h3>
-<p><strong>Primal problem:</strong></p>
-<p><img src="https://latex.codecogs.com/png.latex?%5Cmin_%7Bw,%5C,%20w_0%7D%20%5Cfrac%7B1%7D%7B2%7D%20w%5ET%20w%20%5Cquad%20%5Ctext%7Bs.t.%7D%20%5Cquad%20%5Cforall%20i:%20%5C%20y_i(w%5ET%20x_i%20+%20w_0)%20%5Cgeq%201"></p>
-<p><strong>Dual problem:</strong></p>
-<p><img src="https://latex.codecogs.com/png.latex?%5Cmin_%7B%5Calpha%7D%20%5Cfrac%7B1%7D%7B2%7D%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Csum_%7Bj=1%7D%5E%7Bn%7D%20y_i%20y_j%20%5Calpha_i%20%5Calpha_j%20x_i%5ET%20x_j%20-%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Calpha_i"></p>
-<p><img src="https://latex.codecogs.com/png.latex?%5Ctext%7Bs.t.%7D%20%5Cquad%200%20%5Cleq%20%5Calpha_i%20%5Cleq%20C,%20%5Cquad%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Calpha_i%20y_i%20=%200"></p>
-<p>The optimization depends only on the inner products <img src="https://latex.codecogs.com/png.latex?x_i%5ET%20x_j"> between pairs of observations. Solving for <img src="https://latex.codecogs.com/png.latex?w">:</p>
-<p><img src="https://latex.codecogs.com/png.latex?w%20=%20%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Calpha_i%20y_i%20x_i"></p>
-<p>The decision rule for a new observation <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bz%7D"> is:</p>
-<p><img src="https://latex.codecogs.com/png.latex?h(%5Cmathbf%7Bz%7D)%20=%20%5Ctext%7Bsign%7D%5C!%5Cleft(%5Csum_%7Bi=1%7D%5E%7Bn%7D%20%5Calpha_i%20y_i%5C,%20k(x_i,%20%5Cmathbf%7Bz%7D)%20+%20b%5Cright)"></p>
-<p>where <img src="https://latex.codecogs.com/png.latex?b"> is solved using <img src="https://latex.codecogs.com/png.latex?w">.</p>
-<section id="svm-as-a-smart-nearest-neighbor" class="level4">
-<h4 class="anchored" data-anchor-id="svm-as-a-smart-nearest-neighbor">SVM as a Smart Nearest Neighbor</h4>
-<p>The k-nearest neighbor algorithm classifies as:</p>
-<p><img src="https://latex.codecogs.com/png.latex?h(%5Cmathbf%7Bz%7D)%20=%20%5Ctext%7Bsign%7D%5C!%5Cleft(%5Csum_%7Bi=1%7D%5E%7Bn%7D%20y_i%5C,%20%5Cdelta%5E%7Bnn%7D(x_i,%20%5Cmathbf%7Bz%7D)%5Cright)"></p>
-<p>where <img src="https://latex.codecogs.com/png.latex?%5Cdelta%5E%7Bnn%7D(x_i,%20%5Cmathbf%7Bz%7D)%20=%201"> if <img src="https://latex.codecogs.com/png.latex?x_i"> is among the <img src="https://latex.codecogs.com/png.latex?k"> nearest neighbors of <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bz%7D">, and <img src="https://latex.codecogs.com/png.latex?0"> otherwise.</p>
-<p>SVM can be seen as a smarter version of KNN with three additional components: <img src="https://latex.codecogs.com/png.latex?k(x_i,%20%5Cmathbf%7Bz%7D),%5C%20%5Calpha_i,%5C%20b">.</p>
-<ul>
-<li><img src="https://latex.codecogs.com/png.latex?k(x_i,%20%5Cmathbf%7Bz%7D)"> acts as a <strong>distance-based weight</strong> — with the RBF kernel, the test point places a Gaussian around itself and weighs nearby points more heavily.</li>
-<li><img src="https://latex.codecogs.com/png.latex?%5Calpha_i"> <strong>removes redundant training points</strong> that are already classified correctly (support vectors are the only ones with <img src="https://latex.codecogs.com/png.latex?%5Calpha_i%20%3E%200">).</li>
-<li><img src="https://latex.codecogs.com/png.latex?b"> is the <strong>bias term</strong>.</li>
-</ul>
-</section>
-</section>
-</section>
-<section id="references" class="level2">
-<h2 class="anchored" data-anchor-id="references">References</h2>
-<ul>
-<li>Cornell CS4780 Lecture 13: <a href="https://www.cs.cornell.edu/courses/cs4780/2018fa/lectures/lecturenote13.html" class="uri">https://www.cs.cornell.edu/courses/cs4780/2018fa/lectures/lecturenote13.html</a></li>
-<li>Cornell CS4780 Lecture 14: <a href="https://www.cs.cornell.edu/courses/cs4780/2018fa/lectures/lecturenote14.html" class="uri">https://www.cs.cornell.edu/courses/cs4780/2018fa/lectures/lecturenote14.html</a></li>
-<li>Lecture video (Kernel Methods): <a href="https://www.youtube.com/watch?v=RwF1esLCG4U" class="uri">https://www.youtube.com/watch?v=RwF1esLCG4U</a></li>
-<li>Lecture video (SVM): <a href="https://www.youtube.com/watch?v=_PwhiWxHK8o" class="uri">https://www.youtube.com/watch?v=_PwhiWxHK8o</a></li>
-</ul>
-
-
-</section>
-
-<a onclick="window.scrollTo(0, 0); return false;" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" id="quarto-reuse"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></div></div></section><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-wang2025" class="csl-entry quarto-appendix-citeas">
-Wang, Ray. 2025. <span>“Kernel Methods and SVM.”</span> July 11. <a href="https://changruiraywang.com/blog/2025-07-11-kernel-methods-and-svm/">https://changruiraywang.com/blog/2025-07-11-kernel-methods-and-svm/</a>.
-</div></div></section></div> ]]></description>
-  <category>machine learning</category>
-  <category>SVM</category>
-  <category>kernels</category>
-  <guid>https://changruiraywang.com/blog/2025-07-11-kernel-methods-and-svm/</guid>
-  <pubDate>Fri, 11 Jul 2025 04:00:00 GMT</pubDate>
-  <media:content url="https://changruiraywang.com/blog/2025-07-11-kernel-methods-and-svm/sidebar.jpg" medium="image" type="image/jpeg"/>
 </item>
 </channel>
 </rss>
