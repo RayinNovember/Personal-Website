@@ -3,7 +3,7 @@ title: "Regularization: Bayesian's Perspective"
 author: Ray Wang
 date: "2026-5-30"
 description: "Bayesian rethinking of regularization."
-categories: [machine learning, Bayesian, regularization]
+categories: [Machine Learning, Bayesian, Regularization]
 image: sidebar.jpg
 format:
   html:

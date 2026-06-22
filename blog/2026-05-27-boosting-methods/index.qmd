@@ -3,7 +3,7 @@ title: "Boosting Methods - Gradient Boost and XGBoost"
 author: Ray Wang
 date: "2026-05-27"
 description: "A walkthrough of the mathematical principles behind Gradient Boost and XGBoost, with a map of XGBoost parameters to the underlying concepts."
-categories: [machine learning, boosting, XGBoost]
+categories: [Machine Learning, Boosting, XGBoost]
 image: sidebar.jpg
 draft: false
 ---

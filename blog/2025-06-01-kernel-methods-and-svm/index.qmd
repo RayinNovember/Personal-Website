@@ -3,7 +3,7 @@ title: "Kernel Methods and SVM"
 author: Ray Wang
 date: "2026-06-01"
 description: "An introduction to kernel methods, the kernel trick, and how kernels power Machine Learning."
-categories: [machine learning, SVM, kernels]
+categories: [Machine Learning, SVM, Kernels]
 image: sidebar.jpg
 draft: false
 ---

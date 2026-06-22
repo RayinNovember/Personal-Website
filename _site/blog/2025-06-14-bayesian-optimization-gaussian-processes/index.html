@@ -1,0 +1,1466 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.36">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Ray Wang">
+<meta name="dcterms.date" content="2026-06-14">
+<meta name="description" content="Learning about Gaussian Processes through the Lens of Regression and Stochastic Processes.">
+
+<title>Bayesian Optimization - Gaussian Processes – Ray Wang</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-3220c7140bd839a062eaf171028cd1fc.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-c8e4fbfa697e3cac23c41893a6e40db7.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-3220c7140bd839a062eaf171028cd1fc.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-2128be2227ba7e96272c6d2d49cea99e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-afdf0e5142f8c18a67a95f5bc1ba24b2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../site_libs/bootstrap/bootstrap-2128be2227ba7e96272c6d2d49cea99e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/quarto-contrib/fontawesome6-1.2.0/all.min.css" rel="stylesheet">
+<link href="../../site_libs/quarto-contrib/fontawesome6-1.2.0/latex-fontsize.css" rel="stylesheet">
+<script src="../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Ray Wang</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about/index.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../blog/index.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../project/index.html"> 
+<span class="menu-text">Projects</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+    <a href="https://github.com/" title="" class="quarto-navigation-tool px-1" aria-label=""><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns">
+<div id="title-block-header-title" class="quarto-title page-columns page-full page-layout-full featured-image p-4" style="background-image: url(featured.png), url(featured.jpg), url(../featured.jpg);">
+<h1 class="title">Bayesian Optimization - Gaussian Processes</h1>
+    <div class="quarto-categories">
+        <div class="quarto-category">Machine Learning</div>
+        <div class="quarto-category">Gaussian Processes</div>
+        <div class="quarto-category">Bayesian</div>
+      </div>
+  </div>
+
+<div>
+  <div id="title-block-title-desc" class="description pt-4">
+    Learning about Gaussian Processes through the Lens of Regression and Stochastic Processes.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Ray Wang </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">June 14, 2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+
+</header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#gaussian-processes-gp-through-the-lens-of-regression" id="toc-gaussian-processes-gp-through-the-lens-of-regression" class="nav-link" data-scroll-target="#gaussian-processes-gp-through-the-lens-of-regression">Gaussian Processes (GP) through the Lens of Regression</a>
+  <ul class="collapse">
+  <li><a href="#gaussian-processes-assumption" id="toc-gaussian-processes-assumption" class="nav-link" data-scroll-target="#gaussian-processes-assumption">Gaussian Processes Assumption</a></li>
+  <li><a href="#gaussian-noise" id="toc-gaussian-noise" class="nav-link" data-scroll-target="#gaussian-noise">Gaussian Noise</a></li>
+  </ul></li>
+  <li><a href="#gaussian-processes-gp-through-the-lens-of-stochastic-processes" id="toc-gaussian-processes-gp-through-the-lens-of-stochastic-processes" class="nav-link" data-scroll-target="#gaussian-processes-gp-through-the-lens-of-stochastic-processes">Gaussian Processes (GP) through the Lens of Stochastic Processes</a></li>
+  <li><a href="#gaussian-processes-visualized" id="toc-gaussian-processes-visualized" class="nav-link" data-scroll-target="#gaussian-processes-visualized">Gaussian Processes Visualized</a>
+  <ul class="collapse">
+  <li><a href="#joint-view" id="toc-joint-view" class="nav-link" data-scroll-target="#joint-view">Joint View</a></li>
+  <li><a href="#conditional-view-posterior-predictive-distribution" id="toc-conditional-view-posterior-predictive-distribution" class="nav-link" data-scroll-target="#conditional-view-posterior-predictive-distribution">Conditional View — Posterior Predictive Distribution</a></li>
+  <li><a href="#why-conditioning-reduces-variance" id="toc-why-conditioning-reduces-variance" class="nav-link" data-scroll-target="#why-conditioning-reduces-variance">Why Conditioning Reduces Variance</a></li>
+  </ul></li>
+  <li><a href="#higher-dimension-gp" id="toc-higher-dimension-gp" class="nav-link" data-scroll-target="#higher-dimension-gp">Higher Dimension GP</a></li>
+  <li><a href="#gp-kernels-and-parameters" id="toc-gp-kernels-and-parameters" class="nav-link" data-scroll-target="#gp-kernels-and-parameters">GP Kernels and Parameters</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+<!-- source: https://github.com/gadenbuie/garrickadenbuie-com/blob/main/_partials/title-block-link-buttons/title-block.html -->
+<!-- 
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title"> 
+-->
+<!-- <header id="title-block-header" class="quarto-title-block default page-columns"> -->
+<!-- <div class="quarto-title page-columns page-full featured-image p-4" style="background-image: url(featured.png), url(featured.jpg), url(../featured.jpg);"> -->
+
+
+
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>If you’re a millennial, chances are you played a Windows game called Minesweeper growing up. The premise is deceptively simple: a grid of covered squares hides a set number of mines, and your job is to uncover all the safe squares without triggering one. When you click a square, it either reveals a number — indicating how many of its neighboring squares contain mines — or ends the game in an explosion. Using those numbers, you reason about which adjacent squares are safe to click and which are likely deadly. The further you get, the more information you have, and the more confident your next move becomes. At its heart, Minesweeper is a game of inference under uncertainty. You build a mental model of where the mines are hiding, and you use it to decide where to step next.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="minesweeper.jpg" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="A game of Minesweeper"><img src="minesweeper.jpg" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:80.0%" alt="A game of Minesweeper"></a></p>
+</figure>
+</div>
+<figcaption>A game of Minesweeper</figcaption>
+</figure>
+</div>
+<p>Bayesian Optimization is the Minesweeper of Machine Learning (ML). A typical ML workflow involves defining an objective function — such as a loss function — and then solving for its minimum or maximum using numerical methods based on its derivatives. But there are cases where neither the objective function nor its derivatives are known. For such black-box functions, the only option is to draw samples in search of the optimal value. When samples are cheap to draw, a grid-search approach — systematically evaluating many combinations of input variables — works fine. But when samples are expensive, such as tuning the hyperparameters of a deep neural network or drilling for oil at candidate geographic coordinates, reaching the optimum with as few samples as possible becomes critical.</p>
+<p>That is where Bayesian Optimization (BO) shines. BO consists of two components: a surrogate model — most commonly a Gaussian Process — and an acquisition function. The Gaussian Process is like the revealed squares on the Minesweeper grid, telling you what the landscape looks like around your observations. The acquisition function is your reasoning about where to click next. And the mines? They are the optimum values of your objective function.</p>
+</section>
+<section id="gaussian-processes-gp-through-the-lens-of-regression" class="level2">
+<h2 class="anchored" data-anchor-id="gaussian-processes-gp-through-the-lens-of-regression">Gaussian Processes (GP) through the Lens of Regression</h2>
+<p>There are many ways to introduce Gaussian Processes, of which the most intuitive to me is through the regression perspective.</p>
+<p>Forget about Gaussian Processes for a minute. A typical regression workflow goes like this:</p>
+<p><span class="math display">\[\underbrace{D}_{\text{Data}} \rightarrow \underbrace{W}_{\text{Regression Parameters}} \rightarrow \underbrace{y}_{\text{Predictions}}\]</span></p>
+<p>You use data to estimate regression parameters, then use the estimated parameters to make predictions. To estimate the regression parameters <span class="math inline">\(\mathbf{w}\)</span>, two paradigms are most common:</p>
+<p><span class="math display">\[\text{MLE:} \quad P(\mathbf{D}|\mathbf{w}) = \prod^n_{i=1}P(y_i|x_i,\mathbf{w})\]</span></p>
+<p><span class="math display">\[\text{MAP:} \quad P(\mathbf{w}|\mathbf{D}) = \frac{P(D|\mathbf{w})P(\mathbf{w})}{z} \propto P(\mathbf{D}|\mathbf{w})P(\mathbf{w})\]</span></p>
+<p>For inference tasks, the parameters are the most important since they embed the relationship between the predictors and the outcome. However, both methods lead to a single solution of <span class="math inline">\(\mathbf{w}\)</span>. In fact, there are many <span class="math inline">\(\mathbf{w}\)</span> that may fit the data well and are worth considering. This argument is stronger for predictive tasks where the actual values of parameters <span class="math inline">\(\mathbf{w}\)</span> are less of interest.</p>
+<p>Bayesians say: let’s go directly from data to predictions, accounting for the variability of the parameters without having to estimate them:</p>
+<p><span class="math display">\[\underbrace{D}_{\text{Data}} \rightarrow \underbrace{y}_{\text{Predictions}}\]</span></p>
+<p>This leads to the posterior predictive distribution:</p>
+<p><span class="math display">\[P(y_i|x_i,D) = \int_w P(y_i|x_i,w,D)\,dw\]</span></p>
+<p>The equation says: for a test point <span class="math inline">\(i\)</span>, we consider every possible value of the regression parameters and take a weighted average of their predicted values by integrating them out. The formula above can be further broken down into a product of the likelihood and posterior:</p>
+<p><span class="math display">\[P(y_i \mid x_i, D) = \int_w \underbrace{P(y_i \mid x_i, w)}_{\text{Likelihood}} \, \underbrace{P(w \mid D)}_{\text{Posterior}} \, dw\]</span></p>
+<p>Here is where the magic happens. The likelihood <span class="math inline">\(P(y_i|x_i,w)\)</span> is Gaussian. The posterior <span class="math inline">\(P(w \mid D) = \frac{P(D|w)P(w)}{z}\)</span>, if we assume a Gaussian prior <span class="math inline">\(P(w)\)</span> (just like we do with Ridge regression), is also Gaussian. Two Gaussians multiplied together is still a Gaussian, so <span class="math inline">\(P(y|x,D)\)</span> is also a Gaussian!</p>
+<p>Now that is just one test case. We can extend the same idea to more than one test point:</p>
+<p><span class="math display">\[P(y_* \mid D, \mathbf{x}) \sim \mathcal{N}(\mu_{y_*|D}, \Sigma_{y_*|D})\]</span></p>
+<p>where <span class="math inline">\(y_*\)</span> is the test dataset.</p>
+<section id="gaussian-processes-assumption" class="level3">
+<h3 class="anchored" data-anchor-id="gaussian-processes-assumption">Gaussian Processes Assumption</h3>
+<p>Now the question becomes: how do we find <span class="math inline">\(\mu_{y_*|D}\)</span> and <span class="math inline">\(\Sigma_{y_*|D}\)</span>? The key assumption is that our training data and test data <strong>jointly</strong> follow a <strong>multivariate normal distribution (MVN)</strong>:</p>
+<p><span class="math display">\[P\left(\begin{bmatrix} y_1 \\ \vdots \\ y_n \\ y_* \end{bmatrix}, (x_1, \ldots, x_n), x_*\right) \sim \mathcal{N}(\mu, \Sigma)\]</span></p>
+<p>where the covariance matrix <span class="math inline">\(\Sigma\)</span> is represented via a kernel function <span class="math inline">\(K\)</span>, with <span class="math inline">\(K_{ij} = k(x_i, x_j)\)</span>:</p>
+<p><span class="math display">\[\Sigma = \begin{bmatrix} K &amp; K_* \\ K_*^T &amp; K_{**} \end{bmatrix}\]</span></p>
+<ul>
+<li><span class="math inline">\(K\)</span> — an <span class="math inline">\(n \times n\)</span> matrix of kernel evaluations between all pairs of training points, where entry <span class="math inline">\(K_{ij} = k(x_i, x_j)\)</span>. This is the covariance structure among the observed data.</li>
+<li><span class="math inline">\(K_*\)</span> — an <span class="math inline">\(n \times 1\)</span> vector of kernel evaluations between each training point and the test point <span class="math inline">\(x_*\)</span>, where entry <span class="math inline">\(K_{*i} = k(x_i, x_*)\)</span>. This is what links the training data to the test point.</li>
+<li><span class="math inline">\(K_*^T\)</span> — the transpose of <span class="math inline">\(K_*\)</span>, a <span class="math inline">\(1 \times n\)</span> vector. It appears in the lower left to keep the matrix symmetric, as a covariance matrix must be.</li>
+<li><span class="math inline">\(K_{**}\)</span> — a scalar, the kernel evaluation of the test point with itself, <span class="math inline">\(k(x_*, x_*)\)</span>. This is the prior variance of the test point before seeing any data.</li>
+</ul>
+<p>And what about Gaussian Processes? They are essentially MVN. The posterior predictive distribution can now be defined as follows (math derivation omitted):</p>
+<p><span class="math display">\[P(y_* \mid D, \mathbf{x}) \sim \mathcal{N}(\mu_{y_*|D}, \Sigma_{y_*|D})\]</span></p>
+<p>where</p>
+<p><span class="math display">\[\mu_{y_*|D} = K_*^T(K + \sigma^2 I)^{-1}y\]</span></p>
+<p>and</p>
+<p><span class="math display">\[\Sigma_{y_*|D} = K_{**} - K_*^T(K + \sigma^2 I)^{-1}K_*\]</span></p>
+</section>
+<section id="gaussian-noise" class="level3">
+<h3 class="anchored" data-anchor-id="gaussian-noise">Gaussian Noise</h3>
+<p>In the example above, we treat the observed values <span class="math inline">\(y\)</span> as the true values of the underlying function <span class="math inline">\(f\)</span>. However, in many applications this is not the case. The observed values are noisy, with an independent noise term layered on top:</p>
+<p><span class="math display">\[\hat{Y}_i = f_i + \epsilon_i\]</span></p>
+<p>In this case the covariance matrix becomes <span class="math inline">\(\hat{\Sigma} = \Sigma + \sigma^2\mathbf{I}\)</span>, and the Gaussian Process posterior distribution leads to:</p>
+<p><span class="math display">\[Y_* \mid (Y_1 = y_1, \ldots, Y_n = y_n, \mathbf{x}_1, \ldots, \mathbf{x}_n) \sim \mathcal{N}\!\left(K_*^\top (K + \sigma^2 I)^{-1} y,\ K_{**} + \sigma^2 I - K_*^\top (K + \sigma^2 I)^{-1} K_*\right)\]</span></p>
+<p>To bring everything full circle: we bypass the estimation of regression parameters but are still able to make predictions. With some observed data, we can obtain a distribution for the values of the test data.</p>
+<p>Yet the assumption and formulation can seem odd. Why combine training and test data? Why represent the covariance matrix with kernel functions? The core idea of GP is that data points close to each other should yield similar results. Under the GP framework, predictions are made by assuming all data come from the same generative model and examining how close the test data are to the training data via the kernel. It is analogous to estimating your house price based on the house prices in your neighborhood — without building a specific regression model with predictors like number of bedrooms or year built.</p>
+<p>To think in MVN terms is a paradigm shift. In most regression settings, individual data points are assumed to have their own distributions. In Gaussian Processes, our data are counted only as a partial observation of one sample from an MVN. To facilitate understanding, we now visit the origin of Gaussian Processes in Stochastic Processes.</p>
+</section>
+</section>
+<section id="gaussian-processes-gp-through-the-lens-of-stochastic-processes" class="level2">
+<h2 class="anchored" data-anchor-id="gaussian-processes-gp-through-the-lens-of-stochastic-processes">Gaussian Processes (GP) through the Lens of Stochastic Processes</h2>
+<p>By <a href="https://en.wikipedia.org/wiki/Gaussian_process">Wikipedia</a>, a Gaussian Process is a time continuous stochastic process <span class="math inline">\(\{X_t; t \in T\}\)</span> such that for every finite set of indices <span class="math inline">\(t_1, \ldots, t_k\)</span> in the index set <span class="math inline">\(T\)</span>,</p>
+<p><span class="math display">\[\mathbf{X}_{t_1,\ldots,t_k} = (X_{t_1}, \ldots, X_{t_k})\]</span></p>
+<p>is a multivariate Gaussian random variable. Essentially, GP observations are never independent — although collected at different inputs, they are <strong>jointly</strong> Gaussian, correlated with each other through the kernel function. The data points collectively are one realization from the <strong>joint</strong> distribution:</p>
+<p><span class="math display">\[\begin{bmatrix} f(x_1) \\ \vdots \\ f(x_n) \end{bmatrix} \sim \mathcal{N}(\mu, \Sigma)\]</span></p>
+<p>The covariance structure encoded in <span class="math inline">\(K\)</span> means that observing <span class="math inline">\(f(x_i)\)</span> says something about <span class="math inline">\(f(x_j)\)</span> for nearby <span class="math inline">\(x_j\)</span>. The most common choice for the covariance structure is the Radial Basis Function (RBF) kernel:</p>
+<p><span class="math display">\[k(x_i, x_j) = \sigma^2\exp\left(-\frac{\|x_i - x_j\|^2}{2\ell^2}\right)\]</span></p>
+</section>
+<section id="gaussian-processes-visualized" class="level2">
+<h2 class="anchored" data-anchor-id="gaussian-processes-visualized">Gaussian Processes Visualized</h2>
+<p>We have now discussed two views of Gaussian Processes. The <strong>Conditional View</strong>: after observing some points, the remaining points follow an updated Gaussian — the posterior predictive distribution from the regression perspective. And the <strong>Joint View</strong>: all observations together are one draw from a multivariate Gaussian, corresponding to the stochastic process perspective.</p>
+<p>In this section, we code GPs in Python to generate plots of both views using the RBF kernel.</p>
+<div id="imports" class="cell" data-message="false" data-execution_count="1">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> scipy</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> scipy.spatial.distance</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> itertools</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.gridspec <span class="im">as</span> gridspec</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib.figure <span class="im">import</span> Figure</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib.gridspec <span class="im">import</span> SubplotSpec</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> mpl_toolkits.axes_grid1 <span class="im">import</span> make_axes_locatable</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> numpy <span class="im">import</span> ndarray <span class="im">as</span> KernelMatrix</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.stats.qmc <span class="im">import</span> LatinHypercube</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div id="gp-class" class="cell" data-execution_count="2">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> GPreg:</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, X_train, y_train, X_test, length_scale<span class="op">=</span><span class="dv">1</span>, amplitude<span class="op">=</span><span class="dv">1</span>, keps<span class="op">=</span><span class="fl">1e-8</span>):</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.L <span class="op">=</span> length_scale</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.A <span class="op">=</span> amplitude</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.keps <span class="op">=</span> keps</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.muFn <span class="op">=</span> <span class="va">self</span>.mean_func(X_test)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.Kfn <span class="op">=</span> <span class="va">self</span>.kernel_func(X_test, X_test, amplitude<span class="op">=</span><span class="va">self</span>.A, length_scale<span class="op">=</span><span class="va">self</span>.L) <span class="op">+</span> <span class="fl">1e-15</span> <span class="op">*</span> np.eye(np.shape(X_test)[<span class="dv">0</span>])</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.X_train <span class="op">=</span> X_train</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.y_train <span class="op">=</span> y_train</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.X_test <span class="op">=</span> X_test</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.y_test <span class="op">=</span> np.sin(X_test)</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> mean_func(<span class="va">self</span>, X):</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Zero mean function."""</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> np.zeros((np.shape(X)[<span class="dv">0</span>], <span class="dv">1</span>))</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> kernel_func(<span class="va">self</span>, x, z, amplitude<span class="op">=</span><span class="dv">1</span>, length_scale<span class="op">=</span><span class="dv">1</span>):</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""RBF (squared exponential) kernel."""</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>        sq_dist <span class="op">=</span> scipy.spatial.distance.cdist(x, z, metric<span class="op">=</span><span class="st">'sqeuclidean'</span>)</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> amplitude<span class="op">**</span><span class="dv">2</span> <span class="op">*</span> np.exp(<span class="op">-</span><span class="fl">0.5</span> <span class="op">*</span> sq_dist <span class="op">/</span> length_scale<span class="op">**</span><span class="dv">2</span>)</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> compute_posterior(<span class="va">self</span>):</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>        K <span class="op">=</span> <span class="va">self</span>.kernel_func(<span class="va">self</span>.X_train, <span class="va">self</span>.X_train, amplitude<span class="op">=</span><span class="va">self</span>.A, length_scale<span class="op">=</span><span class="va">self</span>.L) <span class="op">+</span> <span class="va">self</span>.keps <span class="op">*</span> np.eye(np.shape(<span class="va">self</span>.X_train)[<span class="dv">0</span>])</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>        K_s <span class="op">=</span> <span class="va">self</span>.kernel_func(<span class="va">self</span>.X_train, <span class="va">self</span>.X_test, amplitude<span class="op">=</span><span class="va">self</span>.A, length_scale<span class="op">=</span><span class="va">self</span>.L)</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>        K_ss <span class="op">=</span> <span class="va">self</span>.kernel_func(<span class="va">self</span>.X_test, <span class="va">self</span>.X_test, amplitude<span class="op">=</span><span class="va">self</span>.A, length_scale<span class="op">=</span><span class="va">self</span>.L) <span class="op">+</span> <span class="va">self</span>.keps <span class="op">*</span> np.eye(np.shape(<span class="va">self</span>.X_test)[<span class="dv">0</span>])</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>        K_inv <span class="op">=</span> np.linalg.inv(K)</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.muFn <span class="op">=</span> np.dot(K_s.T, np.dot(K_inv, <span class="va">self</span>.y_train))</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.Kfn <span class="op">=</span> K_ss <span class="op">-</span> np.dot(K_s.T, np.dot(K_inv, K_s))</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">None</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> generate_random_prior_plots(<span class="va">self</span>, num_points<span class="op">=</span><span class="dv">40</span>, num_samples<span class="op">=</span><span class="dv">5</span>):</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Plot prior GP samples."""</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>        X <span class="op">=</span> np.expand_dims(np.linspace(<span class="op">-</span><span class="dv">4</span>, <span class="dv">4</span>, num_points), <span class="dv">1</span>)</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>        sigma <span class="op">=</span> <span class="va">self</span>.kernel_func(X, X, amplitude<span class="op">=</span><span class="va">self</span>.A, length_scale<span class="op">=</span><span class="va">self</span>.L)</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>        Y <span class="op">=</span> np.random.multivariate_normal(mean<span class="op">=</span>np.zeros(num_points), cov<span class="op">=</span>sigma, size<span class="op">=</span>num_samples)</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>        plt.figure(figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">4</span>))</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(num_samples):</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>            plt.plot(X, Y[i], linestyle<span class="op">=</span><span class="st">"-"</span>, marker<span class="op">=</span><span class="st">"o"</span>, markersize<span class="op">=</span><span class="dv">3</span>)</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>        plt.xlabel(<span class="st">"$x$"</span>, fontsize<span class="op">=</span><span class="dv">13</span>)</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>        plt.ylabel(<span class="st">"$y = f(x)$"</span>, fontsize<span class="op">=</span><span class="dv">13</span>)</span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>        plt.title(</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>            <span class="ss">f"</span><span class="sc">{</span>num_samples<span class="sc">}</span><span class="ss"> different function realizations at </span><span class="sc">{</span>num_points<span class="sc">}</span><span class="ss"> points</span><span class="ch">\n</span><span class="ss">"</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>            <span class="st">"sampled from a Gaussian process with exponentiated quadratic kernel"</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>        plt.xlim([<span class="op">-</span><span class="dv">4</span>, <span class="dv">4</span>])</span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>        plt.show()</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> generate_posterior_plots(<span class="va">self</span>, X, num_samples<span class="op">=</span><span class="dv">3</span>):</span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Plot posterior distribution and samples."""</span></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>        fig, (ax1, ax2) <span class="op">=</span> plt.subplots(nrows<span class="op">=</span><span class="dv">2</span>, ncols<span class="op">=</span><span class="dv">1</span>, figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">6</span>))</span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>        ax1.plot(X, np.sin(X), <span class="st">"b--"</span>, label<span class="op">=</span><span class="st">"$</span><span class="er">\</span><span class="st">sin(x)$"</span>)</span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>        ax1.fill_between(</span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>            X.flatten(),</span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.muFn.flatten() <span class="op">-</span> <span class="dv">2</span> <span class="op">*</span> np.sqrt(np.diag(<span class="va">self</span>.Kfn)),</span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.muFn.flatten() <span class="op">+</span> <span class="dv">2</span> <span class="op">*</span> np.sqrt(np.diag(<span class="va">self</span>.Kfn)),</span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>            color<span class="op">=</span><span class="st">"red"</span>, alpha<span class="op">=</span><span class="fl">0.15</span>, label<span class="op">=</span><span class="vs">r"95% CI — </span><span class="dv">$</span><span class="vs">2</span><span class="dv">\s</span><span class="vs">igma_{test</span><span class="cf">|</span><span class="vs">train}</span><span class="dv">$</span><span class="vs">"</span>,</span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>        ax1.plot(X, <span class="va">self</span>.muFn, <span class="st">"r-"</span>, lw<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="vs">r"</span><span class="dv">$\m</span><span class="vs">u_{test</span><span class="cf">|</span><span class="vs">train}</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a>        ax1.plot(<span class="va">self</span>.X_train, <span class="va">self</span>.y_train, <span class="st">"ko"</span>, linewidth<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="st">"$(x_</span><span class="sc">{train}</span><span class="st">, y_</span><span class="sc">{train}</span><span class="st">)$"</span>)</span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>        ax1.set_xlabel(<span class="st">"$x$"</span>, fontsize<span class="op">=</span><span class="dv">13</span>)</span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a>        ax1.set_ylabel(<span class="st">"$y$"</span>, fontsize<span class="op">=</span><span class="dv">13</span>)</span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a>        ax1.set_title(<span class="st">"Posterior predictive distribution"</span>)</span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a>        ax1.legend()</span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a>        ax2.plot(X, np.random.multivariate_normal(mean<span class="op">=</span><span class="va">self</span>.muFn.flatten(), cov<span class="op">=</span><span class="va">self</span>.Kfn, size<span class="op">=</span><span class="dv">5</span>).T, <span class="st">"-"</span>)</span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a>        ax2.set_xlabel(<span class="st">"$x$"</span>, fontsize<span class="op">=</span><span class="dv">13</span>)</span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>        ax2.set_ylabel(<span class="st">"$y$"</span>, fontsize<span class="op">=</span><span class="dv">13</span>)</span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a>        ax2.set_title(<span class="st">"5 function realizations from the posterior GP"</span>)</span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>        ax2.set_xlim([X.<span class="bu">min</span>(), X.<span class="bu">max</span>()])</span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a>        plt.tight_layout()</span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a>        plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>&lt;&gt;:52: SyntaxWarning:
+
+invalid escape sequence '\s'
+
+&lt;&gt;:52: SyntaxWarning:
+
+invalid escape sequence '\s'
+
+C:\Users\rwang\AppData\Local\Temp\ipykernel_16496\1627296385.py:52: SyntaxWarning:
+
+invalid escape sequence '\s'
+</code></pre>
+</div>
+</div>
+<section id="joint-view" class="level3">
+<h3 class="anchored" data-anchor-id="joint-view">Joint View</h3>
+<p>Each curve below represents one GP sample, with 40 observed points shown and infinitely many unobserved points implied. One collection of 40 data points is only a partial observation of one realized function.</p>
+<div id="cell-joint-view" class="cell" data-execution_count="3">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>X_train_1d <span class="op">=</span> np.array([[<span class="dv">1</span>], [<span class="fl">2.7</span>], [<span class="fl">3.2</span>], [<span class="fl">4.1</span>], [<span class="dv">5</span>]]).reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>y_train_1d <span class="op">=</span> np.sin(X_train_1d)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>X_test_1d <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="dv">6</span>, <span class="dv">100</span>).reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>gp <span class="op">=</span> GPreg(X_train_1d, y_train_1d, X_test_1d, <span class="dv">1</span>, <span class="dv">1</span>, <span class="fl">1e-8</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>gp.generate_random_prior_plots()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><a href="index_files/figure-html/joint-view-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img src="index_files/figure-html/joint-view-output-1.png" id="joint-view" width="585" height="397" class="figure-img"></a></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="conditional-view-posterior-predictive-distribution" class="level3">
+<h3 class="anchored" data-anchor-id="conditional-view-posterior-predictive-distribution">Conditional View — Posterior Predictive Distribution</h3>
+<p>Suppose we have a function <span class="math inline">\(f(x) = \sin(x)\)</span> for which we have observed the values at several data points, and we hope to build a posterior predictive distribution over the entire space. Plugging the observed values into the posterior predictive formula:</p>
+<p><span class="math display">\[Y_* \mid (Y_1 = y_1, \ldots, Y_n = y_n, \mathbf{x}_1, \ldots, \mathbf{x}_n) \sim \mathcal{N}\!\left(K_*^\top (K + \sigma^2 I)^{-1} y,\ K_{**} + \sigma^2 I - K_*^\top (K + \sigma^2 I)^{-1} K_*\right)\]</span></p>
+<p>we get the posterior predictive distribution at each test point:</p>
+<div id="cell-conditional-view" class="cell" data-execution_count="4">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>gp.compute_posterior()</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>gp.generate_posterior_plots(X_test_1d, <span class="dv">5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><a href="index_files/figure-html/conditional-view-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3"><img src="index_files/figure-html/conditional-view-output-1.png" id="conditional-view" width="565" height="565" class="figure-img"></a></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The characteristic football/sausage shape reflects low variance around observed values and high variance for points far from the training data. Statistically, 95% of samples drawn from the posterior should fall within the shaded 95% confidence interval.</p>
+</section>
+<section id="why-conditioning-reduces-variance" class="level3">
+<h3 class="anchored" data-anchor-id="why-conditioning-reduces-variance">Why Conditioning Reduces Variance</h3>
+<p>With a GP, the closer <span class="math inline">\(x_*\)</span> is to the training points, the more confident the model becomes, and thus the more variance gets reduced. But why? What role does the kernel play? Let’s unpack the math behind the posterior covariance.</p>
+<p>The posterior covariance of a test point <span class="math inline">\(x_*\)</span> given training data is:</p>
+<p><span class="math display">\[\Sigma_{y_*|D} = K_{**} - K_*^T K^{-1} K_*\]</span></p>
+<p>where <span class="math inline">\(K_{**}\)</span> is the <em>prior</em> variance of <span class="math inline">\(x_*\)</span> — the uncertainty before seeing any data — and <span class="math inline">\(K_*^T K^{-1} K_*\)</span> is the variance <em>removed</em> by the training points. Assume <span class="math inline">\(n\)</span> training points and a single test point <span class="math inline">\(x_*\)</span>, with <span class="math inline">\(K\)</span> as <span class="math inline">\(n \times n\)</span>, <span class="math inline">\(K_*\)</span> as <span class="math inline">\(n \times 1\)</span>, and <span class="math inline">\(K_*^T\)</span> as <span class="math inline">\(1 \times n\)</span>. The full product is a scalar:</p>
+<p><span class="math display">\[K_*^T K^{-1} K_* = \underbrace{(1 \times n)}_{K_*^T} \underbrace{(n \times n)}_{K^{-1}} \underbrace{(n \times 1)}_{K_*} = (1 \times 1)\]</span></p>
+<p>Given the <a href="https://en.wikipedia.org/wiki/Definite_matrix">positive definite</a> nature of kernels, this quantity is always positive — it can be thought of as the total amount of variance removed from the test data.</p>
+<p>To see how much variance is removed, let’s examine the quantity with three training points <span class="math inline">\((x_1, x_2, x_3)\)</span> and one test point <span class="math inline">\(x_*\)</span>. Set <span class="math inline">\(a = k(x_*, x_1)\)</span>, <span class="math inline">\(b = k(x_*, x_2)\)</span>, <span class="math inline">\(c = k(x_*, x_3)\)</span>, with <span class="math inline">\(m_{ij}\)</span> denoting entries of <span class="math inline">\(K^{-1}\)</span>:</p>
+<p><span class="math display">\[K_*^T K^{-1} K_* = \begin{bmatrix} a &amp; b &amp; c \end{bmatrix}
+\begin{bmatrix} m_{11} &amp; m_{12} &amp; m_{13} \\ m_{21} &amp; m_{22} &amp; m_{23} \\
+m_{31} &amp; m_{32} &amp; m_{33} \end{bmatrix}
+\begin{bmatrix} a \\ b \\ c \end{bmatrix}
+= m_{11}a^2 + m_{22}b^2 + m_{33}c^2 + 2m_{12}ab + 2m_{13}ac + 2m_{23}bc\]</span></p>
+<p>The <strong>squared terms</strong> <span class="math inline">\(a^2, b^2, c^2\)</span> capture how similar <span class="math inline">\(x_*\)</span> is to each individual training point. The <strong>cross terms</strong> <span class="math inline">\(ab, ac, bc\)</span> capture interactions between <span class="math inline">\(x_*\)</span>’s relationships to different training points and are treated as constants driven by the training data structure.</p>
+<p>With the RBF kernel, each similarity score <span class="math inline">\(k(x_*, x_i)\)</span> approaches 1 when <span class="math inline">\(x_*\)</span> is close to <span class="math inline">\(x_i\)</span> and 0 when far away. This means one nearby training point gives moderate variance reduction; two nearby training points give larger reduction; and no nearby training points means the GP falls back to its prior. The variance reduction is therefore a <strong>vote</strong> from each training point, weighted by proximity to <span class="math inline">\(x_*\)</span>. GP uncertainty is <em>locally determined</em> — confidence builds up around observed points and fades in unexplored regions. As we will see in the second blog of the series, this is exactly the signal the acquisition function uses to decide where to sample next.</p>
+</section>
+</section>
+<section id="higher-dimension-gp" class="level2">
+<h2 class="anchored" data-anchor-id="higher-dimension-gp">Higher Dimension GP</h2>
+<p>So far we have focused on simple 1D examples. In the real world, data points come in much higher dimensions. The distance calculation remains the same: for each pair of data points, we take the distances across each feature and compute the norm of the difference vector. The example below extends the GP to a 2D input space, modeling the underlying function <span class="math inline">\(f(x_1, x_2) = x_1 \exp(-x_1^2 - x_2^2)\)</span>.</p>
+<div id="cell-high-dim-gp" class="cell" data-fig-height="4" data-fig-width="9" data-execution_count="5">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> HighDimGPreg:</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, X_train, y_train, X_test, L<span class="op">=</span><span class="dv">1</span>, A<span class="op">=</span><span class="dv">1</span>, keps<span class="op">=</span><span class="fl">1e-8</span>):</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.L <span class="op">=</span> L</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.A <span class="op">=</span> A</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.keps <span class="op">=</span> keps</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.muFn <span class="op">=</span> <span class="va">self</span>.mean_func(X_test)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.Kfn <span class="op">=</span> <span class="va">self</span>.kernel_func(X_test, X_test) <span class="op">+</span> <span class="fl">1e-15</span> <span class="op">*</span> np.eye(X_test.shape[<span class="dv">0</span>])</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.X_train <span class="op">=</span> X_train</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.y_train <span class="op">=</span> y_train.reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.X_test <span class="op">=</span> X_test</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.y_test <span class="op">=</span> X_test[:, <span class="dv">0</span>] <span class="op">*</span> np.exp(<span class="op">-</span>X_test[:, <span class="dv">0</span>]<span class="op">**</span><span class="dv">2</span> <span class="op">-</span> X_test[:, <span class="dv">1</span>]<span class="op">**</span><span class="dv">2</span>)</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> mean_func(<span class="va">self</span>, X):</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Zero mean function."""</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> np.zeros((X.shape[<span class="dv">0</span>], <span class="dv">1</span>))</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> kernel_func(<span class="va">self</span>, x, z):</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""RBF kernel with amplitude and length scale."""</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>        sq_dist <span class="op">=</span> scipy.spatial.distance.cdist(x <span class="op">/</span> <span class="va">self</span>.L, z <span class="op">/</span> <span class="va">self</span>.L, metric<span class="op">=</span><span class="st">'sqeuclidean'</span>)</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.A<span class="op">**</span><span class="dv">2</span> <span class="op">*</span> np.exp(<span class="op">-</span><span class="fl">0.5</span> <span class="op">*</span> sq_dist)</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> compute_posterior(<span class="va">self</span>):</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>        K <span class="op">=</span> <span class="va">self</span>.kernel_func(<span class="va">self</span>.X_train, <span class="va">self</span>.X_train) <span class="op">+</span> <span class="va">self</span>.keps <span class="op">*</span> np.eye(<span class="va">self</span>.X_train.shape[<span class="dv">0</span>])</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>        K_s <span class="op">=</span> <span class="va">self</span>.kernel_func(<span class="va">self</span>.X_train, <span class="va">self</span>.X_test)</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>        K_ss <span class="op">=</span> <span class="va">self</span>.kernel_func(<span class="va">self</span>.X_test, <span class="va">self</span>.X_test) <span class="op">+</span> <span class="va">self</span>.keps <span class="op">*</span> np.eye(<span class="va">self</span>.X_test.shape[<span class="dv">0</span>])</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>        K_inv <span class="op">=</span> np.linalg.inv(K)</span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.muFn <span class="op">=</span> np.dot(K_s.T, np.dot(K_inv, <span class="va">self</span>.y_train))</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.Kfn <span class="op">=</span> K_ss <span class="op">-</span> np.dot(K_s.T, np.dot(K_inv, K_s))</span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">None</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> generate_plots(<span class="va">self</span>, X, nx):</span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Generate heatmap plots of the posterior mean and uncertainty."""</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>        mu <span class="op">=</span> <span class="va">self</span>.muFn.ravel()</span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>        std <span class="op">=</span> np.sqrt(np.diag(<span class="va">self</span>.Kfn))</span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>        fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">4</span>))</span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>        im0 <span class="op">=</span> axes[<span class="dv">0</span>].imshow(</span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>            mu.reshape(nx, nx), origin<span class="op">=</span><span class="st">'lower'</span>, cmap<span class="op">=</span><span class="st">'viridis'</span>,</span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>            extent<span class="op">=</span>[X[:, <span class="dv">0</span>].<span class="bu">min</span>(), X[:, <span class="dv">0</span>].<span class="bu">max</span>(), X[:, <span class="dv">1</span>].<span class="bu">min</span>(), X[:, <span class="dv">1</span>].<span class="bu">max</span>()]</span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>        axes[<span class="dv">0</span>].set_title(<span class="st">'Posterior Mean'</span>)</span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>        axes[<span class="dv">0</span>].set_xlabel(<span class="st">'$x_1$'</span>)</span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>        axes[<span class="dv">0</span>].set_ylabel(<span class="st">'$x_2$'</span>)</span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>        plt.colorbar(im0, ax<span class="op">=</span>axes[<span class="dv">0</span>])</span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a>        im1 <span class="op">=</span> axes[<span class="dv">1</span>].imshow(</span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a>            std.reshape(nx, nx), origin<span class="op">=</span><span class="st">'lower'</span>, cmap<span class="op">=</span><span class="st">'plasma'</span>,</span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a>            extent<span class="op">=</span>[X[:, <span class="dv">0</span>].<span class="bu">min</span>(), X[:, <span class="dv">0</span>].<span class="bu">max</span>(), X[:, <span class="dv">1</span>].<span class="bu">min</span>(), X[:, <span class="dv">1</span>].<span class="bu">max</span>()]</span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a>        axes[<span class="dv">1</span>].set_title(<span class="st">'Posterior Std Dev (Uncertainty)'</span>)</span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a>        axes[<span class="dv">1</span>].set_xlabel(<span class="st">'$x_1$'</span>)</span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a>        axes[<span class="dv">1</span>].set_ylabel(<span class="st">'$x_2$'</span>)</span>
+<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a>        plt.colorbar(im1, ax<span class="op">=</span>axes[<span class="dv">1</span>])</span>
+<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a>        plt.tight_layout()</span>
+<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a>        plt.show()</span>
+<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a>nx <span class="op">=</span> <span class="dv">40</span></span>
+<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a>n_train <span class="op">=</span> <span class="dv">10</span></span>
+<span id="cb6-59"><a href="#cb6-59" aria-hidden="true" tabindex="-1"></a>sampler <span class="op">=</span> LatinHypercube(d<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb6-60"><a href="#cb6-60" aria-hidden="true" tabindex="-1"></a>X_train_2d <span class="op">=</span> sampler.random(n<span class="op">=</span>n_train)</span>
+<span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a>X_train_2d[:, <span class="dv">0</span>] <span class="op">=</span> (X_train_2d[:, <span class="dv">0</span>] <span class="op">-</span> <span class="fl">0.5</span>) <span class="op">*</span> <span class="dv">6</span> <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb6-62"><a href="#cb6-62" aria-hidden="true" tabindex="-1"></a>X_train_2d[:, <span class="dv">1</span>] <span class="op">=</span> (X_train_2d[:, <span class="dv">1</span>] <span class="op">-</span> <span class="fl">0.5</span>) <span class="op">*</span> <span class="dv">6</span> <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb6-63"><a href="#cb6-63" aria-hidden="true" tabindex="-1"></a>y_train_2d <span class="op">=</span> X_train_2d[:, <span class="dv">0</span>] <span class="op">*</span> np.exp(<span class="op">-</span>X_train_2d[:, <span class="dv">0</span>]<span class="op">**</span><span class="dv">2</span> <span class="op">-</span> X_train_2d[:, <span class="dv">1</span>]<span class="op">**</span><span class="dv">2</span>)</span>
+<span id="cb6-64"><a href="#cb6-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-65"><a href="#cb6-65" aria-hidden="true" tabindex="-1"></a>X_test_seq <span class="op">=</span> np.linspace(<span class="op">-</span><span class="dv">2</span>, <span class="dv">4</span>, nx)</span>
+<span id="cb6-66"><a href="#cb6-66" aria-hidden="true" tabindex="-1"></a>x1, x2 <span class="op">=</span> np.meshgrid(X_test_seq, X_test_seq)</span>
+<span id="cb6-67"><a href="#cb6-67" aria-hidden="true" tabindex="-1"></a>X_test_2d <span class="op">=</span> np.column_stack([x1.ravel(), x2.ravel()])</span>
+<span id="cb6-68"><a href="#cb6-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-69"><a href="#cb6-69" aria-hidden="true" tabindex="-1"></a>gp2d <span class="op">=</span> HighDimGPreg(X_train_2d, y_train_2d, X_test_2d, L<span class="op">=</span><span class="dv">1</span>, A<span class="op">=</span><span class="dv">1</span>, keps<span class="op">=</span><span class="fl">1e-8</span>)</span>
+<span id="cb6-70"><a href="#cb6-70" aria-hidden="true" tabindex="-1"></a>gp2d.compute_posterior()</span>
+<span id="cb6-71"><a href="#cb6-71" aria-hidden="true" tabindex="-1"></a>gp2d.generate_plots(X_test_2d, nx<span class="op">=</span>nx)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><a href="index_files/figure-html/high-dim-gp-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4"><img src="index_files/figure-html/high-dim-gp-output-1.png" id="high-dim-gp" width="933" height="399" class="figure-img"></a></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The <strong>posterior mean</strong> (left) shows the GP’s best estimate of the underlying function across the 2D input space. The color intensity represents the predicted function value — warmer colors indicate higher values, cooler colors indicate lower values. The surface is smooth, as expected from the RBF kernel.</p>
+<p>The <strong>posterior uncertainty</strong> (right) shows the posterior standard deviation <span class="math inline">\(\sigma_{test|train}\)</span> at each test point — the square root of the diagonal of <span class="math inline">\(\Sigma_{y_*|D}\)</span>. Dark regions indicate low uncertainty near the 10 Latin Hypercube training points, where variance reduction is large. Bright regions indicate high uncertainty far from all training points, where the posterior falls back toward the prior. With only 10 training points over a 2D space, large portions of the input space remain uncertain — illustrating precisely why efficient sampling strategies like BO matter when evaluations are expensive.</p>
+</section>
+<section id="gp-kernels-and-parameters" class="level2">
+<h2 class="anchored" data-anchor-id="gp-kernels-and-parameters">GP Kernels and Parameters</h2>
+<p>So far we have only used the RBF kernel:</p>
+<p><span class="math display">\[k(x_i, x_j) = \sigma^2\exp\left(-\frac{\|x_i - x_j\|^2}{2\ell^2}\right)\]</span></p>
+<p>where two hyperparameters are required: <span class="math inline">\(\sigma\)</span> (amplitude) and <span class="math inline">\(\ell\)</span> (lengthscale). In practice, these parameters are unknown and usually estimated via Maximum Likelihood Estimation. A great reference is <a href="https://peterroelants.github.io/posts/gaussian-process-kernel-fitting/">Gaussian processes (2/3) — Fitting a Gaussian process kernel</a>.</p>
+<p>Each parameter affects the shape of the kernel function and the resulting GP. Let’s first look at how the parameters affect the kernel function itself:</p>
+<div id="cell-gp-kernel-distance" class="cell" data-execution_count="6">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Reference: Roelants, P. (2019). Gaussian Processes (3/3) - Exploring Kernels.</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co"># https://peterroelants.github.io/posts/gaussian-process-kernels/</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> exponentiated_quadratic(xa, xb, amplitude<span class="op">=</span><span class="fl">1.0</span>, length_scale<span class="op">=</span><span class="fl">1.0</span>):</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""RBF kernel with explicit hyperparameters."""</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    sq_norm <span class="op">=</span> scipy.spatial.distance.cdist(xa, xb, <span class="st">"sqeuclidean"</span>)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> amplitude<span class="op">**</span><span class="dv">2</span> <span class="op">*</span> np.exp(<span class="op">-</span><span class="fl">0.5</span> <span class="op">*</span> sq_norm <span class="op">/</span> length_scale<span class="op">**</span><span class="dv">2</span>)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>xlim <span class="op">=</span> (<span class="op">-</span><span class="dv">4</span>, <span class="dv">4</span>)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> np.expand_dims(np.linspace(<span class="op">*</span>xlim, num<span class="op">=</span><span class="dv">75</span>), <span class="dv">1</span>)</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>zero <span class="op">=</span> np.array([[<span class="fl">0.0</span>]])</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="fl">5.4</span>, <span class="dv">3</span>))</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ls, amp, label <span class="kw">in</span> [</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    (<span class="fl">1.0</span>, <span class="fl">1.0</span>, <span class="st">"$</span><span class="ch">\\</span><span class="st">ell = 1$, $</span><span class="ch">\\</span><span class="st">sigma = 1$"</span>),</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    (<span class="fl">0.5</span>, <span class="fl">1.0</span>, <span class="st">"$</span><span class="ch">\\</span><span class="st">ell = 0.5$, $</span><span class="ch">\\</span><span class="st">sigma = 1$"</span>),</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    (<span class="fl">1.0</span>, <span class="fl">0.5</span>, <span class="st">"$</span><span class="ch">\\</span><span class="st">ell = 1$, $</span><span class="ch">\\</span><span class="st">sigma = 0.5$"</span>),</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    (<span class="fl">0.5</span>, <span class="fl">0.5</span>, <span class="st">"$</span><span class="ch">\\</span><span class="st">ell = 0.5$, $</span><span class="ch">\\</span><span class="st">sigma = 0.5$"</span>),</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>]:</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    Σ <span class="op">=</span> exponentiated_quadratic(xa<span class="op">=</span>zero, xb<span class="op">=</span>X, amplitude<span class="op">=</span>amp, length_scale<span class="op">=</span>ls)</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    ax.plot(X[:, <span class="dv">0</span>], Σ[<span class="dv">0</span>, :], label<span class="op">=</span>label)</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"$x_a - x_b$"</span>, fontsize<span class="op">=</span><span class="dv">11</span>)</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"$K(x_a,x_b)$"</span>, fontsize<span class="op">=</span><span class="dv">11</span>)</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Exponentiated quadratic kernel"</span>)</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>ax.set_ylim((<span class="dv">0</span>, <span class="fl">1.1</span>))</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>ax.set_xlim(<span class="op">*</span>xlim)</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>ax.legend(loc<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><a href="index_files/figure-html/gp-kernel-distance-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5"><img src="index_files/figure-html/gp-kernel-distance-output-1.png" id="gp-kernel-distance" width="506" height="277" class="figure-img"></a></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Now let’s see how the parameters affect the GP samples themselves:</p>
+<div id="cell-gp-kernel-samples" class="cell" data-execution_count="7">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Reference: Roelants, P. (2019). Gaussian Processes (3/3) - Exploring Kernels.</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co"># https://peterroelants.github.io/posts/gaussian-process-kernels/</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> sample_from_kernel(</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    covariance: KernelMatrix, nb_of_samples: <span class="bu">int</span>, nb_of_realizations: <span class="bu">int</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> KernelMatrix:</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Draw sample functions from a covariance matrix."""</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.random.multivariate_normal(</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>        mean<span class="op">=</span>np.zeros(nb_of_samples), cov<span class="op">=</span>covariance, size<span class="op">=</span>nb_of_realizations</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    ).T</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_kernel(</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    X: KernelMatrix, y: KernelMatrix, covariance: KernelMatrix,</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    description: <span class="bu">str</span>, fig: Figure, subplot_spec: SubplotSpec,</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    xlim: <span class="bu">tuple</span>[<span class="bu">int</span>, <span class="bu">int</span>], scatter: <span class="bu">bool</span> <span class="op">=</span> <span class="va">False</span>, rotate_x_labels: <span class="bu">bool</span> <span class="op">=</span> <span class="va">False</span>,</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Visualize a kernel through samples and its covariance matrix."""</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    grid_spec <span class="op">=</span> gridspec.GridSpecFromSubplotSpec(</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>        <span class="dv">1</span>, <span class="dv">2</span>, width_ratios<span class="op">=</span>[<span class="dv">2</span>, <span class="dv">1</span>], height_ratios<span class="op">=</span>[<span class="dv">1</span>],</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>        wspace<span class="op">=</span><span class="fl">0.18</span>, hspace<span class="op">=</span><span class="fl">0.0</span>, subplot_spec<span class="op">=</span>subplot_spec,</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    ax1 <span class="op">=</span> fig.add_subplot(grid_spec[<span class="dv">0</span>])</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>    ax2 <span class="op">=</span> fig.add_subplot(grid_spec[<span class="dv">1</span>])</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> scatter:</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(y.shape[<span class="dv">1</span>]):</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>            ax1.scatter(X, y[:, i], alpha<span class="op">=</span><span class="fl">0.8</span>, s<span class="op">=</span><span class="dv">3</span>)</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(y.shape[<span class="dv">1</span>]):</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>            ax1.plot(X, y[:, i], alpha<span class="op">=</span><span class="fl">0.8</span>)</span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>    ax1.set_ylabel(<span class="st">"$y$"</span>, fontsize<span class="op">=</span><span class="dv">13</span>, labelpad<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>    ax1.set_xlabel(<span class="st">"$x$"</span>, fontsize<span class="op">=</span><span class="dv">13</span>, labelpad<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>    ax1.set_xlim(xlim)</span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> rotate_x_labels:</span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> label <span class="kw">in</span> ax1.get_xticklabels():</span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>            label.set_rotation(<span class="dv">30</span>)</span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>    ax1.set_title(<span class="ss">f"Samples from </span><span class="sc">{</span>description<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>    im <span class="op">=</span> ax2.imshow(covariance, cmap<span class="op">=</span><span class="st">"YlGnBu"</span>)</span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>    divider <span class="op">=</span> make_axes_locatable(ax2)</span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>    cax <span class="op">=</span> divider.append_axes(<span class="st">"right"</span>, size<span class="op">=</span><span class="st">"5%"</span>, pad<span class="op">=</span><span class="fl">0.02</span>)</span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>    cbar <span class="op">=</span> plt.colorbar(im, ax<span class="op">=</span>ax2, cax<span class="op">=</span>cax)</span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>    cbar.ax.set_ylabel(<span class="st">"$K(X,X)$"</span>, fontsize<span class="op">=</span><span class="dv">8</span>)</span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>    ax2.set_title(<span class="ss">f"Covariance matrix</span><span class="ch">\n</span><span class="sc">{</span>description<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>    ax2.set_xlabel(<span class="st">"X"</span>, fontsize<span class="op">=</span><span class="dv">10</span>, labelpad<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>    ax2.set_ylabel(<span class="st">"X"</span>, fontsize<span class="op">=</span><span class="dv">10</span>, labelpad<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>    nb_ticks <span class="op">=</span> <span class="dv">5</span></span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>    ticks <span class="op">=</span> <span class="bu">list</span>(<span class="bu">range</span>(xlim[<span class="dv">0</span>], xlim[<span class="dv">1</span>] <span class="op">+</span> <span class="dv">1</span>))</span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>    ticks_idx <span class="op">=</span> np.rint(</span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a>        np.linspace(<span class="dv">1</span>, <span class="bu">len</span>(ticks), num<span class="op">=</span><span class="bu">min</span>(nb_ticks, <span class="bu">len</span>(ticks))) <span class="op">-</span> <span class="dv">1</span></span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>    ).astype(<span class="bu">int</span>)</span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a>    ticks <span class="op">=</span> <span class="bu">list</span>(np.array(ticks)[ticks_idx])</span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a>    ax2.set_xticks(np.linspace(<span class="dv">0</span>, <span class="bu">len</span>(X) <span class="op">-</span> <span class="dv">1</span>, <span class="bu">len</span>(ticks)))</span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a>    ax2.set_yticks(np.linspace(<span class="dv">0</span>, <span class="bu">len</span>(X) <span class="op">-</span> <span class="dv">1</span>, <span class="bu">len</span>(ticks)))</span>
+<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a>    ax2.set_xticklabels(ticks)</span>
+<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a>    ax2.set_yticklabels(ticks)</span>
+<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> rotate_x_labels:</span>
+<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> label <span class="kw">in</span> ax2.get_xticklabels():</span>
+<span id="cb8-58"><a href="#cb8-58" aria-hidden="true" tabindex="-1"></a>            label.set_rotation(<span class="dv">30</span>)</span>
+<span id="cb8-59"><a href="#cb8-59" aria-hidden="true" tabindex="-1"></a>    ax2.grid(<span class="va">False</span>)</span>
+<span id="cb8-60"><a href="#cb8-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-61"><a href="#cb8-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-62"><a href="#cb8-62" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_kernel_combinations(amplitudes, length_scales, nb_of_samples<span class="op">=</span><span class="dv">150</span>, nb_of_realizations<span class="op">=</span><span class="dv">3</span>):</span>
+<span id="cb8-63"><a href="#cb8-63" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Plot GP samples and covariance matrices for all combinations of hyperparameters."""</span></span>
+<span id="cb8-64"><a href="#cb8-64" aria-hidden="true" tabindex="-1"></a>    xlim <span class="op">=</span> (<span class="op">-</span><span class="dv">4</span>, <span class="dv">4</span>)</span>
+<span id="cb8-65"><a href="#cb8-65" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> np.expand_dims(np.linspace(<span class="op">*</span>xlim, nb_of_samples), <span class="dv">1</span>)</span>
+<span id="cb8-66"><a href="#cb8-66" aria-hidden="true" tabindex="-1"></a>    combinations <span class="op">=</span> <span class="bu">list</span>(itertools.product(amplitudes, length_scales))</span>
+<span id="cb8-67"><a href="#cb8-67" aria-hidden="true" tabindex="-1"></a>    n_combos <span class="op">=</span> <span class="bu">len</span>(combinations)</span>
+<span id="cb8-68"><a href="#cb8-68" aria-hidden="true" tabindex="-1"></a>    fig <span class="op">=</span> plt.figure(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="fl">2.5</span> <span class="op">*</span> n_combos))</span>
+<span id="cb8-69"><a href="#cb8-69" aria-hidden="true" tabindex="-1"></a>    gs <span class="op">=</span> gridspec.GridSpec(n_combos, <span class="dv">1</span>, figure<span class="op">=</span>fig, wspace<span class="op">=</span><span class="fl">0.2</span>, hspace<span class="op">=</span><span class="fl">0.4</span>)</span>
+<span id="cb8-70"><a href="#cb8-70" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i, (amplitude, length_scale) <span class="kw">in</span> <span class="bu">enumerate</span>(combinations):</span>
+<span id="cb8-71"><a href="#cb8-71" aria-hidden="true" tabindex="-1"></a>        Σ <span class="op">=</span> exponentiated_quadratic(xa<span class="op">=</span>X, xb<span class="op">=</span>X, amplitude<span class="op">=</span>amplitude, length_scale<span class="op">=</span>length_scale)</span>
+<span id="cb8-72"><a href="#cb8-72" aria-hidden="true" tabindex="-1"></a>        y <span class="op">=</span> sample_from_kernel(covariance<span class="op">=</span>Σ, nb_of_samples<span class="op">=</span>nb_of_samples, nb_of_realizations<span class="op">=</span>nb_of_realizations)</span>
+<span id="cb8-73"><a href="#cb8-73" aria-hidden="true" tabindex="-1"></a>        plot_kernel(</span>
+<span id="cb8-74"><a href="#cb8-74" aria-hidden="true" tabindex="-1"></a>            X<span class="op">=</span>X, y<span class="op">=</span>y, covariance<span class="op">=</span>Σ,</span>
+<span id="cb8-75"><a href="#cb8-75" aria-hidden="true" tabindex="-1"></a>            description<span class="op">=</span><span class="ss">f"$</span><span class="ch">\\</span><span class="ss">ell = </span><span class="sc">{</span>length_scale<span class="sc">}</span><span class="ss">$, $</span><span class="ch">\\</span><span class="ss">sigma = </span><span class="sc">{</span>amplitude<span class="sc">}</span><span class="ss">$"</span>,</span>
+<span id="cb8-76"><a href="#cb8-76" aria-hidden="true" tabindex="-1"></a>            fig<span class="op">=</span>fig, subplot_spec<span class="op">=</span>gs[i], xlim<span class="op">=</span>xlim,</span>
+<span id="cb8-77"><a href="#cb8-77" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb8-78"><a href="#cb8-78" aria-hidden="true" tabindex="-1"></a>    plt.suptitle(<span class="st">"Exponentiated quadratic kernel"</span>, y<span class="op">=</span><span class="fl">0.99</span>)</span>
+<span id="cb8-79"><a href="#cb8-79" aria-hidden="true" tabindex="-1"></a>    fig.subplots_adjust(left<span class="op">=</span><span class="fl">0.07</span>, bottom<span class="op">=</span><span class="fl">0.04</span>, right<span class="op">=</span><span class="fl">0.93</span>, top<span class="op">=</span><span class="fl">0.94</span>)</span>
+<span id="cb8-80"><a href="#cb8-80" aria-hidden="true" tabindex="-1"></a>    plt.show()</span>
+<span id="cb8-81"><a href="#cb8-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-82"><a href="#cb8-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-83"><a href="#cb8-83" aria-hidden="true" tabindex="-1"></a>plot_kernel_combinations(amplitudes<span class="op">=</span>[<span class="fl">1.0</span>, <span class="fl">10.0</span>], length_scales<span class="op">=</span>[<span class="fl">0.5</span>, <span class="fl">1.0</span>, <span class="fl">2.0</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><a href="index_files/figure-html/gp-kernel-samples-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-6"><img src="index_files/figure-html/gp-kernel-samples-output-1.png" id="gp-kernel-samples" width="705" height="1427" class="figure-img"></a></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The RBF kernel has two hyperparameters: the length scale <span class="math inline">\(\ell\)</span> and the amplitude <span class="math inline">\(\sigma\)</span>. The six plots above correspond to all combinations of <span class="math inline">\(\sigma \in \{1, 10\}\)</span> and <span class="math inline">\(\ell \in \{0.5, 1, 2\}\)</span>, generated by <code>itertools.product</code> in this order:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: center;">Plot</th>
+<th style="text-align: center;"><span class="math inline">\(\sigma\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(\ell\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1.0</td>
+<td style="text-align: center;">0.5</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1.0</td>
+<td style="text-align: center;">1.0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">1.0</td>
+<td style="text-align: center;">2.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">10.0</td>
+<td style="text-align: center;">0.5</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">10.0</td>
+<td style="text-align: center;">1.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">10.0</td>
+<td style="text-align: center;">2.0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Length scale <span class="math inline">\(\ell\)</span> controls the smoothness of the function.</strong> At <span class="math inline">\(\ell = 0.5\)</span> (plots 1, 4), the sampled functions are highly wiggly — only points within 0.5 units of each other are considered similar, so the function changes direction rapidly. At <span class="math inline">\(\ell = 1\)</span> (plots 2, 5), functions are smooth at a moderate pace. At <span class="math inline">\(\ell = 2\)</span> (plots 3, 6), the functions are very slow-moving — points up to 2 units apart remain highly correlated, producing long sweeping curves. In the covariance matrix, a larger <span class="math inline">\(\ell\)</span> spreads correlations further from the diagonal, making the matrix appear more uniformly bright. A smaller <span class="math inline">\(\ell\)</span> concentrates correlation near the diagonal.</p>
+<p><strong>Amplitude <span class="math inline">\(\sigma\)</span> controls the vertical scale of the function.</strong> At <span class="math inline">\(\sigma = 1\)</span> (plots 1–3), function values stay roughly within <span class="math inline">\([-1, 1]\)</span>. At <span class="math inline">\(\sigma = 10\)</span> (plots 4–6), they can swing as wide as <span class="math inline">\([-10, 10]\)</span>, while the smoothness pattern mirrors plots 1–3 exactly since <span class="math inline">\(\ell\)</span> is unchanged. Comparing plot 1 (<span class="math inline">\(\ell=0.5\)</span>, <span class="math inline">\(\sigma=1\)</span>) to plot 4 (<span class="math inline">\(\ell=0.5\)</span>, <span class="math inline">\(\sigma=10\)</span>): identical wiggliness, but the vertical range is inflated by a factor of 10. <span class="math inline">\(\sigma\)</span> scales the entire kernel matrix by <span class="math inline">\(\sigma^2\)</span>, inflating variance at every point without touching the correlation structure. Think of <span class="math inline">\(\ell\)</span> as controlling the <em>shape</em> of the functions and <span class="math inline">\(\sigma\)</span> as controlling their <em>range</em>.</p>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>Gaussian Processes are a powerful and elegant tool for modeling uncertainty. Starting from the regression perspective, we saw how integrating out the parameters leads naturally to the posterior predictive distribution — a Gaussian whose mean and covariance are fully defined by the kernel function. From the stochastic processes perspective, we saw that a GP treats the entire function as a single draw from a multivariate Gaussian, where observations are jointly correlated rather than independent.</p>
+<p>The kernel function is the engine of the GP. It encodes how information propagates from observed points to unobserved ones. The closer a test point is to the training points, the more confident the model becomes, and the more variance gets reduced. This variance reduction is not magic — it is a weighted sum of similarities, driven entirely by how close a test point is to the training data.</p>
+<p>Back to the Minesweeper analogy: the GP is your mental model of the board. Each observation updates your belief about the surrounding landscape, narrowing uncertainty near revealed squares and leaving it wide open in unexplored corners. In the next blog of the series, we will see how the acquisition function uses that uncertainty map to decide where to click next — and how the full Bayesian Optimization loop comes together.</p>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+<ul>
+<li><p>P. Roelants. <a href="https://peterroelants.github.io/posts/gaussian-process-tutorial/">Gaussian Processes Tutorial.</a> 2019.</p></li>
+<li><p>P. Roelants. <a href="https://peterroelants.github.io/posts/gaussian-process-kernels/">Gaussian Processes (3/3) — Exploring Kernels.</a> 2019.</p></li>
+<li><p>K. Weinberger. <a href="https://www.cs.cornell.edu/courses/cs4780/2018fa/lectures/lecturenote15.html">Gaussian Processes.</a> Cornell CS4780 Machine Learning Lecture Notes. 2018.</p></li>
+<li><p>M. Krasserm. <a href="https://krasserm.github.io/2018/03/21/bayesian-optimization/#Optimization-algorithm">Bayesian Optimization.</a> 2018.</p></li>
+<li><p>R. B. Gramacy. <a href="https://bookdown.org/rbg/surrogates/chap5.html">Surrogates: Gaussian Process Modeling, Design, and Optimization for the Applied Sciences, Chapter 5.</a> Chapman Hall/CRC, 2020.</p></li>
+</ul>
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" id="quarto-reuse"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></div></div></section><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-wang2026" class="csl-entry quarto-appendix-citeas" role="listitem">
+Wang, Ray. 2026. <span>“Bayesian Optimization - Gaussian
+Processes.”</span> June 14. <a href="https://changruiraywang.com/blog/2025-06-14-bayesian-optimization-gaussian-processes/">https://changruiraywang.com/blog/2025-06-14-bayesian-optimization-gaussian-processes/</a>.
+</div></div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/changruiraywang\.com");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© 2026 Ray Wang ∙ Made with <a href="https://quarto.org">Quarto</a></p>
+</div>   
+    <div class="nav-footer-center">
+<p><a class="link-dark me-1" href="../../accessibility.html" title="Accessibility commitment" target="_blank" rel="noopener"><i class="fa-solid fa-universal-access" aria-label="universal-access"></i></a> <a class="link-dark me-1" href="https://linkedin.com/in/" title="LinkedIn" target="_blank" rel="noopener"><i class="fa-brands fa-linkedin" aria-label="linkedin"></i></a> <a class="link-dark me-1" href="https://github.com/" title="GitHub" target="_blank" rel="noopener"><i class="fa-brands fa-github" aria-label="github"></i></a> <a class="link-dark me-1" href="mailto:you@example.com" title="Email" target="_blank" rel="noopener"><i class="fa-solid fa-envelope" aria-label="envelope"></i></a></p>
+</div>
+    <div class="nav-footer-right">
+      <ul class="footer-items list-unstyled">
+    <li class="nav-item">
+    <a class="nav-link" href="../../accessibility.html">
+<p>Accessibility</p>
+</a>
+  </li>  
+    <li class="nav-item">
+    <a class="nav-link" href="../../contact.html">
+<p>Contact</p>
+</a>
+  </li>  
+    <li class="nav-item">
+    <a class="nav-link" href="../../license.html">
+<p>License</p>
+</a>
+  </li>  
+    <li class="nav-item compact">
+    <a class="nav-link" href="../../blog/index.xml">
+      <i class="bi bi-rss" role="img">
+</i> 
+    </a>
+  </li>  
+</ul>
+    </div>
+  </div>
+</footer>
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
+
+
+
+
+</body></html>
