@@ -60,9 +60,15 @@ resources:
 
 Thanks for stopping by!
 
-I work as a data scientist at [Wallick Communities](https://www.wallick.com/), where I focus on reporting, analytics, and turning operational data into something useful for the rest of the business.
+I work as a data professional at [Wallick Communities](https://www.wallick.com/), where I build products that turn data into actionable insights. 
 
-Outside of work I'm on an ongoing learning journey through Python, statistics, and modern data tooling. This site is where I write things down — partly so future-me can find them, and partly in case they help someone else.
+I have a Master's in applied statistics and I'm interested in data science, machine learning, and AI. My study and work have given me a strong foundation in data analysis, statistical modeling, and machine learning, and I enjoy exploring the ways these tools can be applied to challengingreal-world problems.
+
+I enjoy building descriptive reporting and analysis; The specific areas of predictive analytics that I'm interested and experienced in include predictive modeling, longitudinal analysis, survival analysis, joint modeling of longitudinal and time-to-event data, Bayesian methods, deep learning, time series, and survey analysis. I'm also interested in experimental design, causal inference, and A/B testing for prescriptive analytics. 
+
+Tools I use include Python, R, Power BI (DAX), and SQL. I'm also interested in learning more about cloud computing and AI technologies.
+
+To see my learnings and projects on this site, so feel free to check out my [blog](../blog/index.qmd) and [projects](../project/index.qmd).
 
 Get in touch by [sending me a note](../contact.qmd)! {{< fa feather-pointed >}}
 

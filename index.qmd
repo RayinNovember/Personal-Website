@@ -30,8 +30,7 @@ resources:
 
 ::: {#hero-heading}
 
-I'm a data scientist working at **Wallick Communities**, where I turn operational data into reports and insights that help the business run better. Outside of work I'm on a continuous learning journey through Python, statistics, and modern data tooling — and this site is where I share what I'm working on and what I've learned along the way.
-
+I'm a data professional working at **Wallick Communities** where I build actionable data products. Outside of work, I'm on a continuous learning journey through statistics, machine learning, and AI — this site is where I share the projects, methods, and lessons along the way — partly so future-me can find them, and partly in case they help someone else.
 [Learn more about me &rarr;](about/index.qmd){.about-links .subtitle}
 
 :::
