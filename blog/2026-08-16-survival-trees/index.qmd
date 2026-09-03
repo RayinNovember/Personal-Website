@@ -1,0 +1,369 @@
+---
+title: "Survival Analysis - Part 5 - Tree-based Models"
+author: Ray Wang
+date: "2026-08-16"
+description: "Understanding Tree-based Methods for Survival Analysis."
+categories: [Statistics, Machine Learning]
+image: sidebar.jpg
+format:
+  html:
+    code-fold: true
+draft: false
+---
+
+## Introduction
+
+The methods covered in earlier parts of this series — the Cox Proportional Hazards (CPH) model and the Accelerated Failure Time (AFT) model — are parametric or semi-parametric in nature. They impose structure on how covariates relate to survival time: the Cox model assumes a multiplicative effect on the hazard that remains constant over time; AFT models assume a specific distributional form for the error. When these assumptions hold, these models are efficient and interpretable. When they don't, estimates can be badly biased and hard to diagnose.
+
+Tree-based methods offer a powerful alternative. They make no assumptions about the functional form of covariate effects and naturally capture non-linearities — at the cost of some interpretability. Ensemble methods like random forests and gradient boosting further stabilize these estimates by aggregating over many trees. 
+
+This post covers two tree-based approaches to survival analysis. The first is the Random Survival Forest (RSF), which extends the standard random forest to the survival setting by adapting the splitting criterion and terminal node estimation to handle censored outcomes. The second is XGBoost, which can incorporate the Cox partial likelihood and the AFT likelihood directly into its loss-function-minimizing framework. 
+
+## Random Survival Forest (RSF)
+
+Like the standard random forest algorithm, RSF grows trees out of bootstrap samples with replacement from the original data. When growing trees, RSF uses the log-rank statistic. 
+
+### Log-rank Statistic
+
+The log-rank statistic is originally used for a non-parametric test for comparing two survival curves. It can be thought of as a series of chi-square tests for group difference done at each observed event time. For example, for the i-th event time, we can put the data in the following contingency table: 
+
+|Event/Group | 1 | 0 | Total |
+|---|---|---|---|
+| Event | $d_{1i}$ | $d_{0i}$ | $d_i$ |
+| No Event | $n_{1i}-d_{1i}$ | $n_{0i}-d_{0i}$ | $n_i-d_i$ |
+| At Risk | $n_{1i}$ | $n_{0i}$ | $n_i$ |
+
+The expected number of event in group 1 (or 0), assuming the survival function is the same in each of the two groups (i.e., the null hypothesis is true), is:
+
+$E(d_{1i}) = e_{1i} = n_{1i}\frac{d_i}{n_i}$ 
+
+The total observed-minus-expected for event in group 1, summed across all event times, is:
+
+$U = \sum_{i=1}^{m}(d_{1i}-e_{1i})$
+
+The variance of $U$ is:
+
+$V_{1i} = \frac{n_{1i}n_{0i}d_i(n_i-d_i)}{n_i^2(n_i-1)}$
+
+The log-rank test statistic is:
+
+$Q = \frac{[\sum_{i=1}^{m}(d_{1i}-e_{1i})]^2}{\sum_{i=1}^{m}V_{1i}}$
+
+The bigger the log-rank statistic is, the more different two survival functions.
+
+With RSF, left leaf and right leaf at the next split are treated as group 1 and group 0 as in the example above. Then RSF chooses the split that results in the largest log-rank statistic.
+
+### Terminal Nodd CHF Estimation and Ensemble Averaging
+
+Once a tree is fully grown, each terminal node receives a Nelson-Aalen estimate of the cumulative hazard function (CHF):
+
+$\hat{H}(t) = \sum_{t_j \leq t} \frac{d_j}{n_j}$
+
+One thing worth noting is that some terminal nodes might end up with only a few events as a result of splitting, producing a sparse staircase with just few steps — a coarse and unstable estimate. As a guard against estimating CHF's from too few event data, the RSF algorithm has a parameter $d_0$ (controlled by `nodesize` in `randomForestSRC`, default `15`) that defines the required minimal number of unique events. 
+
+Within the same tree, each terminal node's CHF is a step function defined only at event times within that node. Two nodes will generally have different sets of event times. In other words, each tree generates an estimate for each of the event times. When there are $B$ trees, there are B estimates for each of the event times. RSF collects and averages all estimates for each event time. 
+
+When making predictions for a new subject $\mathbf{x}$, the subject is dropped down each of the $B$ trees, landing in terminal node $\mathrm{node}(\mathbf{x}, b)$ in tree $b$. The ensemble CHF at each time point $t_k$ is the average of the $B$ node-level CHFs:
+
+$$
+\hat{H}_e(t_k \mid \mathbf{x}) = \frac{1}{B}\sum_{b=1}^{B}
+  \hat{H}^b_{\mathrm{node}(\mathbf{x},\,b)}(t_k)
+$$
+
+The ensemble survival function is recovered as:
+
+$$
+\hat{S}_e(t \mid \mathbf{x}) = \exp\!\left(-\hat{H}_e(t \mid
+  \mathbf{x})\right)
+$$
+
+### Out-of-Bag Error
+
+For each tree $b$, the OOB subjects (those excluded from the bootstrap sample) are dropped down tree $b$ to obtain their terminal-node CHF. The ensemble OOB CHF for subject $i$ aggregates predictions from only the trees in which $i$ was OOB:
+
+$$
+\hat{H}^{\mathrm{OOB}}_e(t \mid \mathbf{x}_i) = \frac{1}{|\{b : i
+  \in \mathrm{OOB}_b\}|} \sum_{b:\,i \in \mathrm{OOB}_b}
+  \hat{H}^b_{\mathrm{node}(\mathbf{x}_i,\,b)}(t)
+$$
+
+This provides an honest estimate of prediction error without requiring a held-out test set, analogous to cross-validation but at zero additional computational cost since the OOB sample is a by-product of bootstrap sampling.
+
+The OOB prediction error is measured by Harrell's C-index or the integrated Brier score, both evaluated on the OOB ensemble CHF.
+
+For more information on RSF, check the official [R Vignette](https://www.randomforestsrc.org/articles/survival.html)
+
+## XGBoost 
+
+The standard XGBoost tree method can be applied to both Cox PH (CPH) model and Accelerated Failure Time (AFT) model. The power of XGBoost method lies in the fact that the general framework does not change. All we need to do is find the proper loss function.
+
+The standard loss function of the XGBoost tree per the [Xgboost paper](https://arxiv.org/abs/1603.02754) is: 
+
+$\ell^{(t)} = \sum^{n}_{i=1}\ell(y_i,\hat{y}_i^{(t-1)}+\alpha f_t(x_i))+\dfrac{1}{2}\lambda\sum^J_{j=1}f^2_j(x)+\gamma T$
+
+where $\ell$ is the loss function, $f_j(x)$ is the prediction for leaf j and $\dfrac{1}{2}\lambda\sum^J_{j=1}f^2_j(x)$ is the L2 regularization term. 
+
+With second-degree Taylor expansion of the first summation term, we get the loss function:
+
+$\ell^{(t)} = \sum^{n}_{i=1}[\ell(y_i,\hat{y}_i^{(t-1)}) + g_i f_t(x_i) + \dfrac{1}{2}h_i f^2_t(x_i)]+\dfrac{1}{2}\lambda\sum^J_{j=1}f^2_j(x)+\gamma T$
+
+where $g_i = \dfrac{\partial \ell}{\partial \hat{y}_i^{(t-1)}}$ is the gradient of the loss function with respect to the current prediction and $h_i = \dfrac{\partial^2 \ell}{\partial (\hat{y}_i^{(t-1)})^2}$ is the hessian of the loss function with respect to the current prediction.
+
+The optimal output for leaf $j$ is:
+
+$f_j^*(x) = -\dfrac{\sum_{i\in j}g_i}{\sum_{i\in j}h_i+\lambda}$
+
+The splitting rule is the same as the standard setting:
+$$
+Gain = \dfrac{1}{2}\left[\dfrac{(\sum_{i\in j_L}g_i)^2}{\sum_{i\in j_L}h_i+\lambda}+\dfrac{(\sum_{i\in j_R}g_i)^2}{\sum_{i\in j_R}h_i+\lambda}-\dfrac{(\sum_{i\in j}g_i)^2}{\sum_{i\in j}h_i+\lambda}\right] - \gamma
+$$
+
+All we need to do is to get the proper loss function that incorporates the covariates for the CPH model and AFT model to get the corresponding $g_i$ and $h_i$.
+
+### Cox Proportional Hazards Model
+
+With the CPH model, the linear combination of covariates - $\eta=\beta_1X_1+\beta_2X_2+...+\beta_pX_3$ represents the log hazard ratio. Each leaf output represents an increment from the current ensemble's log hazard ratio for any subject landing in that leaf.
+
+The loss function of the CPH model is based on the partial likelihood:
+$$
+\text{Partial Likelihood} = \prod\limits_{\text{observed event time}}\frac{\exp(\eta_{i})}{\displaystyle\sum_{\mathcal{R}(t_j)} \exp(\eta_{i})}
+$$
+
+where $\eta_{ij}=\beta_1X_{1i}+\beta_2X_{2i}+...+\beta_pX_{3i}$ is the linear combination of covariates for subject i;
+
+$\mathcal{R}(t_j)$ is the risk set at time j.
+
+XGBoost's loss function is the negative partial log-likelihood: 
+
+$\ell = - \sum_{\text{observed events}}\left[\eta_{i} - \log\sum_{\mathcal{R}(t_j)}\exp(\eta_{i})\right]$
+
+where $\eta_{i}$ represents the linear combination of covariates for subject i .
+
+The **gradient** for subject i is:
+
+$g_i = \frac{\partial \ell}{\partial \eta_i} = -\delta_i + \sum_{\mathcal{R}(t_j)} w_i(t_j)$
+
+where $\delta_i$ is 1 if i had the event, 0 if censored;
+
+$w_{i}(t_j) = \frac{e^{\eta_{i}}}{\sum_{k \in \mathcal{R}(t_j)} e^{\eta_{k}}}$
+
+The **hessian** for subject i is:
+$$
+h_i = \frac{\partial^2 \ell}{\partial \eta_i^2} = \sum_{k \in \mathcal{R}(t_j)} w_i(t_j)\bigl(1 - w_i(t_j)\bigr)
+$$
+
+::: {.callout-note title="Gradient and Hessian Derivation" collapse="true"}
+
+Expanding the brackets, we write the equation above as two terms:
+
+$\ell = \underbrace{-\sum_{\text{observed events}} \eta_{i}}_{\text{Term A}}+ \underbrace{\sum_{\text{observed events}}\log\sum_{\mathcal{R}(t_i)}\exp(\eta_{i})}_{\text{Term B}}$
+
+Differentiating Term A is straightforward: 
+
+$\frac{\partial}{\partial \eta_{i}}\left[-\sum_{\text{observed events}} \eta_{i}\right] =\delta_i$
+
+where $\delta_i=1$ if event, 0 otherwise.
+
+Differentiating Term B requires chain rule:
+
+For a single event time $t_i$, define:
+
+$S_i = \sum_{\mathcal{R}(t_j)}\exp(\eta_{i})$ 
+
+Then we have:
+
+$$
+\frac{\partial}{\partial \eta_{i}}\log S_i  = \frac{\partial \log S_i}{\partial S_i}\cdot\frac{\partial S_i}{\partial \eta_{i}} 
+=\frac{1}{S_i}\cdot exp(\eta_{i})
+=\frac{exp(\eta_{i})}{\sum_{\mathcal{R}(t_i)}\exp(\eta_{i})}
+$$
+
+We now sum over all event times:
+
+$$
+\frac{\partial\,\text{Term B}}{\partial \eta_{i}} = \sum_{\text{event times}} \frac{exp(\eta_{i})}{\sum_{\mathcal{R}(t_j)}\exp(\eta_{i})}
+$$
+
+Adding Term A and Term B and we get the gradient $g_i$:
+
+$$
+g_i = -\delta_i +\sum_{\text{event times}} w_{i}(t_j)
+$$
+
+For Hessian $h_i$, we take the derivative with respect to $\eta_{i}$ again:
+
+$$
+h_i = \frac{\partial \frac{exp(\eta_{i})}{\sum_{\mathcal{R}(t_j)}\exp(\eta_{i})}}{\partial \eta_i}
+$$
+
+We can proceed to get the result with the quotient rule. 
+:::
+
+
+### Accelerated Failure Time (AFT) Model
+
+Since the full distribution of event times is being modeled with AFT models, we are able to construct the full likelihood of the dataset given a distribution like the typical maximum likelihood estimation procedure. For observed event times, the PDF of the distribution is used; For censored cases, the survival function is used instead. The likelihood for a parametric survival model is:
+
+$L = \prod^n_{i: uncensored}f(t_i)\cdot\prod^n_{i:censored}S(t_i)$
+
+Taking logarithm, we get:
+
+$log(L) = \sum^n_{i:uncensored}logf(t_i)+\sum^n_{i:censored}logS(t_i)$
+
+Since $\lambda(t)=\frac{f(t)}{S(t)}$
+
+The equation above can be written as:
+$$
+\begin{align*}
+\log(L) &= \sum^n_{i:\text{uncensored}}\log\lambda(t_i)+\sum^n_{i:\text{uncensored}}\log S(t_i)+\sum^n_{i:\text{censored}}\log S(t_i) \\
+        &= \sum^n_{i:\text{uncensored}}\log\lambda(t_i)+\sum_i^n \log S(t_i) \\
+        &= \sum^n_{i:\text{uncensored}}\log\lambda(t_i)-\sum_i^n \Lambda(t_i)
+\end{align*}
+$$
+
+The equation has two parts per subject: the instantaneous hazard at the event time $\lambda(t_i)$ - this term is 0 when the subject is censored, and the cumulative hazard up to their observed time $\Lambda(t_i)$. 
+
+The **gradient** and **hessian** for subject i, depending on their censoring status, is summarized in the following table:
+
+| | Gradient $g_i$ | Hessian $h_i$ |
+|---|---|---|
+| **Right-censored** | $\dfrac{\phi(z_i)}{\sigma\,\bar\Phi(z_i)}$ | $\dfrac{\phi(z_i)}{\sigma^2}\!\left[\dfrac{-z_i}{\bar\Phi(z_i)}+\dfrac{\phi(z_i)}{\bar\Phi(z_i)^2}\right]$ |
+| **Event** | $\dfrac{f_Z'(z_i)}{\sigma f_Z(z_i)}$ | $\dfrac{f_Z'(z_i)^2 - f_Z(z_i)\,f_Z''(z_i)}{\sigma^2 f_Z(z_i)^2}$ |
+
+: {tbl-colwidths="[15,40,45]"}
+
+where $z_i = \frac{\log t_i - F(x_i)}{\sigma}$, and $\Phi$ is the CDF of the error distribution specified for the AFT model.
+
+::: {.callout-note title="Gradient and Hessian Derivation" collapse="true"}
+
+With the AFT model, the log-time is being modeled as the reponse of a linear regression:
+
+$\log t_i = F(x_i) + \sigma \varepsilon_i, \qquad \varepsilon_i \sim f_Z$
+
+where $F(x_i)$ is the linear predictor $\beta^\top x$, $f_Z$ is the error distribution (normal, logistic, or Extreme); $\sigma$ is a fixed scale parameter. 
+
+Like with CPH, XGBoost minimizes the negative log likelihood.
+
+Let $z_i = \frac{\log t_i - F(x_i)}{\sigma}$, and $\Phi$ is the CDF of the error distribution, we can get the gradients and hessian for censored and uncensored subjects respectively:
+
+For **Right-censored subjects**, the individual loss function is :
+
+$\ell_i = - log(l_i) = \Lambda(t_i) = logS(t_i) = log(1-\Phi(z_i))$
+
+By the chain rule, the graident is:
+
+$g_i = \frac{\partial \ell_i}{\partial F(x_i)} =\frac{\partial \ell_i}{\partial \Phi(z_i)} \cdot \frac{\partial \Phi(z_i)}{\partial z_i}\cdot \frac{\partial z_i}{\partial F(x_i)}$
+
+Term by term, we have:
+
+$\frac{\partial \ell_i}{\partial \Phi(z_i)}=-\frac{1}{1-\Phi(z_i)}$
+
+$\frac{\partial \Phi(z_i)}{\partial z_i} = \phi(z_i)$ where $\phi(z_i)$ is the pdf of the error distribution.
+
+$\frac{\partial z_i}{\partial F(x_i)}=\frac{\partial \frac{\log t_i - F(x_i)}{\sigma}}{\partial F(x_i)} = -\frac{1}{\sigma}$
+
+That is:
+
+$g_i = \frac{\phi(z_i)}{\sigma(1-\Phi(z_i))}$
+
+For Hessian, differentiating $g_i$ using the quotient rule and $\phi'(z) = -z\phi(z)$:
+
+$$
+\frac{\partial g_i}{\partial z_i} = -\frac{1}{\sigma} \cdot
+\frac{-z_i\phi(z_i)\bar\Phi(z_i) + \phi(z_i)^2}{\bar\Phi(z_i)^2} =
+\frac{\phi(z_i)}{\sigma}\left[\frac{z_i}{\bar\Phi(z_i)} -
+\frac{\phi(z_i)}{\bar\Phi(z_i)^2}\right]
+$$
+
+Multiplying by $\partial z_i/\partial F(x_i) = -1/\sigma$:
+
+$h_i = \frac{\phi(z_i)}{\sigma^2}\left[\frac{-z_i}{\bar\Phi(z_i)} +\frac{\phi(z_i)}{\bar\Phi(z_i)^2}\right]$
+
+For **Uncensored subjects**, the loss is $\ell_i = - log(l_i) = -\log \lambda(t_i) + \Lambda(t_i) = -\log \frac{f(t_i)}{S(t_i)} - logS(t_i) = -logf(t_i)$ 
+
+Like the censored cases, we want to get $z_i$ in the equation through some relationship. 
+
+Since $z_i = \frac{\log t_i - F(x_i)}{\sigma}$, through variable transformation, we have:
+
+$f_T(t) = f_Z(z)\frac{dz}{dt}$
+
+which gives:
+
+$f_T(t) = f_Z(z)\frac{dz}{dt} = f_Z(z)\dfrac{1}{\sigma t_i}$
+
+Now the individual loss becomes: $\ell_i = -logf(t_i) =-logf_Z(z)+log\sigma +log t_i$
+
+With chain rule, we get:
+
+$$g_i = \frac{\partial \ell_i}{\partial F(x_i)} 
+= \frac{\partial -logf_Z(z_i)+log\sigma +log t_i}{\partial \, f(z_i)} \cdot \frac{\partial\, f(z_i)}{\partial z_i}\cdot\frac{\partial z_i}{\partial F(x_i)}
+= \frac{f'_Z(z_i)}{\sigma f_Z(z_i)}
+$$
+
+For **Hessian**, differentiating $g_i = f_Z'(z_i)/[\sigma f_Z(z_i)]$ via the chain rule and quotient rule:
+
+$$h_i = \frac{\partial g_i}{\partial F(x_i)}=\frac{\partial g_i}{z_i}\cdot\frac{\partial z_i}{\partial F(x_i)}
+= \frac{f_Z'(z_i)^2 - f_Z(z_i)\,f_Z''(z_i)}{\sigma^2\, f_Z(z_i)^2}
+$$
+
+:::
+
+## Python Package Parameters Reference
+
+In Python, the random survival forest algorithm is implements through RandomSurvivalForest of the sksurv package (`sksurv.ensemble'). The standard xgb function from the xgboost package can be used to implement the CPH and AFT model with their parameters set up accordingly.
+
+### Random Survival Forest 
+
+| Parameter | Default | Notes |
+|---|---|---|
+| `n_estimators` | `100` | Number of trees $B$ |
+| `min_samples_leaf` | `15` | Minimum number of unique deaths per terminal node; analogous to `nodesize` in R |
+| `max_features` | `"sqrt"` | Features considered at each split; analogous to `mtry`. Accepts `"sqrt"`, `"log2"`, int, or float |
+| `n_jobs` | `1` | Parallel jobs for fitting and prediction; `-1` uses all cores |
+| `oob_score` | `False` | Whether to compute OOB Harrell's C-index after fitting; accessible via `oob_score_` |
+| `random_state` | `None` | Random seed for reproducibility |
+| `max_depth` | `None` | Maximum tree depth; `None` = grow until `min_samples_leaf` is reached |
+| `min_samples_split` | `6` | Minimum samples required to split an internal node |
+| `max_leaf_nodes` | `None` | Maximum number of terminal nodes; `None` = unlimited |
+
+: {tbl-colwidths="[22,15,63]"}
+
+**Label format**: `y` must be a structured array with fields `(event: bool, time: float)`. Predictions are accessed via:
+
+- `rsf.predict(X)` — returns risk scores (expected number of events)
+- `rsf.predict_cumulative_hazard_function(X)` — returns per-subject CHF step functions
+- `rsf.predict_survival_function(X)` — returns per-subject survival function step functions
+
+### XGBoost with Cox Proportional Hazards
+
+| Parameter | Value | Notes |
+|---|---|---|
+| `objective` | `"survival:cox"` | |
+| `eval_metric` | `"cox-nloglik"` | Negative partial log-likelihood |
+| **Label format** | Positive = event time; Negative = censored time | e.g. `-5.3` means censored at $t=5.3$ |
+
+
+### XGBoost with Accelerated Failure Time
+
+| Parameter | Value | Notes |
+|---|---|---|
+| `objective` | `"survival:aft"` | |
+| `eval_metric` | `"aft-nloglik"` | Negative AFT log-likelihood |
+| `aft_loss_distribution` | `"normal"`, `"logistic"`, `"extreme"` | Error distribution $f_Z$; `"extreme"` gives the Weibull/Gumbel |
+| `aft_loss_distribution_scale` | float (default `1.0`) | Fixed scale parameter $\sigma$ |
+
+
+## Conclusion
+
+Tree-based methods extend the survival analysis toolkit in two important ways. First, they relax the structural assumptions of Cox PH and AFT models — no proportional hazards, no fixed distributional form — letting the data determine how covariates relate to survival time. Second, they are better suited to capture non-linear relationship in the data and thus tend to generate better results at prediction tasks. In the next part of the series, we will see various models in code, examine model assumptions, and compare the predictive performance.
+
+
+## References
+
+- F. E. Harrell Jr. [Regression Modeling Strategies: With Applications to Linear Models, Logistic and Ordinal Regression, and Survival Analysis.](https://link.springer.com/book/10.1007/978-3-319-19425-7) Springer, 2015.
+
+- H. Ishwaran and U. B. Kogalur. [Random Forests for Survival, Regression, and Classification (RF-SRC).](https://www.randomforestsrc.org/articles/survival.html) R package vignette.
+
+- XGBoost Documentation. [Survival Analysis with Accelerated Failure Time.](https://xgboost.readthedocs.io/en/stable/tutorials/aft_survival_analysis.html)
+
+- W. Fu, S. Simonetti, H. Kjellström. [Survival Regression with Accelerated Failure Time Model in XGBoost.](https://arxiv.org/abs/2006.04920) arXiv:2006.04920, 2020.
