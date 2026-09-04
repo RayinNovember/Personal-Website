@@ -9,6 +9,9 @@
   {
     "listing": "/blog/index.html",
     "items": [
+      "/blog/2026-08-16-survival-trees/index.html",
+      "/blog/2026-08-02-survival-parametric/index.html",
+      "/blog/2026-07-19-survival-fundamentals/index.html",
       "/blog/2026-06-30-bayesian-optimization-acquisition-functions/index.html",
       "/blog/2025-06-14-bayesian-optimization-gaussian-processes/index.html",
       "/blog/2025-06-01-kernel-methods-and-svm/index.html",
@@ -19,6 +22,9 @@
   {
     "listing": "/about/index.html",
     "items": [
+      "/blog/2026-08-16-survival-trees/index.html",
+      "/blog/2026-08-02-survival-parametric/index.html",
+      "/blog/2026-07-19-survival-fundamentals/index.html",
       "/blog/2026-06-30-bayesian-optimization-acquisition-functions/index.html",
       "/blog/2025-06-14-bayesian-optimization-gaussian-processes/index.html",
       "/blog/2025-06-01-kernel-methods-and-svm/index.html",

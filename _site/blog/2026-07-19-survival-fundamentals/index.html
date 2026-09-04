@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.36">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Ray Wang">
+<meta name="dcterms.date" content="2026-07-19">
+<meta name="description" content="Learning about Fundamentals of Survival Analysis.">
+
+<title>Survival Analysis - Part 1 - Fundamentals – Ray Wang</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-3220c7140bd839a062eaf171028cd1fc.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-c8e4fbfa697e3cac23c41893a6e40db7.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-3220c7140bd839a062eaf171028cd1fc.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-2128be2227ba7e96272c6d2d49cea99e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-afdf0e5142f8c18a67a95f5bc1ba24b2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../site_libs/bootstrap/bootstrap-2128be2227ba7e96272c6d2d49cea99e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/quarto-contrib/fontawesome6-1.2.0/all.min.css" rel="stylesheet">
+<link href="../../site_libs/quarto-contrib/fontawesome6-1.2.0/latex-fontsize.css" rel="stylesheet">
+<script src="../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Ray Wang</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about/index.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../blog/index.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../project/index.html"> 
+<span class="menu-text">Projects</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+    <a href="https://github.com/" title="" class="quarto-navigation-tool px-1" aria-label=""><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns">
+<div id="title-block-header-title" class="quarto-title page-columns page-full page-layout-full featured-image p-4" style="background-image: url(featured.png), url(featured.jpg), url(../featured.jpg);">
+<h1 class="title">Survival Analysis - Part 1 - Fundamentals</h1>
+    <div class="quarto-categories">
+        <div class="quarto-category">Statistics</div>
+      </div>
+  </div>
+
+<div>
+  <div id="title-block-title-desc" class="description pt-4">
+    Learning about Fundamentals of Survival Analysis.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Ray Wang </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">July 19, 2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+
+</header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#introduction---what-is-survival-analysis" id="toc-introduction---what-is-survival-analysis" class="nav-link active" data-scroll-target="#introduction---what-is-survival-analysis">Introduction - What is Survival Analysis?</a></li>
+  <li><a href="#time-to-event-data" id="toc-time-to-event-data" class="nav-link" data-scroll-target="#time-to-event-data">Time-to-Event Data</a>
+  <ul class="collapse">
+  <li><a href="#visualizing-time-to-event-data" id="toc-visualizing-time-to-event-data" class="nav-link" data-scroll-target="#visualizing-time-to-event-data">Visualizing Time-to-Event Data</a></li>
+  </ul></li>
+  <li><a href="#describing-event-time-distribution" id="toc-describing-event-time-distribution" class="nav-link" data-scroll-target="#describing-event-time-distribution">Describing Event Time Distribution</a>
+  <ul class="collapse">
+  <li><a href="#survival-function" id="toc-survival-function" class="nav-link" data-scroll-target="#survival-function">Survival Function</a></li>
+  <li><a href="#hazard-function" id="toc-hazard-function" class="nav-link" data-scroll-target="#hazard-function">Hazard Function</a></li>
+  <li><a href="#cumulative-hazard-function" id="toc-cumulative-hazard-function" class="nav-link" data-scroll-target="#cumulative-hazard-function">Cumulative Hazard Function</a></li>
+  <li><a href="#relationship-between-the-survival-function-and-hazard-function" id="toc-relationship-between-the-survival-function-and-hazard-function" class="nav-link" data-scroll-target="#relationship-between-the-survival-function-and-hazard-function">Relationship between the Survival Function and Hazard Function</a></li>
+  <li><a href="#how-are-these-functions-used-in-practice" id="toc-how-are-these-functions-used-in-practice" class="nav-link" data-scroll-target="#how-are-these-functions-used-in-practice">How are these functions used in practice?</a></li>
+  </ul></li>
+  <li><a href="#non-parametric-estimates-of-survival-and-hazard-functions" id="toc-non-parametric-estimates-of-survival-and-hazard-functions" class="nav-link" data-scroll-target="#non-parametric-estimates-of-survival-and-hazard-functions">Non-parametric Estimates of Survival and Hazard Functions</a>
+  <ul class="collapse">
+  <li><a href="#kaplan-meier-estimator" id="toc-kaplan-meier-estimator" class="nav-link" data-scroll-target="#kaplan-meier-estimator">Kaplan-Meier Estimator</a></li>
+  <li><a href="#nelson-aalen-estimator" id="toc-nelson-aalen-estimator" class="nav-link" data-scroll-target="#nelson-aalen-estimator">Nelson-Aalen Estimator</a></li>
+  <li><a href="#kaplan-meier-vs.-nelson-aalen" id="toc-kaplan-meier-vs.-nelson-aalen" class="nav-link" data-scroll-target="#kaplan-meier-vs.-nelson-aalen">Kaplan-Meier vs.&nbsp;Nelson-Aalen</a></li>
+  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+<!-- source: https://github.com/gadenbuie/garrickadenbuie-com/blob/main/_partials/title-block-link-buttons/title-block.html -->
+<!-- 
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title"> 
+-->
+<!-- <header id="title-block-header" class="quarto-title-block default page-columns"> -->
+<!-- <div class="quarto-title page-columns page-full featured-image p-4" style="background-image: url(featured.png), url(featured.jpg), url(../featured.jpg);"> -->
+
+
+
+<section id="introduction---what-is-survival-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="introduction---what-is-survival-analysis">Introduction - What is Survival Analysis?</h2>
+<p>In business analytics, we often need to answer questions about when an event is likely to occur. Take a subscription-based business, for instance — leadership might want to know things like:</p>
+<ol type="1">
+<li>How many customers are expected to churn in the next x days?</li>
+<li>What is a given customer’s expected remaining ‘lifetime’ with the company?</li>
+<li>Which customers are at the highest risk of leaving?</li>
+<li>What’s the probability that a new customer stays subscribed for at least x days?</li>
+<li>What is the expected lifetime of a new customer, or a new customer segment?</li>
+</ol>
+<p>These are all versions of the same underlying question: how long until something happens? That’s precisely what survival analysis is built to study — the expected duration of time until an event of interest occurs. Because so many real-world problems can be framed this way, survival analysis shows up across a wide range of domains — clinical prognosis, product reliability and failure testing, employee turnover, and customer churn, among others.</p>
+<p>The dataset used to answer these questions is called <strong>time-to-event data</strong>, and the analysis is called <strong>survival analysis</strong>, or <strong>Time-to-Event Analysis</strong>. The word “survival” here refers to the time until the event occurs, not necessarily literal survival.</p>
+</section>
+<section id="time-to-event-data" class="level2">
+<h2 class="anchored" data-anchor-id="time-to-event-data">Time-to-Event Data</h2>
+<p>When working with time-to-event data, one often defines the <strong>beginning</strong> and <strong>end</strong> of the event of interest. For example, in subscription-based customer churn data, the beginning of the observation is a customer’s subscription date, and the end of their observation is when they cancel their subscription.</p>
+<p>In most real-world cases, however, we don’t get to observe the beginning and end of the event for all instances. For example, when analyzing employee turnover and time to termination, we often get employees that are still active at the end of the analysis period, thus we don’t know when they will actually leave yet. We only know that their true event time is at least as long as some observed value — not the exact value itself. Such feature of time-to-event data is called <strong>censoring</strong>. When the true event time is not observed, we call the cases <strong>right-censored</strong>. When we don’t know the beginning date of an observation, we call those cases <strong>left-censored</strong>.</p>
+<p>There are also cases where we wish to study a population that have already survived to a certain point, and we only observe those who have survived past that point. This is called <strong>truncation</strong>. For example, if we only analyze customers who have been subscribed for at least 6 months, then any customer who churns before 6 months is truncated from our dataset.</p>
+<p>For this blog and series, we focus on right-censoring, assuming no left-censoring. For more information on censoring and truncation, check Klein and Moeschberger’s <a href="https://link.springer.com/book/10.1007/b97377">Survival Analysis: Techniques for Censored and Truncated Data.</a></p>
+<section id="visualizing-time-to-event-data" class="level3">
+<h3 class="anchored" data-anchor-id="visualizing-time-to-event-data">Visualizing Time-to-Event Data</h3>
+<p>One way to visualize time-to-event data is to plot each individual’s observed duration: a horizontal line running from the beginning to their observed event time or censored time. The plot below uses synthetic data generated for a medical study where patients’ outcomes are tracked. The <strong>✕</strong> marks subjects whose line ends because they actually died — we observed their true event time exactly. The <strong>○</strong> marks subjects whose line ends for some other reason — the study ended, they were lost to follow-up, or they were discharged — while they were still alive.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="event_plot_all.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Event plot: each line is one subject’s observed follow-up time, ending in either death (✕) or censoring (○)."><img src="event_plot_all.png" width="500" height="600" alt="Event plot: each line is one subject’s observed follow-up time, ending in either death (✕) or censoring (○)." class="figure-img"></a></p>
+<figcaption>Event plot: each line is one subject’s observed follow-up time, ending in either death (✕) or censoring (○).</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="describing-event-time-distribution" class="level2">
+<h2 class="anchored" data-anchor-id="describing-event-time-distribution">Describing Event Time Distribution</h2>
+<p>In the language of statistics, the goal of survival analysis is to describe the distribution of time-to-event T. Think of the distribution of the observed length of the individual timelines on the event plot above. However, instead of studying the probability density function (PDF), survival analysis deals with functions derived from the PDF:</p>
+<ul>
+<li>Survival Function</li>
+<li>Hazard Function</li>
+<li>Cumulative Hazard Function</li>
+</ul>
+<section id="survival-function" class="level3">
+<h3 class="anchored" data-anchor-id="survival-function">Survival Function</h3>
+<p>The Survival Function is the probability that the event time T is greater than a specific value t:</p>
+<p><span class="math inline">\(S(t) = \Pr(T&gt;t) = 1 - F(t)\)</span></p>
+<p>where <span class="math inline">\(F(t)\)</span> is the Cumulative Distribution Function of event time t.</p>
+<p>One feature of the survival function is that it is a non-increasing function of time. As time goes on, the probability of surviving past that time decreases. The survival function starts at 1 (100% survival) at time 0 and approaches 0 as time goes to infinity.</p>
+<p>The area under the survival function is called the <strong>expected lifetime</strong>, which is defined as: <span class="math display">\[
+E[T] = \int_0^\infty S(t)\, dt
+\]</span></p>
+<p>It’s worth noting that <span class="math inline">\(S(t) = P(T &gt; t)\)</span> is an unconditional probability — the probability of surviving past time <span class="math inline">\(t\)</span>, measured from the very start.</p>
+<p>In practice, survival analysis usually deals with subjects who have <em>already</em> survived up to some point, and we want to know their chances of continuing to survive further. This requires a conditional version of <span class="math inline">\(S(t)\)</span>. Suppose a subject has survived up to time <span class="math inline">\(s\)</span>. The probability that they survive to some later time <span class="math inline">\(t &gt; s\)</span> is defined by conditional probability:</p>
+<p><span class="math display">\[
+P(T &gt; t \mid T &gt; s) = \frac{P(T &gt; t, T &gt; s)}{P(T &gt; s)}
+\]</span></p>
+<p>Since <span class="math inline">\(t &gt; s\)</span>, the event <span class="math inline">\(\{T &gt; t\}\)</span> already implies <span class="math inline">\(\{T &gt; s\}\)</span> — if you’ve survived past <span class="math inline">\(t\)</span>, you’ve certainly survived past <span class="math inline">\(s\)</span> too. So the joint event <span class="math inline">\(\{T &gt; t, T &gt; s\}\)</span> simplifies to just <span class="math inline">\(\{T &gt; t\}\)</span>:</p>
+<p><span class="math display">\[
+P(T &gt; t \mid T &gt; s) = \frac{P(T &gt; t)}{P(T &gt; s)} = \frac{S(t)}{S(s)}
+\]</span></p>
+<p>This is the <strong>conditional survival property</strong>: the probability of surviving to time <span class="math inline">\(t\)</span>, given survival to an earlier time <span class="math inline">\(s\)</span>, is simply the ratio of the two unconditional survival probabilities. Intuitively, <span class="math inline">\(S(s)\)</span> represents “how much of the population is still at risk by time <span class="math inline">\(s\)</span>,” and <span class="math inline">\(S(t)\)</span> represents “how much is still at risk by time <span class="math inline">\(t\)</span>” — dividing one by the other rescales the probability to the population that’s actually still under observation at time <span class="math inline">\(s\)</span>.</p>
+</section>
+<section id="hazard-function" class="level3">
+<h3 class="anchored" data-anchor-id="hazard-function">Hazard Function</h3>
+<p>Besides the distribution of time to event, we also need a function to describe how likely an event can occur at a certain point of time. The ‘risk’ of the event occurence might increase, remain constant, or decrease over time. In survival analysis, such function is called the Hazard Function, which is defined as:</p>
+<p><span class="math display">\[
+\lambda(t) = \lim_{h \to 0} \frac{P\big(\text{event in } [t, t+h) \mid \text{no event in } [0,t)\big)}{h}
+\]</span></p>
+<p>The hazard function is a measure of the instant <strong>potential</strong> of an event occurring at time t, thus it can be graphed over time. Note that the hazard function can take on any shape to reflect the changing risk over time. The chart below illustrates four shapes of the hazard function.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="hazard_shapes.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Differenct Shapes of Hazard Function"><img src="hazard_shapes.png" class="img-fluid figure-img" alt="Differenct Shapes of Hazard Function"></a></p>
+<figcaption>Differenct Shapes of Hazard Function</figcaption>
+</figure>
+</div>
+<p>With different assumptions on the shape of the hazard functions, different types of analysis can be performed. We will examine those techniques in more detail in later posts.</p>
+<section id="hazard-function-and-poisson-process" class="level4">
+<h4 class="anchored" data-anchor-id="hazard-function-and-poisson-process">Hazard Function and Poisson Process</h4>
+<p>When I first learned about the hazard function, I was confused as to why it takes the form of a probability divided by a time interval. The limit of such ratio did not make complete sense to me. In most of the tutorials, the hazard function was introduced as a rate without much explanation on why it takes such form. After learning about Poisson Process, I realized the hazard function is actually equivalent to the rate parameter of the Poisson distribution.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="true" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse show">
+<div class="callout-body-container callout-body">
+<p>The hazard function arises from a Poisson process, a stochastic process that describes event occurrence. Given a stream of events that arrive at random times starting at <span class="math inline">\(t=0\)</span>, let <span class="math inline">\(N_t\)</span> denote the number of arrivals that occur by time <span class="math inline">\(t\)</span>, that is, the number of events in <span class="math inline">\([0,t]\)</span>. For instance, <span class="math inline">\(N_t\)</span> might be the number of text messages received up to time <span class="math inline">\(t\)</span>. Intuitively speaking, a Poisson process can be thought of as a Poisson distribution with rate parameter <span class="math inline">\(\lambda\)</span> applied over a time period <span class="math inline">\(t\)</span>. That is, for all <span class="math inline">\(t &gt; 0\)</span>, <span class="math inline">\(N_t\)</span> has a Poisson distribution with parameter <span class="math inline">\(\lambda t\)</span>. The Poisson PMF gives the probability of exactly <span class="math inline">\(k\)</span> events in time <span class="math inline">\(t\)</span>:</p>
+<p><span class="math display">\[
+P(N(t) = k) = \frac{(\lambda t)^k e^{-\lambda t}}{k!}
+\]</span></p>
+<p>When <span class="math inline">\(k = 0\)</span>:</p>
+<p><span class="math display">\[
+P(N(t) = 0) = \frac{(\lambda t)^0 e^{-\lambda t}}{0!} = e^{-\lambda t}
+\]</span></p>
+<p>To understand how <span class="math inline">\(N_t\)</span> behaves locally, consider a short interval of length <span class="math inline">\(h\)</span>. Since a Poisson process has stationary increments, the count over any interval of length <span class="math inline">\(h\)</span> has the same distribution as <span class="math inline">\(N(t)\)</span> evaluated at <span class="math inline">\(t = h\)</span>. So we can rewrite the above as:</p>
+<p><span class="math display">\[
+P(N(h) = 0) = e^{-\lambda h}
+\]</span></p>
+<p>Now take the Taylor series of <span class="math inline">\(e^{-\lambda h}\)</span> around <span class="math inline">\(h = 0\)</span> and group everything from the quadratic term onward:</p>
+<p><span class="math display">\[
+e^{-\lambda h} = 1 - \lambda h + \underbrace{\left(\frac{(\lambda h)^2}{2!} - \frac{(\lambda h)^3}{3!} + \cdots\right)}_{\text{this is } o(h)}
+\]</span></p>
+<p>which gives:</p>
+<p><span class="math display">\[
+P(N(h) = 0) = e^{-\lambda h} = 1 - \lambda h + o(h)
+\]</span></p>
+<p>The “little-o of <span class="math inline">\(h\)</span>” function, <span class="math inline">\(o(h)\)</span>, means it shrinks faster than <span class="math inline">\(h\)</span> itself as <span class="math inline">\(h \to 0\)</span>:</p>
+<p><span class="math display">\[
+\lim_{h \to 0} \frac{o(h)}{h} = 0
+\]</span></p>
+<p>When <span class="math inline">\(k = 1\)</span>:</p>
+<p><span class="math display">\[
+P(N(h) = 1) = e^{-\lambda h}\lambda h = (1 - \lambda h + o(h))\lambda h = \lambda h - \lambda^2 h^2 + \lambda h \cdot o(h)
+\]</span></p>
+<p>It turns out that <span class="math inline">\(\lambda^2 h^2\)</span> is also <span class="math inline">\(o(h)\)</span>, since <span class="math inline">\(\lim_{h \to 0} \frac{\lambda^2 h^2}{h} = 0\)</span>. Therefore, we have:</p>
+<p><span class="math display">\[
+P(N(h) = 1) = \lambda h + o(h)
+\]</span></p>
+<p>Dividing both sides by <span class="math inline">\(h\)</span> and letting <span class="math inline">\(h \to 0\)</span>, we get:</p>
+<p><span class="math display">\[
+\lim_{h \to 0}\frac{P(N(h) = 1)}{h} = \lambda + \underbrace{\lim_{h \to 0}\frac{o(h)}{h}}_{0} = \lambda
+\]</span></p>
+<p>This shows that <span class="math inline">\(\lambda\)</span> is actually the instantaneous rate of a single event occurring in an infinitesimally small window — which is what we’d want a “rate” to mean.</p>
+<p>The formulation above assumes a constant rate <span class="math inline">\(\lambda\)</span>, giving the same instantaneous probability of an event regardless of how much time has already elapsed. In many real applications, though, the instantaneous event rate does depend on how much time has passed — machines wear out, patients age, components fatigue, thus a time-varying rate <span class="math inline">\(\lambda(t)\)</span>.</p>
+<p>Formally, <span class="math inline">\(\lambda(t)\)</span> is defined as the instantaneous rate of an event occurring at time <span class="math inline">\(t\)</span>, given that no event has occurred before <span class="math inline">\(t\)</span>:</p>
+<p><span class="math display">\[
+\lambda(t) = \lim_{h \to 0} \frac{P\big(\text{event in } [t, t+h) \mid \text{no event in } [0,t)\big)}{h}
+\]</span></p>
+<p>This conditional, instantaneous rate (risk of an event) is precisely the hazard function — and it’s this conditioning on survival up to time <span class="math inline">\(t\)</span> that distinguishes it from simply restating <span class="math inline">\(\lambda\)</span>. In the constant-rate case, the hazard is flat: <span class="math inline">\(\lambda(t) = \lambda\)</span> for all <span class="math inline">\(t\)</span>, recovering exactly the Poisson process we started with. In general, <span class="math inline">\(\lambda(t)\)</span> can rise, fall, or vary in shape over time, which is what makes it a flexible building block for modeling real event processes — failures, relapses, deaths — where risk changes over the course of the process.</p>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="cumulative-hazard-function" class="level3">
+<h3 class="anchored" data-anchor-id="cumulative-hazard-function">Cumulative Hazard Function</h3>
+<p>The hazard function <span class="math inline">\(\lambda(t)\)</span> tells us the instantaneous risk of an event at a single moment in time, but on its own it doesn’t tell us how much risk has built up over a time interval. To answer that, we integrate the hazard over time to get the cumulative hazard function:</p>
+<p><span class="math display">\[
+\Lambda(t) = \int_0^t \lambda(u)\, du
+\]</span></p>
+<p><span class="math inline">\(\Lambda(t)\)</span> accumulates those infinitesimal risks into a single running total up to time <span class="math inline">\(t\)</span> — much like how integrating speed over time gives you total distance traveled, rather than an instantaneous rate.</p>
+</section>
+<section id="relationship-between-the-survival-function-and-hazard-function" class="level3">
+<h3 class="anchored" data-anchor-id="relationship-between-the-survival-function-and-hazard-function">Relationship between the Survival Function and Hazard Function</h3>
+<p>There’s actually a close connection between the survival function <span class="math inline">\(S(t)\)</span> and the hazard function <span class="math inline">\(\lambda(t)\)</span>.</p>
+<p>Back to the hazard function: <span class="math display">\[
+\lambda(t) = \lim_{h \to 0} \frac{P\big(\text{event in } [t, t+h) \mid \text{no event in } [0,t)\big)}{h}
+\]</span></p>
+<p>which in the language of probability means: <span class="math display">\[
+\lambda(t) = \lim_{h \to 0} \frac{\Pr(t &lt; T \leq t+h \mid T &gt; t)}{h}
+\]</span></p>
+<p>which under the law of conditional probability becomes: <span class="math display">\[
+\begin{align}
+\lambda(t) &amp;= \lim_{u \to 0} \frac{\Pr(t &lt; T \leq t+h)/\Pr(T &gt; t)}{h} \\
+&amp;= \lim_{u \to 0} \frac{[F(t+u) - F(t)]/u}{S(t)} \\
+&amp;= \frac{\partial F(t)/\partial t}{S(t)} \\
+&amp;= \frac{f(t)}{S(t)},
+\end{align}
+\]</span></p>
+<p>Based on the result above, we can get a relationship between the survival function and cumulative hazard function. As a stepping stone, let’s take derivative of the log of <span class="math inline">\(S(t)\)</span> with respect to <span class="math inline">\(t\)</span>: <span class="math display">\[
+\frac{\partial \log S(t)}{\partial t} = \frac{\partial S(t)/\partial t}{S(t)} = -\frac{f(t)}{S(t)} = -\lambda(t)
+\]</span></p>
+<p>Integrating both sides, we get: <span class="math display">\[
+\begin{align}
+\int_0^t \lambda(v)\, dv &amp;= -\log S(t). \\[6pt]
+\Lambda(t) &amp;= -\log S(t), \\[6pt]
+S(t) &amp;= \exp[-\Lambda(t)].
+\end{align}
+\]</span></p>
+<p>Such connection allows us to estimate the survival function <span class="math inline">\(S(t)\)</span> from the cumulative hazard function <span class="math inline">\(\Lambda(t)\)</span>, and vice versa.</p>
+</section>
+<section id="how-are-these-functions-used-in-practice" class="level3">
+<h3 class="anchored" data-anchor-id="how-are-these-functions-used-in-practice">How are these functions used in practice?</h3>
+<p>Now that we have defined the survival function, hazard function, and cumulative hazard function, we can now revisit the questions that survival analysis is built to answer:</p>
+<ol type="1">
+<li>What’s the probability that a new customer will stay for at least x days?</li>
+</ol>
+<p>This is simply the survival function evaluated at x: <span class="math inline">\(S(x) = P(T &gt; x)\)</span>.</p>
+<ol start="2" type="1">
+<li>What is the expected lifetime of a new customer/group?</li>
+</ol>
+<p>This is the expected lifetime: <span class="math inline">\(E[T] = \int_0^\infty S(t)\, dt\)</span></p>
+<ol start="3" type="1">
+<li>How many existing customers are expected to leave in the next x days?</li>
+</ol>
+<p>This is the conditional probability of leaving in the next x days, given that they have already survived to today. If a customer has already survived to time s, then the probability of leaving in the next x days is:</p>
+<p><span class="math inline">\(P(T &gt; s+x \mid T &gt; s) = \frac{P(T &gt; s+x)}{P(T &gt; s)} = \frac{S(s+x)}{S(s)}\)</span></p>
+<p>The expected number of customers leaving in the next x days can be estimated by the sum of these conditional probabilities across all customers who have survived to today.</p>
+<ol start="4" type="1">
+<li>What is a customer’s expected remaining ‘lifetime’ given that they have already survived to today?</li>
+</ol>
+<p>Here we need the expected remaining time until the event occurs, given that the subject has already survived to time <span class="math inline">\(t_0\)</span>:</p>
+<p><span class="math display">\[
+\begin{align}
+e(t_0) &amp;= \mathbb{E}[T - t_0 \mid T &gt; t_0] \\[4pt]
+&amp;= \int_0^\infty P(T - t_0 &gt; u \mid T &gt; t_0)\, du \\[4pt]
+&amp;= \int_0^\infty \frac{S(t_0+u)}{S(t_0)}\, du \\[4pt]
+&amp;= \frac{1}{S(t_0)} \int_0^\infty S(t_0+u)\, du \\[4pt]
+&amp;= \frac{1}{S(t_0)} \int_{t_0}^\infty S(t)\, dt
+\end{align}
+\]</span></p>
+<p>where <span class="math inline">\(T\)</span> is the event time, <span class="math inline">\(t_0\)</span> is the time already survived, and <span class="math inline">\(T-t_0\)</span> is the remaining time. The expected remaining lifetime can be calculated if the survival function is known, or estimated based on simulations. The latter provides more information about the distribution of remaining lifetime, which can be used to calculate percentiles rather than a single expected value.</p>
+<p>To get a distribution of remaining lifetime, we can use the conditional survival property to get samples:</p>
+<p>We know that the conditional probability of surviving <span class="math inline">\(u\)</span> units of time beyond <span class="math inline">\(t_0\)</span>, given survival to <span class="math inline">\(t_0\)</span>, is: <span class="math display">\[
+P(T - t_0 &gt; u \mid T &gt; t_0) = \frac{S(t_0+u)}{S(t_0)}
+\]</span></p>
+<p>To get <span class="math inline">\(u\)</span>, we can do the following: <span class="math display">\[
+S(t_0+u)= S(t_0) P(T - t_0 &gt; u \mid T &gt; t_0)
+\]</span></p>
+<p>Now if we denote the probability <span class="math inline">\(P\)</span> with a uniform random variable <span class="math inline">\(U \sim Uniform(0,1)\)</span>, and use the relationship between the survival function and the cumulative hazard function, we can get a sample of <span class="math inline">\(u\)</span> by solving the following equation:</p>
+<p><span class="math display">\[
+\exp[-\Lambda(t_0+u)] = S(t_0) \cdot U \implies u = \Lambda^{-1}[-\log(S(t_0) \cdot U)] - t_0
+\]</span></p>
+<p>where <span class="math inline">\(\Lambda^{-1}\)</span> denotes the inverse of the cumulative hazard function.</p>
+<p>The result abvove shows that the distribution of remaining lifetime can be obtained by sampling from a uniform distribution and transforming it through the cumulative hazard function. This allows us to generate a distribution of remaining lifetimes for subjects who have already survived to a certain time point, providing valuable insights into their expected future survival.</p>
+</section>
+</section>
+<section id="non-parametric-estimates-of-survival-and-hazard-functions" class="level2">
+<h2 class="anchored" data-anchor-id="non-parametric-estimates-of-survival-and-hazard-functions">Non-parametric Estimates of Survival and Hazard Functions</h2>
+<p>So far everything we’ve discussed has been in terms of the <em>true</em>, or <em>theoretical</em> survival and hazard functions, which are unknown in practice. When working with real data, we need to estimate these functions from observed event times and censoring information.There are broadly two approaches to estimating survival and hazard functions: parametric and non-parametric. Parametric methods assume a specific distribution for the event times (e.g., exponential, Weibull, log-normal), while non-parametric methods make no such assumptions and instead rely on the observed data to estimate the functions directly.</p>
+<p>In this post, we focus on non-parametric estimation, which is particularly useful when we have little prior knowledge about the underlying distribution of event times or when we want to avoid imposing potentially incorrect assumptions.</p>
+<p>The most common non-parametric estimators of the survival and hazard functions are the <strong>Kaplan-Meier estimator</strong> and the <strong>Nelson-Aalen estimator</strong>, respectively. Both estimators are built on the same underlying data — the observed event times and the number of subjects at risk at each event time — but they combine that information in different ways to estimate different quantities.</p>
+<section id="kaplan-meier-estimator" class="level3">
+<h3 class="anchored" data-anchor-id="kaplan-meier-estimator">Kaplan-Meier Estimator</h3>
+<p>The idea of the Kaplan-Meier estimator is chaining together conditional survival probabilities across small intervals with the conditional survival property.</p>
+<p>Suppose we observe <span class="math inline">\(k\)</span> distinct event times <span class="math inline">\(t_1 &lt; t_2 &lt; \cdots &lt; t_k\)</span> in our data (censored observations don’t contribute event times, but they do affect who remains at risk). At each event time <span class="math inline">\(t_i\)</span>, define:</p>
+<ul>
+<li><span class="math inline">\(n_i\)</span> = the number of subjects still at risk just before <span class="math inline">\(t_i\)</span> (i.e., alive and not yet censored)</li>
+<li><span class="math inline">\(d_i\)</span> = the number of events that occur exactly at <span class="math inline">\(t_i\)</span></li>
+</ul>
+<p>The idea is to estimate the <em>conditional</em> probability of surviving past <span class="math inline">\(t_i\)</span>, given survival up to just before <span class="math inline">\(t_i\)</span>, using the simplest possible empirical estimate — the observed proportion:</p>
+<p><span class="math display">\[
+\widehat{P}(T &gt; t_i \mid T \geq t_i) = \frac{n_i - d_i}{n_i}
+\]</span></p>
+<p>Note that censoring is naturally handled here: censored subjects are included in <span class="math inline">\(n_i\)</span> up until their censoring time, but they never contribute to <span class="math inline">\(d_i\)</span> since they don’t experience the event.</p>
+<p>Now here’s where the conditional survival property does its work. Since <span class="math inline">\(S(t)\)</span> can be built up as a chain of conditional survival probabilities across each interval between consecutive event times, we estimate the overall survival function as a product of these per-interval conditional probabilities, for all event times up to and including <span class="math inline">\(t\)</span>:</p>
+<p><span class="math display">\[
+\widehat{S}(t) = \prod_{i:\, t_i \leq t} \frac{n_i - d_i}{n_i}
+\]</span></p>
+<p>So with the Kaplan-Meier estimator, each factor in the product represents the estimated probability of “surviving this particular interval,” and multiplying them together — exactly as the conditional survival identity <span class="math inline">\(P(T&gt;t\mid T&gt;s) = S(t)/S(s)\)</span> suggests.</p>
+<p>Here’s a simple example to illustrate the Kaplan-Meier estimator:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="kaplan_meier_estimator.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Kaplan-Meier Estimator"><img src="kaplan_meier_estimator.png" class="img-fluid figure-img" alt="Kaplan-Meier Estimator"></a></p>
+<figcaption>Kaplan-Meier Estimator</figcaption>
+</figure>
+</div>
+<p>As visualized, the Kaplan-Meier curve is a step function that drops at each observed event time, with the size of the drop determined by the number of events and the number at risk at that time.</p>
+<p>There are also confidence intervals that can be constructed around the Kaplan-Meier estimate, often using Greenwood’s formula to estimate the variance of the survival function. For more details on the Kaplan-Meier estimator, check Kalbfleisch and Prentice’s <a href="https://onlinelibrary.wiley.com/doi/book/10.1002/9781118032985">The Statistical Analysis of Failure Time Data.</a></p>
+</section>
+<section id="nelson-aalen-estimator" class="level3">
+<h3 class="anchored" data-anchor-id="nelson-aalen-estimator">Nelson-Aalen Estimator</h3>
+<p>Where the Kaplan-Meier estimator targets <span class="math inline">\(S(t)\)</span> directly, the <strong>Nelson-Aalen estimator</strong> estimates the cumulative hazard <span class="math inline">\(\Lambda(t)\)</span> instead — using the exact same at-risk bookkeeping (<span class="math inline">\(n_i\)</span>, <span class="math inline">\(d_i\)</span>) but combining it differently.</p>
+<p>Recall that the cumulative hazard is defined as an integral over the instantaneous hazard:</p>
+<p><span class="math display">\[
+\Lambda(t) = \int_0^t \lambda(u)\, du
+\]</span></p>
+<p>Just as Kaplan-Meier estimates a conditional survival probability at each event time and combines them multiplicatively, Nelson-Aalen estimates the hazard at each event time and combines them additively. At each observed event time <span class="math inline">\(t_i\)</span>, the natural empirical estimate of the instantaneous hazard — the “fraction of the at-risk population that experienced the event right now” — is simply:</p>
+<p><span class="math display">\[
+\widehat{\lambda}(t_i) = \frac{d_i}{n_i}
+\]</span></p>
+<p>Since the cumulative hazard is a running sum of instantaneous hazard contributions, the Nelson-Aalen estimator sums these per-interval hazard estimates across all event times up to and including <span class="math inline">\(t\)</span>:</p>
+<p><span class="math display">\[
+\widehat{\Lambda}(t) = \sum_{i:\, t_i \leq t} \frac{d_i}{n_i}
+\]</span></p>
+<p>Each term <span class="math inline">\(d_i/n_i\)</span> can be thought of as a small “chunk” of accumulated risk contributed at <span class="math inline">\(t_i\)</span> — subjects who are still at risk but experience the event right then. Summing these chunks across time builds up the total accumulated hazard, exactly mirroring how the continuous-time integral <span class="math inline">\(\int_0^t \lambda(u)\,du\)</span> accumulates instantaneous risk. As a result, the NA estimator is a <strong>discrete step function</strong> — it only jumps at observed event times within the node and is flat between them:</p>
+<p><span class="math display">\[
+\hat{H}(t) = \begin{cases}
+0 &amp; t &lt; t_1 \\
+\dfrac{d_1}{n_1} &amp; t_1 \leq t &lt; t_2 \\[6pt]
+\dfrac{d_1}{n_1} + \dfrac{d_2}{n_2} &amp; t_2 \leq t &lt; t_3 \\[6pt]
+\vdots &amp; \\
+\displaystyle\sum_{j=1}^{K}\frac{d_j}{n_j} &amp; t \geq t_K
+\end{cases}
+\]</span></p>
+<p>Here’s an example of the Nelson-Aalen estimator:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="nelson_aalen_estimator.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Nelson-Aalen Estimator"><img src="nelson_aalen_estimator.png" class="img-fluid figure-img" alt="Nelson-Aalen Estimator"></a></p>
+<figcaption>Nelson-Aalen Estimator</figcaption>
+</figure>
+</div>
+</section>
+<section id="kaplan-meier-vs.-nelson-aalen" class="level3">
+<h3 class="anchored" data-anchor-id="kaplan-meier-vs.-nelson-aalen">Kaplan-Meier vs.&nbsp;Nelson-Aalen</h3>
+<p>Both estimators are built from the same underlying data — the risk sets <span class="math inline">\(n_i\)</span> and event counts <span class="math inline">\(d_i\)</span> at each observed event time — but they combine that information in two structurally different ways:</p>
+<p><span class="math display">\[
+\widehat{S}_{KM}(t) = \prod_{i:\, t_i \leq t} \left(1 - \frac{d_i}{n_i}\right)
+\qquad\text{vs.}\qquad
+\widehat{\Lambda}_{NA}(t) = \sum_{i:\, t_i \leq t} \frac{d_i}{n_i}
+\]</span></p>
+<p>Recall the identity connecting <span class="math inline">\(S(t)\)</span> and <span class="math inline">\(\Lambda(t)\)</span> that we derived earlier:</p>
+<p><span class="math display">\[
+S(t) = \exp[-\Lambda(t)]
+\]</span></p>
+<p>If we plug the Nelson-Aalen estimate of <span class="math inline">\(\Lambda(t)\)</span> into this identity, we get an alternative estimator of the survival function:</p>
+<p><span class="math display">\[
+\widehat{S}_{NA}(t) = \exp\left[-\sum_{i:\, t_i \leq t} \frac{d_i}{n_i}\right]
+\]</span></p>
+<p>This is sometimes called the <strong>Fleming-Harrington estimator</strong>. It turns out to be numerically very close to <span class="math inline">\(\widehat{S}_{KM}(t)\)</span> in most practical settings, and the two converge to the same quantity asymptotically. Below is a comparison of the Kaplan-Meier and Nelson-Aalen estimates on the same dataset:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="km_vs_na.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="Comparison of Kaplan-Meier and Nelson-Aalen Estimators"><img src="km_vs_na.png" class="img-fluid figure-img" alt="Comparison of Kaplan-Meier and Nelson-Aalen Estimators"></a></p>
+<figcaption>Comparison of Kaplan-Meier and Nelson-Aalen Estimators</figcaption>
+</figure>
+</div>
+<p>In practice, Kaplan-Meier is the more commonly reported estimator of <span class="math inline">\(S(t)\)</span>, while Nelson-Aalen is generally preferred as the estimator of <span class="math inline">\(\Lambda(t)\)</span>.</p>
+</section>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>In this blog post, we introduced the fundamentals of survival analysis, including the key concepts of time-to-event data, survival function, hazard function, and cumulative hazard function, and explored their relationships. We also discussed non-parametric estimation methods, specifically the Kaplan-Meier and Nelson-Aalen estimators, which allow us to estimate survival and hazard functions from observed data. The non-parametric estimations serve as a foundation for more advanced survival analysis techniques, which we will explore in subsequent posts.</p>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+<ul>
+<li>R. M. Dobrow. <a href="https://onlinelibrary.wiley.com/doi/book/10.1002/9781118740712">Introduction to Stochastic Processes with R.</a> Wiley, 2016.</li>
+<li>J. D. Singer, J. B. Willett. <a href="https://academic.oup.com/book/41753">Applied Longitudinal Data Analysis: Modeling Change and Event Occurrence.</a> Oxford University Press, 2003.</li>
+<li>F. E. Harrell Jr.&nbsp;<a href="https://link.springer.com/book/10.1007/978-3-319-19425-7">Regression Modeling Strategies: With Applications to Linear Models, Logistic and Ordinal Regression, and Survival Analysis.</a> Springer, 2015.</li>
+<li>D. G. Kleinbaum, M. Klein. <a href="https://link.springer.com/book/10.1007/978-1-4419-6646-9">Survival Analysis: A Self-Learning Text, Third Edition.</a> Springer, 2012.</li>
+</ul>
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" id="quarto-reuse"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></div></div></section><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-wang2026" class="csl-entry quarto-appendix-citeas" role="listitem">
+Wang, Ray. 2026. <span>“Survival Analysis - Part 1 -
+Fundamentals.”</span> July 19. <a href="https://changruiraywang.com/blog/2026-07-19-survival-fundamentals/">https://changruiraywang.com/blog/2026-07-19-survival-fundamentals/</a>.
+</div></div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/changruiraywang\.com");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© 2026 Ray Wang ∙ Made with <a href="https://quarto.org">Quarto</a></p>
+</div>   
+    <div class="nav-footer-center">
+<p><a class="link-dark me-1" href="../../accessibility.html" title="Accessibility commitment" target="_blank" rel="noopener"><i class="fa-solid fa-universal-access" aria-label="universal-access"></i></a> <a class="link-dark me-1" href="https://linkedin.com/in/" title="LinkedIn" target="_blank" rel="noopener"><i class="fa-brands fa-linkedin" aria-label="linkedin"></i></a> <a class="link-dark me-1" href="https://github.com/" title="GitHub" target="_blank" rel="noopener"><i class="fa-brands fa-github" aria-label="github"></i></a> <a class="link-dark me-1" href="mailto:you@example.com" title="Email" target="_blank" rel="noopener"><i class="fa-solid fa-envelope" aria-label="envelope"></i></a></p>
+</div>
+    <div class="nav-footer-right">
+      <ul class="footer-items list-unstyled">
+    <li class="nav-item">
+    <a class="nav-link" href="../../accessibility.html">
+<p>Accessibility</p>
+</a>
+  </li>  
+    <li class="nav-item">
+    <a class="nav-link" href="../../contact.html">
+<p>Contact</p>
+</a>
+  </li>  
+    <li class="nav-item">
+    <a class="nav-link" href="../../license.html">
+<p>License</p>
+</a>
+  </li>  
+    <li class="nav-item compact">
+    <a class="nav-link" href="../../blog/index.xml">
+      <i class="bi bi-rss" role="img">
+</i> 
+    </a>
+  </li>  
+</ul>
+    </div>
+  </div>
+</footer>
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
+
+
+
+
+</body></html>

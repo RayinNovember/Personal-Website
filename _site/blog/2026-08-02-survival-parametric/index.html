@@ -1,0 +1,1995 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.36">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Ray Wang">
+<meta name="dcterms.date" content="2026-08-02">
+<meta name="description" content="Learning about Parametric Distributions in Survival Analysis.">
+
+<title>Survival Analysis - Part 2 - Parametric Distributions – Ray Wang</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-3220c7140bd839a062eaf171028cd1fc.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-c8e4fbfa697e3cac23c41893a6e40db7.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-3220c7140bd839a062eaf171028cd1fc.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-2128be2227ba7e96272c6d2d49cea99e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-afdf0e5142f8c18a67a95f5bc1ba24b2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../site_libs/bootstrap/bootstrap-2128be2227ba7e96272c6d2d49cea99e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/quarto-contrib/fontawesome6-1.2.0/all.min.css" rel="stylesheet">
+<link href="../../site_libs/quarto-contrib/fontawesome6-1.2.0/latex-fontsize.css" rel="stylesheet">
+<script src="../../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="../../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="../../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Ray Wang</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about/index.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../blog/index.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../project/index.html"> 
+<span class="menu-text">Projects</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+    <a href="https://github.com/" title="" class="quarto-navigation-tool px-1" aria-label=""><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns">
+<div id="title-block-header-title" class="quarto-title page-columns page-full page-layout-full featured-image p-4" style="background-image: url(featured.png), url(featured.jpg), url(../featured.jpg);">
+<h1 class="title">Survival Analysis - Part 2 - Parametric Distributions</h1>
+    <div class="quarto-categories">
+        <div class="quarto-category">Statistics</div>
+      </div>
+  </div>
+
+<div>
+  <div id="title-block-title-desc" class="description pt-4">
+    Learning about Parametric Distributions in Survival Analysis.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Ray Wang </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">August 2, 2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+
+</header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#introduction---parametric-distributions" id="toc-introduction---parametric-distributions" class="nav-link active" data-scroll-target="#introduction---parametric-distributions">Introduction - Parametric Distributions</a></li>
+  <li><a href="#exponential-distribution" id="toc-exponential-distribution" class="nav-link" data-scroll-target="#exponential-distribution">Exponential Distribution</a></li>
+  <li><a href="#weibull-distribution" id="toc-weibull-distribution" class="nav-link" data-scroll-target="#weibull-distribution">Weibull Distribution</a>
+  <ul class="collapse">
+  <li><a href="#different-parameterizations-of-weibull-distribution" id="toc-different-parameterizations-of-weibull-distribution" class="nav-link" data-scroll-target="#different-parameterizations-of-weibull-distribution">Different Parameterizations of Weibull Distribution</a></li>
+  <li><a href="#graphical-assessment-of-weibull-fit" id="toc-graphical-assessment-of-weibull-fit" class="nav-link" data-scroll-target="#graphical-assessment-of-weibull-fit">Graphical Assessment of Weibull Fit</a></li>
+  </ul></li>
+  <li><a href="#gompertz-distribution" id="toc-gompertz-distribution" class="nav-link" data-scroll-target="#gompertz-distribution">Gompertz Distribution</a></li>
+  <li><a href="#log-normal-distribution" id="toc-log-normal-distribution" class="nav-link" data-scroll-target="#log-normal-distribution">Log-Normal Distribution</a>
+  <ul class="collapse">
+  <li><a href="#graphical-assessment-of-log-normal-fit" id="toc-graphical-assessment-of-log-normal-fit" class="nav-link" data-scroll-target="#graphical-assessment-of-log-normal-fit">Graphical Assessment of Log-Normal Fit</a></li>
+  </ul></li>
+  <li><a href="#log-logistic-distribution" id="toc-log-logistic-distribution" class="nav-link" data-scroll-target="#log-logistic-distribution">Log-Logistic Distribution</a>
+  <ul class="collapse">
+  <li><a href="#graphical-assessment-of-log-logistic-fit" id="toc-graphical-assessment-of-log-logistic-fit" class="nav-link" data-scroll-target="#graphical-assessment-of-log-logistic-fit">Graphical Assessment of Log-Logistic Fit</a></li>
+  </ul></li>
+  <li><a href="#statistical-goodness-of-fit-test" id="toc-statistical-goodness-of-fit-test" class="nav-link" data-scroll-target="#statistical-goodness-of-fit-test">Statistical Goodness-of-Fit Test</a></li>
+  <li><a href="#case-study" id="toc-case-study" class="nav-link" data-scroll-target="#case-study">Case Study</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+<!-- source: https://github.com/gadenbuie/garrickadenbuie-com/blob/main/_partials/title-block-link-buttons/title-block.html -->
+<!-- 
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title"> 
+-->
+<!-- <header id="title-block-header" class="quarto-title-block default page-columns"> -->
+<!-- <div class="quarto-title page-columns page-full featured-image p-4" style="background-image: url(featured.png), url(featured.jpg), url(../featured.jpg);"> -->
+
+
+
+<section id="introduction---parametric-distributions" class="level2">
+<h2 class="anchored" data-anchor-id="introduction---parametric-distributions">Introduction - Parametric Distributions</h2>
+<p>Non-parametric methods are useful for estimating survival functions and hazard functions without making any assumptions about the underlying distribution of event times. However, in many cases, we may wish to gain more insight into the distribution, e.g.&nbsp;describing quantiles, and make predictions about future events. Parametric methods assume that the event times follow a specific probability distribution, and we can use this assumption to estimate the parameters of the distribution and make inferences about the survival function and hazard function.</p>
+<p>There are several commonly used parametric distributions in survival analysis, including the exponential, Weibull, log-normal, log-logistic, and Gompertz distributions. Each of these distributions has its own characteristics and assumptions, and the choice of distribution depends on the nature of the data and the research question. In this post, we will discuss the properties of these parametric distributions, and how to assess the goodness-of-fit of the chosen distribution to the observed data.</p>
+</section>
+<section id="exponential-distribution" class="level2">
+<h2 class="anchored" data-anchor-id="exponential-distribution">Exponential Distribution</h2>
+<p>With its origin in the theory of Poisson processes, the exponential distribution is often used to model the time until the first event occurs. The exponential distribution is the simplest parametric survival model as it is characterized by a constant hazard rate, <span class="math inline">\(\lambda\)</span>, which means that the probability of an event occurring in the next instant is independent of how long the subject has already survived. This property makes the exponential distribution a useful model for certain types of time-to-event data, such as the time until failure of a mechanical component or the time until death in a population with a constant mortality rate.</p>
+<p>The probability density function (PDF) of the exponential distribution is given by:</p>
+<p><span class="math inline">\(f(t) = \lambda e^{-\lambda t}, \quad t \geq 0\)</span></p>
+<p>where <span class="math inline">\(\lambda &gt; 0\)</span> is the rate parameter.</p>
+<div id="cell-fig-exp-dist" class="cell" data-execution_count="1">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>rates <span class="op">=</span> [<span class="fl">0.5</span>, <span class="fl">1.0</span>, <span class="fl">2.0</span>, <span class="fl">4.0</span>]</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="dv">6</span>, <span class="dv">500</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="fl">2.4</span>))</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axes[<span class="dv">0</span>]</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> lam <span class="kw">in</span> rates:</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    ax.plot(t, lam <span class="op">*</span> np.exp(<span class="op">-</span>lam <span class="op">*</span> t), label<span class="op">=</span><span class="vs">fr"</span><span class="dv">$</span><span class="er">\</span><span class="vs">lambda=</span><span class="sc">{</span>lam<span class="sc">}</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Probability Density Function"</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"t"</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">"f(t)"</span>)<span class="op">;</span> ax.legend()</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axes[<span class="dv">1</span>]</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> lam <span class="kw">in</span> rates:</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    ax.plot(t, np.exp(<span class="op">-</span>lam <span class="op">*</span> t), label<span class="op">=</span><span class="vs">fr"</span><span class="dv">$</span><span class="er">\</span><span class="vs">lambda=</span><span class="sc">{</span>lam<span class="sc">}</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Survival Function"</span>)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"t"</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">"S(t)"</span>)<span class="op">;</span> ax.legend()</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axes[<span class="dv">2</span>]</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> lam <span class="kw">in</span> rates:</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    ax.plot(t, np.full_like(t, lam), label<span class="op">=</span><span class="vs">fr"</span><span class="dv">$</span><span class="er">\</span><span class="vs">lambda=</span><span class="sc">{</span>lam<span class="sc">}</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Hazard Function (constant)"</span>)</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"t"</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">"h(t)"</span>)<span class="op">;</span> ax.legend()</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-exp-dist" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-exp-dist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="index_files/figure-html/fig-exp-dist-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;1: Exponential distribution: PDF, survival, and hazard for varying \lambda"><img src="index_files/figure-html/fig-exp-dist-output-1.png" width="770" height="221" class="figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-exp-dist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Exponential distribution: PDF, survival, and hazard for varying <span class="math inline">\(\lambda\)</span>
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The survival function is given by:</p>
+<p><span class="math inline">\(S(t) = e^{-\lambda t}, \quad t \geq 0\)</span></p>
+<p>The hazard function is constant and given by:</p>
+<p><span class="math inline">\(h(t) = \lambda, \quad t \geq 0\)</span></p>
+<p>The fact that the hazard function is constant implies that the exponential distribution is not suitable for modeling survival data with changing hazard rates over time. To account for such cases, we need parametric distributions whose hazard functions can vary over time, such as the Weibull, log-normal, log-logistic, and Gompertz distributions.</p>
+</section>
+<section id="weibull-distribution" class="level2">
+<h2 class="anchored" data-anchor-id="weibull-distribution">Weibull Distribution</h2>
+<p>The Weibull distribution is a versatile continuous probability distribution that can model a wide range of hazard rate behaviors. It can be viewed as a generalization of the exponential distribution, and it is often used in reliability engineering and survival analysis to model the time until failure of a system or component.</p>
+<p>The probability density function (PDF) of the Weibull distribution is given by:</p>
+<p><span class="math inline">\(f(t) = \lambda \nu t^{\nu - 1}\exp\left(-\lambda t^\nu\right), \quad t \geq 0\)</span></p>
+<p>where <span class="math inline">\(\lambda\)</span> is the scale parameter and <span class="math inline">\(\nu\)</span> is the shape parameter.</p>
+<div id="cell-fig-weibull-dist" class="cell" data-execution_count="2">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>lam <span class="op">=</span> <span class="fl">1.0</span>                        <span class="co"># fix scale parameter</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>nus <span class="op">=</span> [<span class="fl">0.5</span>, <span class="fl">1.0</span>, <span class="fl">1.5</span>, <span class="fl">3.0</span>]       <span class="co"># shape parameters to compare</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> np.linspace(<span class="fl">0.001</span>, <span class="dv">3</span>, <span class="dv">500</span>)   <span class="co"># start slightly above 0 to avoid t^(nu-1) blowup for nu&lt;1</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="fl">2.4</span>))</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axes[<span class="dv">0</span>]</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> nu <span class="kw">in</span> nus:</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    pdf <span class="op">=</span> lam <span class="op">*</span> nu <span class="op">*</span> t<span class="op">**</span>(nu <span class="op">-</span> <span class="dv">1</span>) <span class="op">*</span> np.exp(<span class="op">-</span>lam <span class="op">*</span> t<span class="op">**</span>nu)</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    ax.plot(t, pdf, label<span class="op">=</span><span class="vs">fr"</span><span class="dv">$</span><span class="ch">\n</span><span class="vs">u=</span><span class="sc">{</span>nu<span class="sc">}</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Weibull PDF ($</span><span class="ch">\\</span><span class="st">lambda=1$)"</span>)</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"t"</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">"f(t)"</span>)<span class="op">;</span> ax.legend()</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axes[<span class="dv">1</span>]</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> nu <span class="kw">in</span> nus:</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    S <span class="op">=</span> np.exp(<span class="op">-</span>lam <span class="op">*</span> t<span class="op">**</span>nu)</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    ax.plot(t, S, label<span class="op">=</span><span class="vs">fr"</span><span class="dv">$</span><span class="ch">\n</span><span class="vs">u=</span><span class="sc">{</span>nu<span class="sc">}</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Weibull Survival Function ($</span><span class="ch">\\</span><span class="st">lambda=1$)"</span>)</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"t"</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">"S(t)"</span>)<span class="op">;</span> ax.legend()</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axes[<span class="dv">2</span>]</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> nu <span class="kw">in</span> nus:</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    h <span class="op">=</span> lam <span class="op">*</span> nu <span class="op">*</span> t<span class="op">**</span>(nu <span class="op">-</span> <span class="dv">1</span>)</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>    ax.plot(t, h, label<span class="op">=</span><span class="vs">fr"</span><span class="dv">$</span><span class="ch">\n</span><span class="vs">u=</span><span class="sc">{</span>nu<span class="sc">}</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Weibull Hazard Function ($</span><span class="ch">\\</span><span class="st">lambda=1$)"</span>)</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"t"</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">"h(t)"</span>)<span class="op">;</span> ax.legend()</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-weibull-dist" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-weibull-dist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="index_files/figure-html/fig-weibull-dist-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;2: Weibull distribution: PDF, survival, and hazard for varying \nu"><img src="index_files/figure-html/fig-weibull-dist-output-1.png" width="790" height="220" class="figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-weibull-dist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Weibull distribution: PDF, survival, and hazard for varying <span class="math inline">\(\nu\)</span>
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>As the illustrative plot shows above, the Weibull distribution can model increasing, decreasing, or constant hazard rates depending on the value of the shape parameter <span class="math inline">\(\nu\)</span>. When <span class="math inline">\(\nu = 1\)</span>, the Weibull distribution reduces to the exponential distribution, and the hazard function is constant. When <span class="math inline">\(\nu &lt; 1\)</span>, the hazard function decreases over time. When <span class="math inline">\(\nu &gt; 1\)</span> (early-failure/infant mortality), the hazard function increases over time (aging/wear-out). This flexibility makes the Weibull distribution a popular choice for modeling survival data with varying hazard rates.</p>
+<p>The survival function of the Weibull distribution is given by:</p>
+<p><span class="math inline">\(S(t) = \exp\left(-\lambda t^\nu\right), \quad t \geq 0\)</span></p>
+<p>The hazard function is given by:</p>
+<p><span class="math inline">\(h(t) = \lambda \nu t^{\nu - 1}, \quad t \geq 0\)</span></p>
+<section id="different-parameterizations-of-weibull-distribution" class="level3">
+<h3 class="anchored" data-anchor-id="different-parameterizations-of-weibull-distribution">Different Parameterizations of Weibull Distribution</h3>
+<p>This parameterization is usually called the ‘rate’ parameterization. The Weibull distribution can also be parameterized in terms of a scale parameter <span class="math inline">\(\sigma\)</span> and a shape parameter <span class="math inline">\(k\)</span>, where <span class="math inline">\(\sigma = \lambda^{-1/\nu}\)</span> and <span class="math inline">\(k = \nu\)</span>. Specifically, the survival function is formulated as:</p>
+<p><span class="math inline">\(\exp\left(-\left(\frac{t}{\sigma_{\text{true}}}\right)^a\right)\)</span></p>
+<p>where <span class="math inline">\(a\)</span> is the shape parameter and <span class="math inline">\(\sigma_{\text{true}}\)</span> is the scale parameter.</p>
+<p>The two parameterizations can be confusing enough, to make things worse, different software packages in R and Python use different greek letters to mean the same parameter.</p>
+<p>To make it clear across parameterizations and packages, the table below maps the relationship:</p>
+<div id="tbl-weibull-param" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-weibull-param-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1: Weibull parameterizations across common software conventions. The shape parameter is written <span class="math inline">\(\nu\)</span> throughout, since it is the same quantity in every convention — only the scale changes.
+</figcaption>
+<div aria-describedby="tbl-weibull-param-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 15%">
+<col style="width: 15%">
+<col style="width: 25%">
+<col style="width: 15%">
+<col style="width: 15%">
+<col style="width: 15%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Convention</th>
+<th>Form</th>
+<th style="text-align: center;">Shape (<span class="math inline">\(\nu\)</span>)</th>
+<th>Scale</th>
+<th>Get shape</th>
+<th>Get scale</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Table I (this blog)</td>
+<td><span class="math inline">\(\exp(-\lambda t^\nu)\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(\nu\)</span></td>
+<td><span class="math inline">\(\lambda\)</span> — <em>not</em> a true scale; <span class="math inline">\(\lambda = \sigma_{\text{true}}^{-\nu}\)</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr class="even">
+<td><code>rweibull</code> / <code>lifelines</code></td>
+<td><span class="math inline">\(\exp\left(-(t/\sigma_{\text{true}})^\nu\right)\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(\nu\)</span></td>
+<td><span class="math inline">\(\sigma_{\text{true}}\)</span> (genuine scale)</td>
+<td>Py: <code>WeibullFitter().fit().rho_</code><br>R: <code>rweibull(shape=)</code></td>
+<td>Py: <code>WeibullFitter().fit().lambda_</code><br>R: <code>rweibull(scale=)</code></td>
+</tr>
+<tr class="odd">
+<td><code>survreg</code> (K&amp;P, pre-transform)</td>
+<td><span class="math inline">\(\exp\left(-(\lambda_{KP}\,t)^\nu\right)\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(\nu\)</span></td>
+<td><span class="math inline">\(\lambda_{KP}\)</span> — a rate multiplying <span class="math inline">\(t\)</span>; internal only</td>
+<td>not user-facing</td>
+<td>not user-facing</td>
+</tr>
+<tr class="even">
+<td><code>survreg</code> (reported output)</td>
+<td><span class="math inline">\((\alpha,\sigma)\)</span> on <span class="math inline">\(\log t\)</span>, <span class="math inline">\(\nu=1/\sigma\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(1/\sigma\)</span></td>
+<td><span class="math inline">\(e^{\alpha}\)</span> (equals <span class="math inline">\(\sigma_{\text{true}}\)</span>)</td>
+<td>R: <code>1/fit$scale</code></td>
+<td>R: <code>exp(coef(fit))</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="graphical-assessment-of-weibull-fit" class="level3">
+<h3 class="anchored" data-anchor-id="graphical-assessment-of-weibull-fit">Graphical Assessment of Weibull Fit</h3>
+<p>The Weibull distribution has an important property that allows us to assess the goodness-of-fit of the distribution to the observed data. If the event times follow a Weibull distribution, then the following transformation of the survival function should yield a linear relationship:</p>
+<p><span class="math display">\[
+S(t) = \exp\left(-\lambda t^\nu\right) \implies \ln(-\ln(S(t))) = \ln(\lambda)+\nu \ln(t)
+\]</span></p>
+<p>If we use the Kaplan-Meier estimate of the survival function <span class="math inline">\(S(t)\)</span>, this property allows for a graphical evaluation of the appropriateness of a Weibull model by plotting the log negative log of the Kaplan-Meier estimate of the survival function against the log of time. If the points fall approximately along a straight line, then the Weibull distribution is a reasonable fit for the data.</p>
+</section>
+</section>
+<section id="gompertz-distribution" class="level2">
+<h2 class="anchored" data-anchor-id="gompertz-distribution">Gompertz Distribution</h2>
+<p>Even though the Weibull distribution with a <span class="math inline">\(\nu\)</span> greater than 1 can model increasing hazard rates, the hazard growth is polynomial. The Gompertz distribution is another parametric distribution that can model hazard rates that grow exponentially over time, and it is often used in demography and actuarial science to model human mortality.</p>
+<p>The probability density function (PDF) of the Gompertz distribution is given by: <span class="math display">\[
+f(t) = \lambda e^{\alpha t} \exp\!\left(-\frac{\lambda}{\alpha}\left(e^{\alpha t} - 1\right)\right)
+\]</span></p>
+<p>where <span class="math inline">\(\lambda\)</span> is the scale parameter and <span class="math inline">\(\alpha\)</span> is the shape parameter.</p>
+<p>The survival function of the Gompertz distribution is given by: <span class="math display">\[
+S(t) = \exp\!\left(-\frac{\lambda}{\alpha}\left(e^{\alpha t} - 1\right)\right)
+\]</span></p>
+<p>The hazard function is given by: <span class="math display">\[
+h(t) = \lambda e^{\alpha t}
+\]</span></p>
+<p>With <span class="math inline">\(\alpha &gt; 0\)</span>, the hazard function increases exponentially over time.</p>
+<p>To see the two different growth patterns, consider the hazard functions of the Weibull and Gompertz distributions: <span class="math display">\[
+h(t) = \lambda \nu t^{\nu - 1}
+\]</span></p>
+<p>This is <span class="math inline">\(t\)</span> raised to a fixed power.</p>
+<p><span class="math display">\[
+h(t) = \lambda e^{\alpha t}
+\]</span></p>
+<p>Here <span class="math inline">\(t\)</span> sits in the exponent. As <span class="math inline">\(t\)</span> increases by a fixed amount, <span class="math inline">\(h(t)\)</span> gets multiplied by a fixed factor <span class="math inline">\(e^{\alpha}\)</span>, rather than just increasing by some additive/polynomial amount.</p>
+<p>Let’s visualize some Gompertz distributions with different values of the shape parameter <span class="math inline">\(\alpha\)</span>.</p>
+<div id="cell-fig-gompertz-dist" class="cell" data-execution_count="3">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>lam <span class="op">=</span> <span class="fl">1.0</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>alphas <span class="op">=</span> [<span class="op">-</span><span class="fl">1.0</span>, <span class="op">-</span><span class="fl">0.3</span>, <span class="fl">0.3</span>, <span class="fl">1.0</span>]</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> np.linspace(<span class="fl">0.001</span>, <span class="dv">3</span>, <span class="dv">500</span>)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="fl">2.4</span>))</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axes[<span class="dv">0</span>]</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> alpha <span class="kw">in</span> alphas:</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    H <span class="op">=</span> (lam <span class="op">/</span> alpha) <span class="op">*</span> (np.exp(alpha <span class="op">*</span> t) <span class="op">-</span> <span class="dv">1</span>)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    pdf <span class="op">=</span> lam <span class="op">*</span> np.exp(alpha <span class="op">*</span> t) <span class="op">*</span> np.exp(<span class="op">-</span>H)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    ax.plot(t, pdf, label<span class="op">=</span><span class="vs">fr"</span><span class="dv">$</span><span class="ch">\a</span><span class="vs">lpha=</span><span class="sc">{</span>alpha<span class="sc">}</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Gompertz PDF ($</span><span class="ch">\\</span><span class="st">lambda=1$)"</span>)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"t"</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">"f(t)"</span>)<span class="op">;</span> ax.legend()</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axes[<span class="dv">1</span>]</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> alpha <span class="kw">in</span> alphas:</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    H <span class="op">=</span> (lam <span class="op">/</span> alpha) <span class="op">*</span> (np.exp(alpha <span class="op">*</span> t) <span class="op">-</span> <span class="dv">1</span>)</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    S <span class="op">=</span> np.exp(<span class="op">-</span>H)</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    ax.plot(t, S, label<span class="op">=</span><span class="vs">fr"</span><span class="dv">$</span><span class="ch">\a</span><span class="vs">lpha=</span><span class="sc">{</span>alpha<span class="sc">}</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Gompertz Survival Function ($</span><span class="ch">\\</span><span class="st">lambda=1$)"</span>)</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"t"</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">"S(t)"</span>)<span class="op">;</span> ax.legend()</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axes[<span class="dv">2</span>]</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> alpha <span class="kw">in</span> alphas:</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>    h <span class="op">=</span> lam <span class="op">*</span> np.exp(alpha <span class="op">*</span> t)</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>    ax.plot(t, h, label<span class="op">=</span><span class="vs">fr"</span><span class="dv">$</span><span class="ch">\a</span><span class="vs">lpha=</span><span class="sc">{</span>alpha<span class="sc">}</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Gompertz Hazard Function ($</span><span class="ch">\\</span><span class="st">lambda=1$)"</span>)</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"t"</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">"h(t)"</span>)<span class="op">;</span> ax.legend()</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-gompertz-dist" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-gompertz-dist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="index_files/figure-html/fig-gompertz-dist-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;3: Gompertz distribution: PDF, survival, and hazard for varying \alpha"><img src="index_files/figure-html/fig-gompertz-dist-output-1.png" width="809" height="220" class="figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-gompertz-dist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Gompertz distribution: PDF, survival, and hazard for varying <span class="math inline">\(\alpha\)</span>
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="log-normal-distribution" class="level2">
+<h2 class="anchored" data-anchor-id="log-normal-distribution">Log-Normal Distribution</h2>
+<p>The log-normal distribution is often used to model survival data with non-monotonic hazard rates, where the hazard rate initially increases and then decreases over time. This property makes the log-normal distribution suitable for modeling survival data with a peak hazard rate, such as the time until failure of a mechanical component that experiences wear and tear over time.</p>
+<p>The log-normal distribution is obtained by taking the logarithm of a normally distributed random variable. We apply the logarithm transformation to event time <span class="math inline">\(T\)</span> and assume the new variable <span class="math inline">\(Y = \ln(T)\)</span> follows a normal distribution with mean <span class="math inline">\(\mu\)</span> and standard deviation <span class="math inline">\(\sigma\)</span>: <span class="math inline">\(\log(T) \sim N(\mu, \sigma^2)\)</span>.</p>
+<p>The probability density function (PDF) of the log-normal distribution is given by:</p>
+<p><span class="math inline">\(f(t) = \frac{1}{t\sigma\sqrt{2\pi}} \exp\left(-\frac{(\ln t - \mu)^2}{2\sigma^2}\right), \quad t &gt; 0\)</span></p>
+<p>where <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\sigma\)</span> are the mean and standard deviation of the underlying normal distribution.</p>
+<p>The survival function is given by:</p>
+<p><span class="math inline">\(S(t) = 1 - \Phi\left(\frac{\ln t - \mu}{\sigma}\right) = \underbrace{\Phi\left(-\frac{\ln t - \mu}{\sigma}\right)}_{\text{symmetry of standard normal CDF}}, \quad t &gt; 0\)</span></p>
+<p>where <span class="math inline">\(\Phi\)</span> is the cumulative distribution function of the standard normal distribution.</p>
+<p>The hazard function is given by:</p>
+<p><span class="math inline">\(h(t) = \frac{f(t)}{S(t)} = \frac{\phi\left(\dfrac{\log t - \mu}{\sigma}\right)}{t\sigma\, \Phi\left(-\dfrac{\log t - \mu}{\sigma}\right)}\)</span></p>
+<div id="cell-fig-lognormal-dist" class="cell" data-execution_count="4">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.stats <span class="im">import</span> norm</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>mu <span class="op">=</span> <span class="fl">0.0</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>sigmas <span class="op">=</span> [<span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">1.0</span>, <span class="fl">1.5</span>]</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> np.linspace(<span class="fl">0.001</span>, <span class="dv">6</span>, <span class="dv">1000</span>)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="fl">2.4</span>))</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axes[<span class="dv">0</span>]</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> sigma <span class="kw">in</span> sigmas:</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    pdf <span class="op">=</span> (<span class="dv">1</span> <span class="op">/</span> (t <span class="op">*</span> sigma <span class="op">*</span> np.sqrt(<span class="dv">2</span> <span class="op">*</span> np.pi))) <span class="op">*</span> np.exp(<span class="op">-</span>(np.log(t) <span class="op">-</span> mu) <span class="op">**</span> <span class="dv">2</span> <span class="op">/</span> (<span class="dv">2</span> <span class="op">*</span> sigma <span class="op">**</span> <span class="dv">2</span>))</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    ax.plot(t, pdf, label<span class="op">=</span><span class="vs">fr"</span><span class="dv">$\s</span><span class="vs">igma=</span><span class="sc">{</span>sigma<span class="sc">}</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Log-normal PDF ($</span><span class="ch">\\</span><span class="st">mu=0$)"</span>)</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"t"</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">"f(t)"</span>)<span class="op">;</span> ax.legend()</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axes[<span class="dv">1</span>]</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> sigma <span class="kw">in</span> sigmas:</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    z <span class="op">=</span> (np.log(t) <span class="op">-</span> mu) <span class="op">/</span> sigma</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    S <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> norm.cdf(z)</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    ax.plot(t, S, label<span class="op">=</span><span class="vs">fr"</span><span class="dv">$\s</span><span class="vs">igma=</span><span class="sc">{</span>sigma<span class="sc">}</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Log-normal Survival Function ($</span><span class="ch">\\</span><span class="st">mu=0$)"</span>)</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"t"</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">"S(t)"</span>)<span class="op">;</span> ax.legend()</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axes[<span class="dv">2</span>]</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> sigma <span class="kw">in</span> sigmas:</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>    z <span class="op">=</span> (np.log(t) <span class="op">-</span> mu) <span class="op">/</span> sigma</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>    S <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> norm.cdf(z)</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>    h <span class="op">=</span> norm.pdf(z) <span class="op">/</span> (t <span class="op">*</span> sigma <span class="op">*</span> S)</span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>    ax.plot(t, h, label<span class="op">=</span><span class="vs">fr"</span><span class="dv">$\s</span><span class="vs">igma=</span><span class="sc">{</span>sigma<span class="sc">}</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Log-normal Hazard Function ($</span><span class="ch">\\</span><span class="st">mu=0$)"</span>)</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"t"</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">"h(t)"</span>)<span class="op">;</span> ax.legend()</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-lognormal-dist" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-lognormal-dist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="index_files/figure-html/fig-lognormal-dist-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Figure&nbsp;4: Log-normal distribution: PDF, survival, and hazard for varying \sigma"><img src="index_files/figure-html/fig-lognormal-dist-output-1.png" width="806" height="220" class="figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-lognormal-dist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Log-normal distribution: PDF, survival, and hazard for varying <span class="math inline">\(\sigma\)</span>
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<section id="graphical-assessment-of-log-normal-fit" class="level3">
+<h3 class="anchored" data-anchor-id="graphical-assessment-of-log-normal-fit">Graphical Assessment of Log-Normal Fit</h3>
+<p>If the event times follow a log-normal distribution, then the following transformation of the survival function should yield a linear relationship:</p>
+<p><span class="math display">\[
+\Phi^{-1}(S(t)) = \frac{\mu - \ln(t)}{\sigma} = -\frac{1}{\sigma}\ln(t) + \frac{\mu}{\sigma}
+\]</span></p>
+<p>That is, if we plot the inverse of the standard normal CDF of the Kaplan-Meier estimate of the survival function against the logarithm of time, we should see a linear relationship if the log-normal distribution is a reasonable fit for the data.</p>
+</section>
+</section>
+<section id="log-logistic-distribution" class="level2">
+<h2 class="anchored" data-anchor-id="log-logistic-distribution">Log-Logistic Distribution</h2>
+<p>A cousin of the log-normal distribution is the log-logistic distribution, which is obtained by taking the logarithm of a logistic distributed random variable. We apply the logarithm transformation to event time <span class="math inline">\(T\)</span> and assume the new variable <span class="math inline">\(Y = \ln(T)\)</span> follows a logistic distribution with location parameter <span class="math inline">\(\mu\)</span> and scale parameter <span class="math inline">\(\sigma\)</span>: <span class="math inline">\(\log(T) \sim Logistic(\mu, \sigma)\)</span>.</p>
+<p>The log logistic distribution can be thought of a flexible alternative to the log-normal distribution, as it can not only model non-monotonic hazard rates, but also has a closed-form expression for its survival function and hazard function without having to rely on <span class="math inline">\(\Phi\)</span>, making it more tractable for optimization and interpretation.</p>
+<p>The probability density function (PDF) of the log-logistic distribution is given by:</p>
+<p><span class="math inline">\(f(t) = \frac{(\beta/\alpha)(t/\alpha)^{\beta-1}}{(1+(t/\alpha)^\beta)^2}, \quad t &gt; 0\)</span></p>
+<p>where <span class="math inline">\(\alpha\)</span> is the scale parameter and <span class="math inline">\(\beta\)</span> is the shape parameter.</p>
+<p>The survival function is given by:</p>
+<p><span class="math inline">\(S(t) = \frac{1}{1+(t/\alpha)^\beta}, \quad t &gt; 0\)</span></p>
+<p>The hazard function is given by:</p>
+<p><span class="math inline">\(h(t) = \frac{(\beta/\alpha)(t/\alpha)^{\beta-1}}{1+(t/\alpha)^\beta}\)</span></p>
+<p>Below is an illustrative plot of the log-logistic distribution with different values of the shape parameter <span class="math inline">\(\beta\)</span>. As we can see, the log-logistic distribution can model increasing, decreasing, or non-monotonic hazard rates depending on the value of <span class="math inline">\(\beta\)</span>.</p>
+<div id="cell-fig-loglogistic-dist" class="cell" data-execution_count="5">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>alpha <span class="op">=</span> <span class="fl">1.0</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>betas <span class="op">=</span> [<span class="fl">0.5</span>, <span class="fl">1.0</span>, <span class="fl">2.0</span>, <span class="fl">4.0</span>]</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> np.linspace(<span class="fl">0.001</span>, <span class="dv">6</span>, <span class="dv">1000</span>)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="fl">2.4</span>))</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axes[<span class="dv">0</span>]</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> beta <span class="kw">in</span> betas:</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> t <span class="op">/</span> alpha</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    pdf <span class="op">=</span> (beta <span class="op">/</span> alpha) <span class="op">*</span> x<span class="op">**</span>(beta <span class="op">-</span> <span class="dv">1</span>) <span class="op">/</span> (<span class="dv">1</span> <span class="op">+</span> x<span class="op">**</span>beta) <span class="op">**</span> <span class="dv">2</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    ax.plot(t, pdf, label<span class="op">=</span><span class="vs">fr"</span><span class="dv">$\b</span><span class="vs">eta=</span><span class="sc">{</span>beta<span class="sc">}</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Log-logistic PDF ($</span><span class="ch">\\</span><span class="st">alpha=1$)"</span>)</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"t"</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">"f(t)"</span>)<span class="op">;</span> ax.legend()</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axes[<span class="dv">1</span>]</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> beta <span class="kw">in</span> betas:</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> t <span class="op">/</span> alpha</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    S <span class="op">=</span> <span class="dv">1</span> <span class="op">/</span> (<span class="dv">1</span> <span class="op">+</span> x<span class="op">**</span>beta)</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    ax.plot(t, S, label<span class="op">=</span><span class="vs">fr"</span><span class="dv">$\b</span><span class="vs">eta=</span><span class="sc">{</span>beta<span class="sc">}</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Log-logistic Survival Function ($</span><span class="ch">\\</span><span class="st">alpha=1$)"</span>)</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"t"</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">"S(t)"</span>)<span class="op">;</span> ax.legend()</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> axes[<span class="dv">2</span>]</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> beta <span class="kw">in</span> betas:</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> t <span class="op">/</span> alpha</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>    h <span class="op">=</span> (beta <span class="op">/</span> alpha) <span class="op">*</span> x<span class="op">**</span>(beta <span class="op">-</span> <span class="dv">1</span>) <span class="op">/</span> (<span class="dv">1</span> <span class="op">+</span> x<span class="op">**</span>beta)</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>    ax.plot(t, h, label<span class="op">=</span><span class="vs">fr"</span><span class="dv">$\b</span><span class="vs">eta=</span><span class="sc">{</span>beta<span class="sc">}</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Log-logistic Hazard Function ($</span><span class="ch">\\</span><span class="st">alpha=1$)"</span>)</span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"t"</span>)<span class="op">;</span> ax.set_ylabel(<span class="st">"h(t)"</span>)<span class="op">;</span> ax.legend()</span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-loglogistic-dist" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-loglogistic-dist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="index_files/figure-html/fig-loglogistic-dist-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="Figure&nbsp;5: Log-logistic distribution: PDF, survival, and hazard for varying \beta"><img src="index_files/figure-html/fig-loglogistic-dist-output-1.png" width="806" height="220" class="figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-loglogistic-dist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Log-logistic distribution: PDF, survival, and hazard for varying <span class="math inline">\(\beta\)</span>
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<section id="graphical-assessment-of-log-logistic-fit" class="level3">
+<h3 class="anchored" data-anchor-id="graphical-assessment-of-log-logistic-fit">Graphical Assessment of Log-Logistic Fit</h3>
+<p>To graphically assess the goodness-of-fit of the log-logistic distribution to the observed data, we can use a similar approach as for the Weibull and log-normal distributions. If the event times follow a log-logistic distribution, then the following transformation of the survival function should yield a linear relationship:</p>
+<p><span class="math display">\[
+S(t) = \frac{1}{1+(t/\alpha)^\beta} \implies \ln(\dfrac{1-S(t)}{S(t)}) = \beta \ln(t) - \beta \ln(\alpha)
+\]</span></p>
+<p>That is, if we plot the logit of the Kaplan-Meier estimate of the survival function against the logarithm of time, we should see a linear relationship if the log-logistic distribution is a reasonable fit for the data.</p>
+<p>We can now compare all four parametric distributions (Weibull, Gompertz, log-normal, and log-logistic) in one table.</p>
+<div id="tbl-dists" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-dists-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2: Characterization of the exponential, Weibull, Gompertz, log-normal, and log-logistic distributions.
+</figcaption>
+<div aria-describedby="tbl-dists-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 10%">
+<col style="width: 17%">
+<col style="width: 17%">
+<col style="width: 17%">
+<col style="width: 17%">
+<col style="width: 17%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Characteristic</th>
+<th style="text-align: center;">Exponential</th>
+<th style="text-align: center;">Weibull</th>
+<th style="text-align: center;">Gompertz</th>
+<th style="text-align: center;">Log-normal</th>
+<th style="text-align: center;">Log-logistic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Parameter</td>
+<td style="text-align: center;">Scale <span class="math inline">\(\lambda &gt; 0\)</span></td>
+<td style="text-align: center;">Scale <span class="math inline">\(\lambda &gt; 0\)</span><br>Shape <span class="math inline">\(\nu &gt; 0\)</span></td>
+<td style="text-align: center;">Scale <span class="math inline">\(\lambda &gt; 0\)</span><br>Shape <span class="math inline">\(-\infty &lt; \alpha &lt; \infty\)</span></td>
+<td style="text-align: center;">Location <span class="math inline">\(-\infty &lt; \mu &lt; \infty\)</span><br>Scale <span class="math inline">\(\sigma &gt; 0\)</span></td>
+<td style="text-align: center;">Scale <span class="math inline">\(\alpha &gt; 0\)</span><br>Shape <span class="math inline">\(\beta &gt; 0\)</span></td>
+</tr>
+<tr class="even">
+<td>Hazard function</td>
+<td style="text-align: center;"><span class="math inline">\(h_0(t) = \lambda\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(h_0(t) = \lambda \nu t^{\nu-1}\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(h_0(t) = \lambda e^{\alpha t}\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(h(t) = \dfrac{\phi\left(\frac{\log t - \mu}{\sigma}\right)}{t\sigma\,\Phi\left(-\frac{\log t - \mu}{\sigma}\right)}\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(h(t) = \dfrac{(\beta/\alpha)(t/\alpha)^{\beta-1}}{1+(t/\alpha)^\beta}\)</span></td>
+</tr>
+<tr class="odd">
+<td>Cumulative hazard</td>
+<td style="text-align: center;"><span class="math inline">\(H_0(t) = \lambda t\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(H_0(t) = \lambda t^{\nu}\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(H_0(t) = \dfrac{\lambda}{\alpha}\left(e^{\alpha t} - 1\right)\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(H(t) = -\log\Phi\left(-\dfrac{\log t - \mu}{\sigma}\right)\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(H(t) = \log\left(1+(t/\alpha)^\beta\right)\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Example Code of Graphical Assessment of GoF">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Example Code of Graphical Assessment of GoF
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div id="b57d4bbc" class="cell" data-execution_count="6">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> probability_plot(durations, event_observed, distribution, fitter<span class="op">=</span><span class="va">None</span>, ax<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Graphical goodness-of-fit assessment via a linearizing transform of S(t).</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co">    Points roughly linear =&gt; the distribution is plausible.</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    _SPECS <span class="op">=</span> {</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"weibull"</span>: (</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>            <span class="kw">lambda</span> S: np.log(<span class="op">-</span>np.log(S)),</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>            <span class="vs">r"</span><span class="dv">$</span><span class="er">\</span><span class="vs">log</span><span class="kw">(</span><span class="vs">-</span><span class="er">\</span><span class="vs">log </span><span class="er">\</span><span class="vs">hat S</span><span class="kw">(</span><span class="vs">t</span><span class="kw">))</span><span class="dv">$</span><span class="vs">"</span>,</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>            <span class="kw">lambda</span> f: (f.rho_, <span class="op">-</span>f.rho_ <span class="op">*</span> np.log(f.lambda_)),   </span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>            <span class="kw">lambda</span> f: <span class="vs">fr"</span><span class="dv">$</span><span class="ch">\n</span><span class="vs">u</span><span class="dv">$</span><span class="vs">=</span><span class="sc">{</span>f<span class="sc">.</span>rho_<span class="sc">:.3f}</span><span class="vs">, </span><span class="dv">$</span><span class="er">\</span><span class="vs">lambda</span><span class="dv">$</span><span class="vs">=</span><span class="sc">{</span>f<span class="sc">.</span>lambda_<span class="op">**</span>(<span class="op">-</span>f.rho_)<span class="sc">:.3g}</span><span class="vs">"</span>,</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">"lognormal"</span>: (</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>            <span class="kw">lambda</span> S: norm.ppf(<span class="dv">1</span> <span class="op">-</span> S),</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>            <span class="vs">r"</span><span class="dv">$</span><span class="er">\</span><span class="vs">Phi</span><span class="dv">^</span><span class="vs">{-1}</span><span class="kw">(</span><span class="vs">1-</span><span class="er">\</span><span class="vs">hat S</span><span class="kw">(</span><span class="vs">t</span><span class="kw">))</span><span class="dv">$</span><span class="vs">"</span>,</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>            <span class="kw">lambda</span> f: (<span class="dv">1</span> <span class="op">/</span> f.sigma_, <span class="op">-</span>f.mu_ <span class="op">/</span> f.sigma_),</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>            <span class="kw">lambda</span> f: <span class="vs">fr"</span><span class="dv">$\m</span><span class="vs">u</span><span class="dv">$</span><span class="vs">=</span><span class="sc">{</span>f<span class="sc">.</span>mu_<span class="sc">:.3f}</span><span class="vs">, </span><span class="dv">$\s</span><span class="vs">igma</span><span class="dv">$</span><span class="vs">=</span><span class="sc">{</span>f<span class="sc">.</span>sigma_<span class="sc">:.3f}</span><span class="vs">"</span>,</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>        <span class="st">"loglogistic"</span>: (</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>            <span class="kw">lambda</span> S: np.log((<span class="dv">1</span> <span class="op">-</span> S) <span class="op">/</span> S),</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>            <span class="vs">r"</span><span class="dv">$</span><span class="er">\</span><span class="vs">log</span><span class="er">\</span><span class="vs">left</span><span class="pp">[(1-</span><span class="er">\</span><span class="pp">hat S(t))/</span><span class="er">\</span><span class="pp">hat S(t)</span><span class="ch">\r</span><span class="pp">ight]</span><span class="dv">$</span><span class="vs">"</span>,</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>            <span class="kw">lambda</span> f: (f.beta_, <span class="op">-</span>f.beta_ <span class="op">*</span> np.log(f.alpha_)),</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>            <span class="kw">lambda</span> f: <span class="vs">fr"</span><span class="dv">$</span><span class="ch">\a</span><span class="vs">lpha</span><span class="dv">$</span><span class="vs">=</span><span class="sc">{</span>f<span class="sc">.</span>alpha_<span class="sc">:.3f}</span><span class="vs">, </span><span class="dv">$\b</span><span class="vs">eta</span><span class="dv">$</span><span class="vs">=</span><span class="sc">{</span>f<span class="sc">.</span>beta_<span class="sc">:.3f}</span><span class="vs">"</span>,</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> distribution <span class="kw">not</span> <span class="kw">in</span> _SPECS:</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="ss">f"Unknown distribution '</span><span class="sc">{</span>distribution<span class="sc">}</span><span class="ss">'. Choose from </span><span class="sc">{</span><span class="bu">list</span>(_SPECS)<span class="sc">}</span><span class="ss">."</span>)</span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>    ytrans, ylabel, line_params, label_fmt <span class="op">=</span> _SPECS[distribution]</span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>    kmf <span class="op">=</span> KaplanMeierFitter().fit(durations, event_observed)</span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>    sf <span class="op">=</span> kmf.survival_function_.reset_index()</span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>    sf.columns <span class="op">=</span> [<span class="st">"t"</span>, <span class="st">"S"</span>]</span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>    sf <span class="op">=</span> sf[(sf[<span class="st">"t"</span>] <span class="op">&gt;</span> <span class="dv">0</span>) <span class="op">&amp;</span> (sf[<span class="st">"S"</span>] <span class="op">&gt;</span> <span class="dv">0</span>) <span class="op">&amp;</span> (sf[<span class="st">"S"</span>] <span class="op">&lt;</span> <span class="dv">1</span>)]   <span class="co"># guard log(0) / Phi^-1(0,1)</span></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> np.log(sf[<span class="st">"t"</span>].values)</span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> ytrans(sf[<span class="st">"S"</span>].values)</span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> ax <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>        _, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">7</span>, <span class="dv">5</span>))</span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>    ax.plot(x, y, <span class="st">"o"</span>, ms<span class="op">=</span><span class="dv">4</span>, alpha<span class="op">=</span><span class="fl">0.6</span>, label<span class="op">=</span><span class="st">"KM estimate"</span>)</span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> fitter <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a>        slope, intercept <span class="op">=</span> line_params(fitter)</span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a>        xx <span class="op">=</span> np.linspace(x.<span class="bu">min</span>(), x.<span class="bu">max</span>(), <span class="dv">100</span>)</span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a>        ax.plot(xx, intercept <span class="op">+</span> slope <span class="op">*</span> xx, <span class="st">"r-"</span>, lw<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="ss">f"fitted: </span><span class="sc">{</span>label_fmt(fitter)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a>    ax.set_xlabel(<span class="vs">r"</span><span class="dv">$</span><span class="er">\</span><span class="vs">log t</span><span class="dv">$</span><span class="vs">"</span>)</span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a>    ax.set_ylabel(ylabel)</span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a>    ax.set_title(<span class="ss">f"</span><span class="sc">{</span>distribution<span class="sc">.</span>capitalize()<span class="sc">}</span><span class="ss"> Probability Plot"</span>)</span>
+<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a>    ax.legend()</span>
+<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> ax</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="statistical-goodness-of-fit-test" class="level2">
+<h2 class="anchored" data-anchor-id="statistical-goodness-of-fit-test">Statistical Goodness-of-Fit Test</h2>
+<p>In addition to graphical assessment, we can also perform a formal goodness-of-fit test to evaluate how well the chosen distribution fits the observed data.</p>
+<p>The KS test is a widely used non-parametric goodness-of-fit test. It compares the empirical distribution function of the observed data with the cumulative distribution function of the fitted model. However, the standard KS test is not directly applicable to censored data, as it does not account for the censoring mechanism. To address this issue, we can use a modified version of the KS test that takes into account the censoring pattern in the data. For this blog,the modified KS test by the R package <a href="https://cran.r-project.org/package=GofCens">GofCens: Goodness-of-Fit Methods for Right-Censored Data.</a> is implemented in Python.</p>
+<p>For implementation details, check out the notes below.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Algorithm of KS Test for Right-censored Data">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Algorithm of KS Test for Right-censored Data
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>The steps for performing the modified KS test for censored data are as follows:</p>
+<ol type="1">
+<li>Get empirical (KM-based) CDF of original data</li>
+<li>Fit model to original data → θ̂</li>
+<li>Get modified KS statistic D_obs, comparing the KM-based empirical CDF (step 1) against the fitted model (step 2)</li>
+<li>Repeat B times (e.g., B = 999): 4.1 Simulate event times from the fitted model (θ̂) 4.2 Simulate censoring times from the reverse-KM estimate of the censoring distribution (fit to the original data’s censoring pattern) 4.3 Build synthetic censored data: min(event, censor),event indicator 4.4 Refit the model on the synthetic data → θ̂^(b) 4.5 Get the synthetic data’s own KM-based empirical CDF, compute the modified KS statistic D^(b)</li>
+<li>p-value = proportion of {D^(1), …, D^(B)} that are ≥ D_obs</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="GofCens Implementation of Modified KS Statistic">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>GofCens Implementation of Modified KS Statistic
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>The core challenge of the algorithm lies in step 3 to get the modified KS statistic defined per <a href="https://upcommons.upc.edu/server/api/core/bitstreams/fa25282f-4444-443e-b6a5-c4baf28cfe01/content">R package GofCens: Goodness-of-Fit Methods for Right-Censored Data.</a>:</p>
+<p><span class="math display">\[
+\hat{D}_n = \sup_{0\leq t\leq t_m}
+  \hat{S}_n(t)
+  \cdot
+  \int_0^t
+    \frac{S_0(s;\theta^*)}{\hat{S}_n(s)}
+    \;
+    d\!\left[\hat{\Lambda}_n(s) - \Lambda_0(s;\theta^*)\right]
+\]</span></p>
+<p>Instead of direct evaluation, GofCens actually estimates the quantity by the following:</p>
+<p><span class="math display">\[
+\hat{D}_n = \sqrt{n}\sup_{0\leq t\leq t_m}
+  \underbrace{\hat{S}_n(t)}_{\displaystyle\frac{\hat{S}_n(t)+S_0(t;\theta^*)}{2}}
+  \cdot
+  \int_0^t
+    \underbrace{\frac{S_0(s;\theta^*)}{\hat{S}_n(s)}}_{\displaystyle\sqrt{\tilde{G}(s^-)}}
+    \;
+    \underbrace{d\!\left[\hat{\Lambda}_n(s)-\Lambda_0(s;\theta^*)\right]}_{\displaystyle
+      \log\frac{\hat{S}_n(t_{j-1})}{\hat{S}_n(t_j)}
+      \;-\;
+      \log\frac{S_0(t_{j-1};\theta^*)}{S_0(t_j;\theta^*)}}
+\]</span></p>
+<table class="caption-top table">
+<caption>Mapping of Equation (1) terms to <code>KScens</code> code</caption>
+<colgroup>
+<col style="width: 20%">
+<col style="width: 25%">
+<col style="width: 32%">
+<col style="width: 23%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Equation (1) term</th>
+<th>Math formula</th>
+<th>Approximated Equation (1) term</th>
+<th>R Code</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(d\hat\Lambda_n(t_j)\)</span></td>
+<td><span class="math inline">\(\displaystyle\sum_{k=0}^{d_j-1}\frac{1}{r_j-k}\)</span></td>
+<td><span class="math inline">\(\log\dfrac{\hat{S}_n(t_{j-1})}{\hat{S}_n(t_j)}\)</span></td>
+<td><code>log(svbefor / survT$surv)</code></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(d\Lambda_0(t_j)\)</span></td>
+<td><span class="math inline">\(\Lambda_0(t_j;\theta^*)-\Lambda_0(t_{j-1};\theta^*)\)</span></td>
+<td><span class="math inline">\(\log\dfrac{S_0(t_{j-1};\theta^*)}{S_0(t_j;\theta^*)}\)</span></td>
+<td><code>log(SofT0(prev) / SofT0(curr))</code></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\Delta\tilde\Lambda_C(t_j)\)</span></td>
+<td><span class="math inline">\(\displaystyle\sum_{k=0}^{c_j-1}\frac{1}{r_j-d_j-k}\)</span></td>
+<td>—</td>
+<td><code>aux2[i]</code></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\tilde{G}(t_{j-1}^-)\)</span></td>
+<td><span class="math inline">\(\exp\!\left(-\displaystyle\sum_{i&lt;j}\Delta\tilde\Lambda_C(t_i)\right)\)</span></td>
+<td>—</td>
+<td><code>alfatj</code></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\sqrt{\tilde{G}(t_{j-1}^-)}\)</span></td>
+<td><span class="math inline">\(\sqrt{\exp\!\left(-\displaystyle\sum_{i&lt;j}\sum_{k=0}^{c_i-1}\frac{1}{r_i-d_i-k}\right)}\)</span></td>
+<td><span class="math inline">\(\dfrac{S_0(s)}{\hat{S}_n(s)}\)</span></td>
+<td><code>sqrt(alfatj)</code></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\dfrac{S_0(s)}{\hat{S}_n(s)}\cdot d[\hat\Lambda_n-\Lambda_0]\)</span></td>
+<td><span class="math inline">\(\sqrt{\tilde{G}(t_{j-1}^-)}\cdot\bigl(\Delta\hat\Lambda_n(t_j)-\Delta\Lambda_0(t_j)\bigr)\)</span></td>
+<td><span class="math inline">\(\sqrt{\tilde{G}(t_{j-1}^-)}\!\left(\log\dfrac{\hat{S}_n(t_{j-1})}{\hat{S}_n(t_j)}-\log\dfrac{S_0(t_{j-1})}{S_0(t_j)}\right)\)</span></td>
+<td><code>Btj - Atj</code></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\int_0^{t_k}\dfrac{S_0}{\hat{S}_n}\,d[\hat\Lambda_n-\Lambda_0]\)</span></td>
+<td><span class="math inline">\(\displaystyle\sum_{t_j\leq t_k}\sqrt{\tilde{G}(t_{j-1}^-)}\cdot\bigl(\Delta\hat\Lambda_n-\Delta\Lambda_0\bigr)(t_j)\)</span></td>
+<td><span class="math inline">\(\displaystyle\sum_{t_j\leq t_k}\sqrt{\tilde{G}(t_{j-1}^-)}\!\left(\log\dfrac{\hat{S}_n(t_{j-1})}{\hat{S}_n(t_j)}-\log\dfrac{S_0(t_{j-1})}{S_0(t_j)}\right)\)</span></td>
+<td><code>Bvec[k] - Avec[k]</code></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\hat{S}_n(t)\)</span></td>
+<td><span class="math inline">\(e^{-\hat\Lambda_n(t)}\)</span></td>
+<td><span class="math inline">\(\dfrac{\hat{S}_n(t)+S_0(t;\theta^*)}{2}\)</span></td>
+<td><code>(survT$surv + SofT0(stimes,...)) / 2</code></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\sqrt{n}\cdot\sup|\cdot|\)</span></td>
+<td><span class="math inline">\(\sqrt{n}\displaystyle\sup_{0\leq t\leq t_m}|\cdot|\)</span></td>
+<td><span class="math inline">\(\sqrt{n}\cdot\sup_{t}\left\lvert\dfrac{\hat{S}_n(t^-)+S_0(t)}{2}\cdot\sum_{t_j\leq t}\sqrt{\tilde{G}(t_{j-1}^-)}\,\Delta\right\rvert\)</span></td>
+<td><code>sqrt(n) * max(abs(c(Yl, Y, Ym)))</code></td>
+</tr>
+</tbody>
+</table>
+<blockquote class="blockquote">
+<p><strong>Key substitution.</strong> The inner weight <span class="math inline">\(S_0(s)/\hat{S}_n(s)\)</span> is replaced by <span class="math inline">\(\sqrt{\tilde{G}(t_{j-1}^-)}\)</span> (<code>sqrt(alfatj)</code>). This is the variance-stabilising choice: with <span class="math inline">\(w=\sqrt{G}\)</span> the asymptotic variance <span class="math inline">\(\int w^2\,d\Lambda_0/(S\cdot G)\)</span> reduces to <span class="math inline">\(\int d\Lambda_0/S\)</span>, removing <span class="math inline">\(G\)</span> entirely and making the Brownian bridge null distribution hold independently of the censoring pattern.</p>
+</blockquote>
+<p>The proof of the estimate involves stochastic calculus and goes beyond the scope of the blog. But here’s the exact R code and Python code.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>sumSurvT <span class="ot">&lt;-</span> <span class="fu">survfit</span>(<span class="fu">Surv</span>(dat<span class="sc">$</span>times, dat<span class="sc">$</span>cens) <span class="sc">~</span> <span class="dv">1</span>, <span class="at">stype =</span> <span class="dv">2</span>, <span class="at">ctype =</span> <span class="dv">2</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>survT <span class="ot">&lt;-</span> <span class="fu">unique</span>(<span class="fu">data.frame</span>(<span class="at">times =</span> sumSurvT<span class="sc">$</span>time, <span class="at">surv =</span> sumSurvT<span class="sc">$</span>surv))</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>stimes <span class="ot">&lt;-</span> survT<span class="sc">$</span>time</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">length</span>(stimes)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>svbefor <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, survT<span class="sc">$</span>surv[<span class="sc">-</span>m])</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>aux2 <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="dv">1</span><span class="sc">:</span>m, <span class="cf">function</span>(i) {</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (sumSurvT<span class="sc">$</span>n.censor[i] <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sum</span>(<span class="dv">1</span> <span class="sc">/</span> (sumSurvT<span class="sc">$</span>n.risk[i] <span class="sc">-</span> sumSurvT<span class="sc">$</span>n.event[i] <span class="sc">-</span> (<span class="dv">0</span><span class="sc">:</span>(sumSurvT<span class="sc">$</span>n.censor[i] <span class="sc">-</span> <span class="dv">1</span>))))</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>alfatj <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">cumsum</span>(aux2))[<span class="sc">-</span>m])</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>Atj <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="fu">c</span>(<span class="dv">1</span>, alfatj[<span class="sc">-</span>m])) <span class="sc">*</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">log</span>(<span class="fu">SofT0</span>(<span class="fu">c</span>(<span class="dv">0</span>, stimes[<span class="sc">-</span>m]), alphahat, gammahat, muhat, betahat) <span class="sc">/</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>        <span class="fu">SofT0</span>(stimes, alphahat, gammahat, muhat, betahat))</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>Atj[<span class="fu">is.nan</span>(Atj)] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>Avec <span class="ot">&lt;-</span> <span class="fu">cumsum</span>(Atj)</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>Btj <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="fu">c</span>(<span class="dv">1</span>, alfatj[<span class="sc">-</span>m])) <span class="sc">*</span> <span class="fu">log</span>(svbefor <span class="sc">/</span> survT<span class="sc">$</span>surv)</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>Btj[<span class="fu">is.nan</span>(Btj)] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>Bvec <span class="ot">&lt;-</span> <span class="fu">cumsum</span>(Btj)</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>Yl <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(n) <span class="sc">/</span> <span class="dv">2</span> <span class="sc">*</span> (svbefor <span class="sc">+</span> <span class="fu">SofT0</span>(stimes, alphahat, gammahat, muhat, betahat)) <span class="sc">*</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>  (Avec <span class="sc">-</span> <span class="fu">c</span>(<span class="dv">0</span>, Bvec[<span class="sc">-</span>m])) <span class="sc">*</span> <span class="fu">ifelse</span>(Bvec <span class="sc">&gt;</span> <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>)</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span>  <span class="fu">sqrt</span>(n) <span class="sc">/</span> <span class="dv">2</span> <span class="sc">*</span> (survT<span class="sc">$</span>surv <span class="sc">+</span> <span class="fu">SofT0</span>(stimes, alphahat, gammahat, muhat, betahat)) <span class="sc">*</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>  (Avec <span class="sc">-</span> Bvec) <span class="sc">*</span> <span class="fu">ifelse</span>(Bvec <span class="sc">&gt;</span> <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>)</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>Ym <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(n) <span class="sc">/</span> <span class="dv">2</span> <span class="sc">*</span> (survT<span class="sc">$</span>surv[m] <span class="sc">+</span> <span class="fu">SofT0</span>(stimes[m], alphahat, gammahat, muhat,</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>                                           betahat)) <span class="sc">*</span> (Avec[m] <span class="sc">-</span> Bvec[m])</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>A <span class="ot">&lt;-</span> <span class="fu">max</span>(<span class="fu">abs</span>(<span class="fu">c</span>(Yl, Y, Ym)))</span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a><span class="fu">return</span>(A)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Now the Python re-implementation:</p>
+<div id="0a5ea481" class="cell" data-execution_count="7">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lifelines <span class="im">import</span> KaplanMeierFitter</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> modified_ks_statistic(times, events, param_survival_fn):</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co">    Fleming et al. (1980) modified KS statistic for right-censored data,</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co">    replicating GofCens::KScens (stype=2, ctype=2).</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co">    times  : observed durations</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co">    events : 1 = event, 0 = censored</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="co">    param_survival_fn : vectorized callable S0(t)</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    times <span class="op">=</span> np.asarray(times, dtype<span class="op">=</span><span class="bu">float</span>)</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    events <span class="op">=</span> np.asarray(events, dtype<span class="op">=</span><span class="bu">int</span>)</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    n <span class="op">=</span> <span class="bu">len</span>(times)</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    et <span class="op">=</span> KaplanMeierFitter().fit(times, events).event_table</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    et <span class="op">=</span> et[et.index <span class="op">&gt;</span> <span class="dv">0</span>]</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    stimes   <span class="op">=</span> et.index.values.astype(<span class="bu">float</span>)</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    n_risk   <span class="op">=</span> et[<span class="st">"at_risk"</span>].values.astype(<span class="bu">float</span>)</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    n_event  <span class="op">=</span> et[<span class="st">"observed"</span>].values.astype(<span class="bu">float</span>)</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    n_censor <span class="op">=</span> et[<span class="st">"censored"</span>].values.astype(<span class="bu">float</span>)</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    m <span class="op">=</span> <span class="bu">len</span>(stimes)</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>    <span class="co"># --- Nelson-Aalen, Fleming-Harrington tie correction (ctype=2) ---</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>    dH <span class="op">=</span> np.array([</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>        np.<span class="bu">sum</span>(<span class="fl">1.0</span> <span class="op">/</span> (n_risk[i] <span class="op">-</span> np.arange(n_event[i]))) <span class="cf">if</span> n_event[i] <span class="op">&gt;</span> <span class="dv">0</span> <span class="cf">else</span> <span class="fl">0.0</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(m)</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>    ])</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>    <span class="co"># stype=2: S_hat = exp(-H_hat) -- strictly positive, unlike product-limit</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>    surv <span class="op">=</span> np.exp(<span class="op">-</span>np.cumsum(dH))</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>    svbefor <span class="op">=</span> np.concatenate(([<span class="fl">1.0</span>], surv[:<span class="op">-</span><span class="dv">1</span>]))</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>    <span class="co"># --- estimated censoring survival G_hat(t_{j-1}) ---</span></span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>    denom <span class="op">=</span> n_risk <span class="op">-</span> n_event</span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>    hazard_incre <span class="op">=</span> np.zeros(m)</span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(m):</span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> n_censor[i] <span class="op">&gt;</span> <span class="dv">0</span> <span class="kw">and</span> denom[i] <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>            d <span class="op">=</span> denom[i] <span class="op">-</span> np.arange(n_censor[i])</span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>            hazard_incre[i] <span class="op">=</span> np.<span class="bu">sum</span>(<span class="fl">1.0</span> <span class="op">/</span> d[d <span class="op">&gt;</span> <span class="dv">0</span>]) <span class="cf">if</span> np.<span class="bu">any</span>(d <span class="op">&gt;</span> <span class="dv">0</span>) <span class="cf">else</span> <span class="fl">0.0</span></span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>    G_hat <span class="op">=</span> np.exp(<span class="op">-</span>np.concatenate(([<span class="fl">0.0</span>], np.cumsum(hazard_incre)))[:<span class="op">-</span><span class="dv">1</span>])</span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>    w <span class="op">=</span> np.sqrt(np.concatenate(([<span class="fl">1.0</span>], G_hat[:<span class="op">-</span><span class="dv">1</span>])))</span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>    S0_s <span class="op">=</span> np.asarray(param_survival_fn(stimes), dtype<span class="op">=</span><span class="bu">float</span>)</span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>    S0_p <span class="op">=</span> np.asarray(param_survival_fn(np.concatenate(([<span class="fl">0.0</span>], stimes[:<span class="op">-</span><span class="dv">1</span>]))), dtype<span class="op">=</span><span class="bu">float</span>)</span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> safe_log_ratio(num, den):</span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a>        out <span class="op">=</span> np.zeros_like(num)</span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>        ok <span class="op">=</span> (num <span class="op">&gt;</span> <span class="dv">0</span>) <span class="op">&amp;</span> (den <span class="op">&gt;</span> <span class="dv">0</span>)</span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a>        out[ok] <span class="op">=</span> np.log(num[ok] <span class="op">/</span> den[ok])</span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> out</span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a>    Avec <span class="op">=</span> np.cumsum(w <span class="op">*</span> safe_log_ratio(S0_p, S0_s))     <span class="co"># parametric H0</span></span>
+<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a>    Bvec <span class="op">=</span> np.cumsum(w <span class="op">*</span> safe_log_ratio(svbefor, surv))  <span class="co"># empirical  H_hat</span></span>
+<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a>    ind <span class="op">=</span> (Bvec <span class="op">&gt;</span> <span class="dv">0</span>).astype(<span class="bu">float</span>)</span>
+<span id="cb8-58"><a href="#cb8-58" aria-hidden="true" tabindex="-1"></a>    Yl <span class="op">=</span> np.sqrt(n)<span class="op">/</span><span class="dv">2</span> <span class="op">*</span> (svbefor <span class="op">+</span> S0_s) <span class="op">*</span> (Avec <span class="op">-</span> np.concatenate(([<span class="fl">0.0</span>], Bvec[:<span class="op">-</span><span class="dv">1</span>]))) <span class="op">*</span> ind</span>
+<span id="cb8-59"><a href="#cb8-59" aria-hidden="true" tabindex="-1"></a>    Y  <span class="op">=</span> np.sqrt(n)<span class="op">/</span><span class="dv">2</span> <span class="op">*</span> (surv <span class="op">+</span> S0_s) <span class="op">*</span> (Avec <span class="op">-</span> Bvec) <span class="op">*</span> ind</span>
+<span id="cb8-60"><a href="#cb8-60" aria-hidden="true" tabindex="-1"></a>    Ym <span class="op">=</span> np.sqrt(n)<span class="op">/</span><span class="dv">2</span> <span class="op">*</span> (surv[<span class="op">-</span><span class="dv">1</span>] <span class="op">+</span> S0_s[<span class="op">-</span><span class="dv">1</span>]) <span class="op">*</span> (Avec[<span class="op">-</span><span class="dv">1</span>] <span class="op">-</span> Bvec[<span class="op">-</span><span class="dv">1</span>])</span>
+<span id="cb8-61"><a href="#cb8-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-62"><a href="#cb8-62" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">float</span>(np.<span class="bu">max</span>(np.<span class="bu">abs</span>(np.concatenate((Yl, Y, [Ym])))))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Python Implementation of Modified KS Test">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Python Implementation of Modified KS Test
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div id="02e45ad8" class="cell" data-execution_count="8">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">"""</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co">Full modified Kolmogorov-Smirnov test for right-censored data,</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co">replicating GofCens::KScens (Besalu et al. 2025, The R Journal 17(3)).</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co">"""</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lifelines <span class="im">import</span> (KaplanMeierFitter, ExponentialFitter, WeibullFitter,LogNormalFitter, LogLogisticFitter)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.stats <span class="im">import</span> norm</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co"># ---------------------------------------------------------------- Step 2</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> fit_distribution(durations, event_observed, distribution):</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    dist_register <span class="op">=</span> {</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">'exponential'</span>: ExponentialFitter(),</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">'weibull'</span>: WeibullFitter(),</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">'lognormal'</span>: LogNormalFitter(),</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>        <span class="st">'loglogistic'</span>: LogLogisticFitter(),</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> distribution <span class="kw">not</span> <span class="kw">in</span> dist_register:</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="ss">f"Unknown distribution '</span><span class="sc">{</span>distribution<span class="sc">}</span><span class="ss">'. Choose from </span><span class="sc">{</span><span class="bu">list</span>(dist_register)<span class="sc">}</span><span class="ss">."</span>)</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    fitter <span class="op">=</span> dist_register[distribution]</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    fitter.fit(durations<span class="op">=</span>durations, event_observed<span class="op">=</span>event_observed)</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> fitter</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _S0_from_fitter(fitter):</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Any fitted lifelines univariate fitter already knows its own S(t)."""</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="kw">lambda</span> t: fitter.survival_function_at_times(np.asarray(t, dtype<span class="op">=</span><span class="bu">float</span>)).values</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a><span class="co"># ---------------------------------------------------------------- Step 3</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> modified_ks_statistic(times, events, param_survival_fn):</span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a><span class="co">    Fleming et al. (1980) modified KS statistic for right-censored data,</span></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a><span class="co">    replicating GofCens::KScens (stype=2, ctype=2).</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a><span class="co">    times  : observed durations</span></span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a><span class="co">    events : 1 = event, 0 = censored</span></span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a><span class="co">    param_survival_fn : vectorized callable S0(t)</span></span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a>    times <span class="op">=</span> np.asarray(times, dtype<span class="op">=</span><span class="bu">float</span>)</span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a>    events <span class="op">=</span> np.asarray(events, dtype<span class="op">=</span><span class="bu">int</span>)</span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a>    n <span class="op">=</span> <span class="bu">len</span>(times)</span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a>    et <span class="op">=</span> KaplanMeierFitter().fit(times, events).event_table</span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a>    et <span class="op">=</span> et[et.index <span class="op">&gt;</span> <span class="dv">0</span>]</span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a>    stimes   <span class="op">=</span> et.index.values.astype(<span class="bu">float</span>)</span>
+<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a>    n_risk   <span class="op">=</span> et[<span class="st">"at_risk"</span>].values.astype(<span class="bu">float</span>)</span>
+<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a>    n_event  <span class="op">=</span> et[<span class="st">"observed"</span>].values.astype(<span class="bu">float</span>)</span>
+<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a>    n_censor <span class="op">=</span> et[<span class="st">"censored"</span>].values.astype(<span class="bu">float</span>)</span>
+<span id="cb9-49"><a href="#cb9-49" aria-hidden="true" tabindex="-1"></a>    m <span class="op">=</span> <span class="bu">len</span>(stimes)</span>
+<span id="cb9-50"><a href="#cb9-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-51"><a href="#cb9-51" aria-hidden="true" tabindex="-1"></a>    <span class="co"># --- Nelson-Aalen, Fleming-Harrington tie correction (ctype=2) ---</span></span>
+<span id="cb9-52"><a href="#cb9-52" aria-hidden="true" tabindex="-1"></a>    dH <span class="op">=</span> np.array([</span>
+<span id="cb9-53"><a href="#cb9-53" aria-hidden="true" tabindex="-1"></a>        np.<span class="bu">sum</span>(<span class="fl">1.0</span> <span class="op">/</span> (n_risk[i] <span class="op">-</span> np.arange(n_event[i]))) <span class="cf">if</span> n_event[i] <span class="op">&gt;</span> <span class="dv">0</span> <span class="cf">else</span> <span class="fl">0.0</span></span>
+<span id="cb9-54"><a href="#cb9-54" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(m)</span>
+<span id="cb9-55"><a href="#cb9-55" aria-hidden="true" tabindex="-1"></a>    ])</span>
+<span id="cb9-56"><a href="#cb9-56" aria-hidden="true" tabindex="-1"></a>    <span class="co"># stype=2: S_hat = exp(-H_hat) -- strictly positive, unlike product-limit</span></span>
+<span id="cb9-57"><a href="#cb9-57" aria-hidden="true" tabindex="-1"></a>    surv <span class="op">=</span> np.exp(<span class="op">-</span>np.cumsum(dH))</span>
+<span id="cb9-58"><a href="#cb9-58" aria-hidden="true" tabindex="-1"></a>    svbefor <span class="op">=</span> np.concatenate(([<span class="fl">1.0</span>], surv[:<span class="op">-</span><span class="dv">1</span>]))</span>
+<span id="cb9-59"><a href="#cb9-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-60"><a href="#cb9-60" aria-hidden="true" tabindex="-1"></a>    <span class="co"># --- estimated censoring survival G_hat(t_{j-1}) ---</span></span>
+<span id="cb9-61"><a href="#cb9-61" aria-hidden="true" tabindex="-1"></a>    denom <span class="op">=</span> n_risk <span class="op">-</span> n_event</span>
+<span id="cb9-62"><a href="#cb9-62" aria-hidden="true" tabindex="-1"></a>    hazard_incre <span class="op">=</span> np.zeros(m)</span>
+<span id="cb9-63"><a href="#cb9-63" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(m):</span>
+<span id="cb9-64"><a href="#cb9-64" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> n_censor[i] <span class="op">&gt;</span> <span class="dv">0</span> <span class="kw">and</span> denom[i] <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb9-65"><a href="#cb9-65" aria-hidden="true" tabindex="-1"></a>            d <span class="op">=</span> denom[i] <span class="op">-</span> np.arange(n_censor[i])</span>
+<span id="cb9-66"><a href="#cb9-66" aria-hidden="true" tabindex="-1"></a>            hazard_incre[i] <span class="op">=</span> np.<span class="bu">sum</span>(<span class="fl">1.0</span> <span class="op">/</span> d[d <span class="op">&gt;</span> <span class="dv">0</span>]) <span class="cf">if</span> np.<span class="bu">any</span>(d <span class="op">&gt;</span> <span class="dv">0</span>) <span class="cf">else</span> <span class="fl">0.0</span></span>
+<span id="cb9-67"><a href="#cb9-67" aria-hidden="true" tabindex="-1"></a>    G_hat <span class="op">=</span> np.exp(<span class="op">-</span>np.concatenate(([<span class="fl">0.0</span>], np.cumsum(hazard_incre)))[:<span class="op">-</span><span class="dv">1</span>])</span>
+<span id="cb9-68"><a href="#cb9-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-69"><a href="#cb9-69" aria-hidden="true" tabindex="-1"></a>    w <span class="op">=</span> np.sqrt(np.concatenate(([<span class="fl">1.0</span>], G_hat[:<span class="op">-</span><span class="dv">1</span>])))</span>
+<span id="cb9-70"><a href="#cb9-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-71"><a href="#cb9-71" aria-hidden="true" tabindex="-1"></a>    S0_s <span class="op">=</span> np.asarray(param_survival_fn(stimes), dtype<span class="op">=</span><span class="bu">float</span>)</span>
+<span id="cb9-72"><a href="#cb9-72" aria-hidden="true" tabindex="-1"></a>    S0_p <span class="op">=</span> np.asarray(param_survival_fn(np.concatenate(([<span class="fl">0.0</span>], stimes[:<span class="op">-</span><span class="dv">1</span>]))), dtype<span class="op">=</span><span class="bu">float</span>)</span>
+<span id="cb9-73"><a href="#cb9-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-74"><a href="#cb9-74" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> safe_log_ratio(num, den):</span>
+<span id="cb9-75"><a href="#cb9-75" aria-hidden="true" tabindex="-1"></a>        out <span class="op">=</span> np.zeros_like(num)</span>
+<span id="cb9-76"><a href="#cb9-76" aria-hidden="true" tabindex="-1"></a>        ok <span class="op">=</span> (num <span class="op">&gt;</span> <span class="dv">0</span>) <span class="op">&amp;</span> (den <span class="op">&gt;</span> <span class="dv">0</span>)</span>
+<span id="cb9-77"><a href="#cb9-77" aria-hidden="true" tabindex="-1"></a>        out[ok] <span class="op">=</span> np.log(num[ok] <span class="op">/</span> den[ok])</span>
+<span id="cb9-78"><a href="#cb9-78" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> out</span>
+<span id="cb9-79"><a href="#cb9-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-80"><a href="#cb9-80" aria-hidden="true" tabindex="-1"></a>    Avec <span class="op">=</span> np.cumsum(w <span class="op">*</span> safe_log_ratio(S0_p, S0_s))     <span class="co"># parametric H0</span></span>
+<span id="cb9-81"><a href="#cb9-81" aria-hidden="true" tabindex="-1"></a>    Bvec <span class="op">=</span> np.cumsum(w <span class="op">*</span> safe_log_ratio(svbefor, surv))  <span class="co"># empirical  H_hat</span></span>
+<span id="cb9-82"><a href="#cb9-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-83"><a href="#cb9-83" aria-hidden="true" tabindex="-1"></a>    ind <span class="op">=</span> (Bvec <span class="op">&gt;</span> <span class="dv">0</span>).astype(<span class="bu">float</span>)</span>
+<span id="cb9-84"><a href="#cb9-84" aria-hidden="true" tabindex="-1"></a>    Yl <span class="op">=</span> np.sqrt(n)<span class="op">/</span><span class="dv">2</span> <span class="op">*</span> (svbefor <span class="op">+</span> S0_s) <span class="op">*</span> (Avec <span class="op">-</span> np.concatenate(([<span class="fl">0.0</span>], Bvec[:<span class="op">-</span><span class="dv">1</span>]))) <span class="op">*</span> ind</span>
+<span id="cb9-85"><a href="#cb9-85" aria-hidden="true" tabindex="-1"></a>    Y  <span class="op">=</span> np.sqrt(n)<span class="op">/</span><span class="dv">2</span> <span class="op">*</span> (surv <span class="op">+</span> S0_s) <span class="op">*</span> (Avec <span class="op">-</span> Bvec) <span class="op">*</span> ind</span>
+<span id="cb9-86"><a href="#cb9-86" aria-hidden="true" tabindex="-1"></a>    Ym <span class="op">=</span> np.sqrt(n)<span class="op">/</span><span class="dv">2</span> <span class="op">*</span> (surv[<span class="op">-</span><span class="dv">1</span>] <span class="op">+</span> S0_s[<span class="op">-</span><span class="dv">1</span>]) <span class="op">*</span> (Avec[<span class="op">-</span><span class="dv">1</span>] <span class="op">-</span> Bvec[<span class="op">-</span><span class="dv">1</span>])</span>
+<span id="cb9-87"><a href="#cb9-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-88"><a href="#cb9-88" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">float</span>(np.<span class="bu">max</span>(np.<span class="bu">abs</span>(np.concatenate((Yl, Y, [Ym])))))</span>
+<span id="cb9-89"><a href="#cb9-89" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-90"><a href="#cb9-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-91"><a href="#cb9-91" aria-hidden="true" tabindex="-1"></a><span class="co"># ---------------------------------------------------------------- Step 4.1 / 4.2 helpers</span></span>
+<span id="cb9-92"><a href="#cb9-92" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _simulate_event_times(fitter, distribution, u):</span>
+<span id="cb9-93"><a href="#cb9-93" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Inverse-CDF draw from the fitted null, using each fitter's own parameterization."""</span></span>
+<span id="cb9-94"><a href="#cb9-94" aria-hidden="true" tabindex="-1"></a>    u <span class="op">=</span> np.asarray(u, dtype<span class="op">=</span><span class="bu">float</span>)</span>
+<span id="cb9-95"><a href="#cb9-95" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> distribution <span class="op">==</span> <span class="st">'exponential'</span>:</span>
+<span id="cb9-96"><a href="#cb9-96" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="op">-</span>fitter.lambda_ <span class="op">*</span> np.log(u)</span>
+<span id="cb9-97"><a href="#cb9-97" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> distribution <span class="op">==</span> <span class="st">'weibull'</span>:</span>
+<span id="cb9-98"><a href="#cb9-98" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> fitter.lambda_ <span class="op">*</span> (<span class="op">-</span>np.log(u)) <span class="op">**</span> (<span class="fl">1.0</span> <span class="op">/</span> fitter.rho_)</span>
+<span id="cb9-99"><a href="#cb9-99" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> distribution <span class="op">==</span> <span class="st">'lognormal'</span>:</span>
+<span id="cb9-100"><a href="#cb9-100" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> np.exp(fitter.mu_ <span class="op">+</span> fitter.sigma_ <span class="op">*</span> norm.ppf(<span class="dv">1</span> <span class="op">-</span> u))</span>
+<span id="cb9-101"><a href="#cb9-101" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> distribution <span class="op">==</span> <span class="st">'loglogistic'</span>:</span>
+<span id="cb9-102"><a href="#cb9-102" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> fitter.alpha_ <span class="op">*</span> ((<span class="dv">1</span> <span class="op">-</span> u) <span class="op">/</span> u) <span class="op">**</span> (<span class="fl">1.0</span> <span class="op">/</span> fitter.beta_)</span>
+<span id="cb9-103"><a href="#cb9-103" aria-hidden="true" tabindex="-1"></a>    <span class="cf">raise</span> <span class="pp">ValueError</span>(<span class="ss">f"No sampler registered for '</span><span class="sc">{</span>distribution<span class="sc">}</span><span class="ss">'"</span>)</span>
+<span id="cb9-104"><a href="#cb9-104" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-105"><a href="#cb9-105" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-106"><a href="#cb9-106" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _sample_from_km(km_fitter, u):</span>
+<span id="cb9-107"><a href="#cb9-107" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Inverse-transform sampling from a fitted KaplanMeierFitter step function."""</span></span>
+<span id="cb9-108"><a href="#cb9-108" aria-hidden="true" tabindex="-1"></a>    surv <span class="op">=</span> km_fitter.survival_function_</span>
+<span id="cb9-109"><a href="#cb9-109" aria-hidden="true" tabindex="-1"></a>    t_grid <span class="op">=</span> surv.index.values</span>
+<span id="cb9-110"><a href="#cb9-110" aria-hidden="true" tabindex="-1"></a>    S_vals <span class="op">=</span> surv.iloc[:, <span class="dv">0</span>].values</span>
+<span id="cb9-111"><a href="#cb9-111" aria-hidden="true" tabindex="-1"></a>    target <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> np.asarray(u, dtype<span class="op">=</span><span class="bu">float</span>)</span>
+<span id="cb9-112"><a href="#cb9-112" aria-hidden="true" tabindex="-1"></a>    idx <span class="op">=</span> np.searchsorted(<span class="op">-</span>S_vals, <span class="op">-</span>target, side<span class="op">=</span><span class="st">"left"</span>)</span>
+<span id="cb9-113"><a href="#cb9-113" aria-hidden="true" tabindex="-1"></a>    out <span class="op">=</span> np.full_like(target, np.inf, dtype<span class="op">=</span><span class="bu">float</span>)</span>
+<span id="cb9-114"><a href="#cb9-114" aria-hidden="true" tabindex="-1"></a>    valid <span class="op">=</span> idx <span class="op">&lt;</span> <span class="bu">len</span>(t_grid)</span>
+<span id="cb9-115"><a href="#cb9-115" aria-hidden="true" tabindex="-1"></a>    out[valid] <span class="op">=</span> t_grid[idx[valid]]</span>
+<span id="cb9-116"><a href="#cb9-116" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> out</span>
+<span id="cb9-117"><a href="#cb9-117" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-118"><a href="#cb9-118" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-119"><a href="#cb9-119" aria-hidden="true" tabindex="-1"></a><span class="co"># ---------------------------------------------------------------- Steps 4-5</span></span>
+<span id="cb9-120"><a href="#cb9-120" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> ks_censored_test(durations, event_observed, distribution, B<span class="op">=</span><span class="dv">999</span>, rng<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb9-121"><a href="#cb9-121" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb9-122"><a href="#cb9-122" aria-hidden="true" tabindex="-1"></a><span class="co">    Modified KS test for right-censored data (Fleming et al. 1980 / GofCens::KScens).</span></span>
+<span id="cb9-123"><a href="#cb9-123" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-124"><a href="#cb9-124" aria-hidden="true" tabindex="-1"></a><span class="co">    Returns dict with D_obs, p_value, fitted params, and the bootstrap distribution.</span></span>
+<span id="cb9-125"><a href="#cb9-125" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb9-126"><a href="#cb9-126" aria-hidden="true" tabindex="-1"></a>    durations <span class="op">=</span> np.asarray(durations, dtype<span class="op">=</span><span class="bu">float</span>)</span>
+<span id="cb9-127"><a href="#cb9-127" aria-hidden="true" tabindex="-1"></a>    event_observed <span class="op">=</span> np.asarray(event_observed, dtype<span class="op">=</span><span class="bu">int</span>)</span>
+<span id="cb9-128"><a href="#cb9-128" aria-hidden="true" tabindex="-1"></a>    n <span class="op">=</span> <span class="bu">len</span>(durations)</span>
+<span id="cb9-129"><a href="#cb9-129" aria-hidden="true" tabindex="-1"></a>    rng <span class="op">=</span> np.random.default_rng() <span class="cf">if</span> rng <span class="kw">is</span> <span class="va">None</span> <span class="cf">else</span> rng</span>
+<span id="cb9-130"><a href="#cb9-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-131"><a href="#cb9-131" aria-hidden="true" tabindex="-1"></a>    <span class="co"># --- Step 2: fit null model, Step 3: observed statistic ---</span></span>
+<span id="cb9-132"><a href="#cb9-132" aria-hidden="true" tabindex="-1"></a>    fitter <span class="op">=</span> fit_distribution(durations, event_observed, distribution)</span>
+<span id="cb9-133"><a href="#cb9-133" aria-hidden="true" tabindex="-1"></a>    S0 <span class="op">=</span> _S0_from_fitter(fitter)</span>
+<span id="cb9-134"><a href="#cb9-134" aria-hidden="true" tabindex="-1"></a>    D_obs <span class="op">=</span> modified_ks_statistic(durations, event_observed, S0)</span>
+<span id="cb9-135"><a href="#cb9-135" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-136"><a href="#cb9-136" aria-hidden="true" tabindex="-1"></a>    <span class="co"># --- reverse-KM estimate of the censoring distribution (fixed across replicates) ---</span></span>
+<span id="cb9-137"><a href="#cb9-137" aria-hidden="true" tabindex="-1"></a>    censKM <span class="op">=</span> KaplanMeierFitter().fit(durations, <span class="dv">1</span> <span class="op">-</span> event_observed)</span>
+<span id="cb9-138"><a href="#cb9-138" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-139"><a href="#cb9-139" aria-hidden="true" tabindex="-1"></a>    <span class="co"># --- Step 4: bootstrap ---</span></span>
+<span id="cb9-140"><a href="#cb9-140" aria-hidden="true" tabindex="-1"></a>    D_boot <span class="op">=</span> np.empty(B)</span>
+<span id="cb9-141"><a href="#cb9-141" aria-hidden="true" tabindex="-1"></a>    b <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb9-142"><a href="#cb9-142" aria-hidden="true" tabindex="-1"></a>    attempts <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb9-143"><a href="#cb9-143" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> b <span class="op">&lt;</span> B <span class="kw">and</span> attempts <span class="op">&lt;</span> <span class="dv">10</span> <span class="op">*</span> B:</span>
+<span id="cb9-144"><a href="#cb9-144" aria-hidden="true" tabindex="-1"></a>        attempts <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb9-145"><a href="#cb9-145" aria-hidden="true" tabindex="-1"></a>        u_t <span class="op">=</span> rng.uniform(size<span class="op">=</span>n)</span>
+<span id="cb9-146"><a href="#cb9-146" aria-hidden="true" tabindex="-1"></a>        u_c <span class="op">=</span> rng.uniform(size<span class="op">=</span>n)</span>
+<span id="cb9-147"><a href="#cb9-147" aria-hidden="true" tabindex="-1"></a>        T_b <span class="op">=</span> _simulate_event_times(fitter, distribution, u_t)</span>
+<span id="cb9-148"><a href="#cb9-148" aria-hidden="true" tabindex="-1"></a>        C_b <span class="op">=</span> _sample_from_km(censKM, u_c)</span>
+<span id="cb9-149"><a href="#cb9-149" aria-hidden="true" tabindex="-1"></a>        X_b <span class="op">=</span> np.minimum(T_b, C_b)</span>
+<span id="cb9-150"><a href="#cb9-150" aria-hidden="true" tabindex="-1"></a>        delta_b <span class="op">=</span> (T_b <span class="op">&lt;</span> C_b).astype(<span class="bu">int</span>)</span>
+<span id="cb9-151"><a href="#cb9-151" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-152"><a href="#cb9-152" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> delta_b.<span class="bu">sum</span>() <span class="op">&lt;</span> <span class="dv">2</span>:            <span class="co"># refit needs at least a couple of events</span></span>
+<span id="cb9-153"><a href="#cb9-153" aria-hidden="true" tabindex="-1"></a>            <span class="cf">continue</span></span>
+<span id="cb9-154"><a href="#cb9-154" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span>:</span>
+<span id="cb9-155"><a href="#cb9-155" aria-hidden="true" tabindex="-1"></a>            fitter_b <span class="op">=</span> fit_distribution(X_b, delta_b, distribution)</span>
+<span id="cb9-156"><a href="#cb9-156" aria-hidden="true" tabindex="-1"></a>            S0_b <span class="op">=</span> _S0_from_fitter(fitter_b)</span>
+<span id="cb9-157"><a href="#cb9-157" aria-hidden="true" tabindex="-1"></a>            D_boot[b] <span class="op">=</span> modified_ks_statistic(X_b, delta_b, S0_b)</span>
+<span id="cb9-158"><a href="#cb9-158" aria-hidden="true" tabindex="-1"></a>        <span class="cf">except</span> <span class="pp">Exception</span>:</span>
+<span id="cb9-159"><a href="#cb9-159" aria-hidden="true" tabindex="-1"></a>            <span class="cf">continue</span></span>
+<span id="cb9-160"><a href="#cb9-160" aria-hidden="true" tabindex="-1"></a>        b <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb9-161"><a href="#cb9-161" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-162"><a href="#cb9-162" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> b <span class="op">&lt;</span> B:</span>
+<span id="cb9-163"><a href="#cb9-163" aria-hidden="true" tabindex="-1"></a>        D_boot <span class="op">=</span> D_boot[:b]</span>
+<span id="cb9-164"><a href="#cb9-164" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-165"><a href="#cb9-165" aria-hidden="true" tabindex="-1"></a>    <span class="co"># --- Step 5: p-value (Besalu et al. 2025, matches paper's +1/+1 correction) ---</span></span>
+<span id="cb9-166"><a href="#cb9-166" aria-hidden="true" tabindex="-1"></a>    p_value <span class="op">=</span> (np.<span class="bu">sum</span>(D_obs <span class="op">&lt;=</span> D_boot) <span class="op">+</span> <span class="dv">1</span>) <span class="op">/</span> (<span class="bu">len</span>(D_boot) <span class="op">+</span> <span class="dv">1</span>)</span>
+<span id="cb9-167"><a href="#cb9-167" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-168"><a href="#cb9-168" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {</span>
+<span id="cb9-169"><a href="#cb9-169" aria-hidden="true" tabindex="-1"></a>        <span class="st">"D_obs"</span>: D_obs,</span>
+<span id="cb9-170"><a href="#cb9-170" aria-hidden="true" tabindex="-1"></a>        <span class="st">"p_value"</span>: p_value,</span>
+<span id="cb9-171"><a href="#cb9-171" aria-hidden="true" tabindex="-1"></a>        <span class="st">"params"</span>: <span class="bu">dict</span>(fitter.params_),</span>
+<span id="cb9-172"><a href="#cb9-172" aria-hidden="true" tabindex="-1"></a>        <span class="st">"n_boot"</span>: <span class="bu">len</span>(D_boot),</span>
+<span id="cb9-173"><a href="#cb9-173" aria-hidden="true" tabindex="-1"></a>        <span class="st">"D_boot"</span>: D_boot,</span>
+<span id="cb9-174"><a href="#cb9-174" aria-hidden="true" tabindex="-1"></a>    }</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="case-study" class="level2">
+<h2 class="anchored" data-anchor-id="case-study">Case Study</h2>
+<p>We now apply the concepts discussed above to a real-world dataset which contains survival times and censoring information for patients with a specific medical condition. Three distributions, Weibull, Log-normal, and Log-logistic, are fit to the data, and their goodness-of-fit is assessed using both graphs and the modified KS test (p-value printed next to the plot title). According to the KS test results, Weibull and Log-normal don’t seem to be a good fit despite their moderate graphical fit. The Log-logistic distribution seems plausible.</p>
+<div id="7213f60f" class="cell" data-execution_count="9">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gof_assessment(durations, event_observed, distribution, B<span class="op">=</span><span class="dv">999</span>, ax<span class="op">=</span><span class="va">None</span>, rng<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># fit once, share</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    fitter <span class="op">=</span> fit_distribution(durations, event_observed, distribution)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># KS test (uses fitter internally via ks_censored_test, but you could</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># refactor to accept a pre-fitted fitter to avoid the second fit)</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    result <span class="op">=</span> ks_censored_test(durations, event_observed, distribution, B<span class="op">=</span>B, rng<span class="op">=</span>rng)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># probability plot, passing the fitter so the theoretical line is drawn</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    ax <span class="op">=</span> probability_plot(durations, event_observed, distribution, fitter<span class="op">=</span>fitter, ax<span class="op">=</span>ax)</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># annotate the plot with the p-value</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    ax.set_title(</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"</span><span class="sc">{</span>distribution<span class="sc">.</span>capitalize()<span class="sc">}</span><span class="ss"> Probability Plot  "</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"(KS p = </span><span class="sc">{</span>result[<span class="st">'p_value'</span>]<span class="sc">:.3f}</span><span class="ss">, n_boot=</span><span class="sc">{</span>result[<span class="st">'n_boot'</span>]<span class="sc">}</span><span class="ss">)"</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> ax</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div id="fig-gof-comparison" class="quarto-layout-panel">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-gof-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: flex-start;">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="weibull_gof.png" class="lightbox" data-gallery="quarto-lightbox-gallery-6" title="Weibull"><img src="weibull_gof.png" class="img-fluid figure-img"></a></p>
+<figcaption>Weibull</figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: flex-start;">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="lognormal_gof.png" class="lightbox" data-gallery="quarto-lightbox-gallery-7" title="Log-normal"><img src="lognormal_gof.png" class="img-fluid figure-img"></a></p>
+<figcaption>Log-normal</figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: flex-start;">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="loglogistic_gof.png" class="lightbox" data-gallery="quarto-lightbox-gallery-8" title="Log-logistic"><img src="loglogistic_gof.png" class="img-fluid figure-img"></a></p>
+<figcaption>Log-logistic</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-gof-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: Goodness-of-fit comparison: probability plots with KS test p-values
+</figcaption>
+</figure>
+</div>
+<p>It is worth noting that so far everything has been performed on the dataset level, no individual variables are considered yet. Passing a population-level goodness-of-fit test doesn’t guarantee the same result for the population’s subgroup based on the values of variables. That’s where we will pick next — building and validating Proportional Hazards (PH) and Accelerated Failure Time (AFT) models.</p>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>In this post, we discussed several commonly used parametric distributions — exponential, Weibull, Gompertz, log-normal, and log-logistic, and applied both a graphical probability plot and a modified KS test.</p>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+<ul>
+<li>F. E. Harrell Jr.&nbsp;<a href="https://link.springer.com/book/10.1007/978-3-319-19425-7">Regression Modeling Strategies: With Applications to Linear Models, Logistic and Ordinal Regression, and Survival Analysis.</a> Springer, 2015.</li>
+<li>D. G. Kleinbaum, M. Klein. <a href="https://link.springer.com/book/10.1007/978-1-4419-6646-9">Survival Analysis: A Self-Learning Text, Third Edition.</a> Springer, 2012.</li>
+<li>T. R. Fleming, J. R. O’Fallon, P. C. O’Brien, D. P. Harrington. <a href="https://doi.org/10.2307/2556114">Modified Kolmogorov-Smirnov test procedures with application to arbitrarily right-censored data.</a> Biometrics, 36(4), 607-625, 1980.</li>
+<li>B. Efron. Censored data and the bootstrap. Journal of the American Statistical Association, 76(374), 312-319, 1981.</li>
+<li>M. Besalú, K. Langohr, M. Francisco, A. Garcia-Fernández, G. Gómez Melis. <a href="https://upcommons.upc.edu/server/api/core/bitstreams/fa25282f-4444-443e-b6a5-c4baf28cfe01/content">R package GofCens: Goodness-of-Fit Methods for Right-Censored Data.</a> The R Journal, 17(3), 100-124, 2025.</li>
+<li>K. Langohr, M. Besalú, M. Francisco, A. Garcia, G. Gómez. <a href="https://cran.r-project.org/package=GofCens">GofCens: Goodness-of-Fit Methods for Right-Censored Data.</a> R package, CRAN.</li>
+<li>A. Garcia. <a href="https://github.com/ArnauGarciaGRBIO/GofCens">GofCens source repository.</a> GitHub.</li>
+</ul>
+
+
+</section>
+
+<a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a><div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" id="quarto-reuse"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></div></div></section><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-wang2026" class="csl-entry quarto-appendix-citeas" role="listitem">
+Wang, Ray. 2026. <span>“Survival Analysis - Part 2 - Parametric
+Distributions.”</span> August 2. <a href="https://changruiraywang.com/blog/2026-08-02-survival-parametric/">https://changruiraywang.com/blog/2026-08-02-survival-parametric/</a>.
+</div></div></section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/changruiraywang\.com");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© 2026 Ray Wang ∙ Made with <a href="https://quarto.org">Quarto</a></p>
+</div>   
+    <div class="nav-footer-center">
+<p><a class="link-dark me-1" href="../../accessibility.html" title="Accessibility commitment" target="_blank" rel="noopener"><i class="fa-solid fa-universal-access" aria-label="universal-access"></i></a> <a class="link-dark me-1" href="https://linkedin.com/in/" title="LinkedIn" target="_blank" rel="noopener"><i class="fa-brands fa-linkedin" aria-label="linkedin"></i></a> <a class="link-dark me-1" href="https://github.com/" title="GitHub" target="_blank" rel="noopener"><i class="fa-brands fa-github" aria-label="github"></i></a> <a class="link-dark me-1" href="mailto:you@example.com" title="Email" target="_blank" rel="noopener"><i class="fa-solid fa-envelope" aria-label="envelope"></i></a></p>
+</div>
+    <div class="nav-footer-right">
+      <ul class="footer-items list-unstyled">
+    <li class="nav-item">
+    <a class="nav-link" href="../../accessibility.html">
+<p>Accessibility</p>
+</a>
+  </li>  
+    <li class="nav-item">
+    <a class="nav-link" href="../../contact.html">
+<p>Contact</p>
+</a>
+  </li>  
+    <li class="nav-item">
+    <a class="nav-link" href="../../license.html">
+<p>License</p>
+</a>
+  </li>  
+    <li class="nav-item compact">
+    <a class="nav-link" href="../../blog/index.xml">
+      <i class="bi bi-rss" role="img">
+</i> 
+    </a>
+  </li>  
+</ul>
+    </div>
+  </div>
+</footer>
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
+
+
+
+
+</body></html>
