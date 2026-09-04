@@ -19,7 +19,7 @@ There are several commonly used parametric distributions in survival analysis, i
 
 ## Exponential Distribution
 
-With its origin in the theory of Poisson processes, the exponential distribution is often used to model the time until the first event occurs.The exponential distribution is the simplest parametric survival model as it is characterized by a constant hazard rate, $\lambda$, which means that the probability of an event occurring in the next instant is independent of how long the subject has already survived. This property makes the exponential distribution a useful model for certain types of time-to-event data, such as the time until failure of a mechanical component or the time until death in a population with a constant mortality rate. 
+With its origin in the theory of Poisson processes, the exponential distribution is often used to model the time until the first event occurs. The exponential distribution is the simplest parametric survival model as it is characterized by a constant hazard rate, $\lambda$, which means that the probability of an event occurring in the next instant is independent of how long the subject has already survived. This property makes the exponential distribution a useful model for certain types of time-to-event data, such as the time until failure of a mechanical component or the time until death in a population with a constant mortality rate. 
 
 The probability density function (PDF) of the exponential distribution is given by:
 
@@ -136,7 +136,7 @@ $h(t) = \lambda \nu t^{\nu - 1}, \quad t \geq 0$
 
 This parameterization is usually called the 'rate' parameterization. The Weibull distribution can also be parameterized in terms of a scale parameter $\sigma$ and a shape parameter $k$, where $\sigma = \lambda^{-1/\nu}$ and $k = \nu$. Specifically, the survival function is formulated as:
 
-$exp\left(-\left(\frac{t}{\sigma_{\text{true}}}\right)^a\right)$
+$\exp\left(-\left(\frac{t}{\sigma_{\text{true}}}\right)^a\right)$
 
 where $a$ is the shape parameter and $\sigma_{\text{true}}$ is the scale parameter. 
 
@@ -247,7 +247,7 @@ plt.show()
 
 The log-normal distribution is often used to model survival data with non-monotonic hazard rates, where the hazard rate initially increases and then decreases over time. This property makes the log-normal distribution suitable for modeling survival data with a peak hazard rate, such as the time until failure of a mechanical component that experiences wear and tear over time.
 
-The log-normal distribution is obtained by taking the logarithm of a normally distributed random variable. We apply the logarithm transformation to event time $T$ and assume the new variable $Y = \ln(T)$ follows a normal distribution with mean $\mu$ and standard deviation $\sigma$: $log(T) \sim N(\mu, \sigma^2)$.
+The log-normal distribution is obtained by taking the logarithm of a normally distributed random variable. We apply the logarithm transformation to event time $T$ and assume the new variable $Y = \ln(T)$ follows a normal distribution with mean $\mu$ and standard deviation $\sigma$: $\log(T) \sim N(\mu, \sigma^2)$.
 
 The probability density function (PDF) of the log-normal distribution is given by:
 
@@ -321,7 +321,7 @@ That is, if we plot the inverse of the standard normal CDF of the Kaplan-Meier e
 
 ## Log-Logistic Distribution
 
-A cousin of the log-normal distribution is the log-logistic distribution, which is obtained by taking the logarithm of a logistic distributed random variable. We apply the logarithm transformation to event time $T$ and assume the new variable $Y = \ln(T)$ follows a logistic distribution with location parameter $\mu$ and scale parameter $\sigma$: $log(T) \sim Logistic(\mu, \sigma)$.
+A cousin of the log-normal distribution is the log-logistic distribution, which is obtained by taking the logarithm of a logistic distributed random variable. We apply the logarithm transformation to event time $T$ and assume the new variable $Y = \ln(T)$ follows a logistic distribution with location parameter $\mu$ and scale parameter $\sigma$: $\log(T) \sim Logistic(\mu, \sigma)$.
 
 The log logistic distribution can be thought of a flexible alternative to the log-normal distribution, as it can not only model non-monotonic hazard rates, but also has a closed-form expression for its survival function and hazard function without having to rely on $\Phi$, making it more tractable for optimization and interpretation.
 

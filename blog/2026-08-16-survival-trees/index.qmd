@@ -53,7 +53,7 @@ The bigger the log-rank statistic is, the more different two survival functions.
 
 With RSF, left leaf and right leaf at the next split are treated as group 1 and group 0 as in the example above. Then RSF chooses the split that results in the largest log-rank statistic.
 
-### Terminal Nodd CHF Estimation and Ensemble Averaging
+### Terminal Node CHF Estimation and Ensemble Averaging
 
 Once a tree is fully grown, each terminal node receives a Nelson-Aalen estimate of the cumulative hazard function (CHF):
 
@@ -99,13 +99,13 @@ The standard XGBoost tree method can be applied to both Cox PH (CPH) model and A
 
 The standard loss function of the XGBoost tree per the [Xgboost paper](https://arxiv.org/abs/1603.02754) is: 
 
-$\ell^{(t)} = \sum^{n}_{i=1}\ell(y_i,\hat{y}_i^{(t-1)}+\alpha f_t(x_i))+\dfrac{1}{2}\lambda\sum^J_{j=1}f^2_j(x)+\gamma T$
+$$\ell^{(t)} = \sum^{n}_{i=1}\ell(y_i,\hat{y}_i^{(t-1)}+\alpha f_t(x_i))+\dfrac{1}{2}\lambda\sum^J_{j=1}f^2_j(x)+\gamma T$$
 
 where $\ell$ is the loss function, $f_j(x)$ is the prediction for leaf j and $\dfrac{1}{2}\lambda\sum^J_{j=1}f^2_j(x)$ is the L2 regularization term. 
 
 With second-degree Taylor expansion of the first summation term, we get the loss function:
 
-$\ell^{(t)} = \sum^{n}_{i=1}[\ell(y_i,\hat{y}_i^{(t-1)}) + g_i f_t(x_i) + \dfrac{1}{2}h_i f^2_t(x_i)]+\dfrac{1}{2}\lambda\sum^J_{j=1}f^2_j(x)+\gamma T$
+$$\ell^{(t)} = \sum^{n}_{i=1}[\ell(y_i,\hat{y}_i^{(t-1)}) + g_i f_t(x_i) + \dfrac{1}{2}h_i f^2_t(x_i)]+\dfrac{1}{2}\lambda\sum^J_{j=1}f^2_j(x)+\gamma T$$
 
 where $g_i = \dfrac{\partial \ell}{\partial \hat{y}_i^{(t-1)}}$ is the gradient of the loss function with respect to the current prediction and $h_i = \dfrac{\partial^2 \ell}{\partial (\hat{y}_i^{(t-1)})^2}$ is the hessian of the loss function with respect to the current prediction.
 
@@ -122,14 +122,14 @@ All we need to do is to get the proper loss function that incorporates the covar
 
 ### Cox Proportional Hazards Model
 
-With the CPH model, the linear combination of covariates - $\eta=\beta_1X_1+\beta_2X_2+...+\beta_pX_3$ represents the log hazard ratio. Each leaf output represents an increment from the current ensemble's log hazard ratio for any subject landing in that leaf.
+With the CPH model, the linear combination of covariates - $\eta=\beta_1X_1+\beta_2X_2+...+\beta_pX_p$ represents the log hazard ratio. Each leaf output represents an increment from the current ensemble's log hazard ratio for any subject landing in that leaf.
 
 The loss function of the CPH model is based on the partial likelihood:
 $$
 \text{Partial Likelihood} = \prod\limits_{\text{observed event time}}\frac{\exp(\eta_{i})}{\displaystyle\sum_{\mathcal{R}(t_j)} \exp(\eta_{i})}
 $$
 
-where $\eta_{ij}=\beta_1X_{1i}+\beta_2X_{2i}+...+\beta_pX_{3i}$ is the linear combination of covariates for subject i;
+where $\eta_{ij}=\beta_1X_{1i}+\beta_2X_{2i}+...+\beta_pX_{pi}$ is the linear combination of covariates for subject i;
 
 $\mathcal{R}(t_j)$ is the risk set at time j.
 
@@ -236,7 +236,7 @@ where $z_i = \frac{\log t_i - F(x_i)}{\sigma}$, and $\Phi$ is the CDF of the err
 
 ::: {.callout-note title="Gradient and Hessian Derivation" collapse="true"}
 
-With the AFT model, the log-time is being modeled as the reponse of a linear regression:
+With the AFT model, the log-time is being modeled as the response of a linear regression:
 
 $\log t_i = F(x_i) + \sigma \varepsilon_i, \qquad \varepsilon_i \sim f_Z$
 
@@ -250,7 +250,7 @@ For **Right-censored subjects**, the individual loss function is :
 
 $\ell_i = - log(l_i) = \Lambda(t_i) = logS(t_i) = log(1-\Phi(z_i))$
 
-By the chain rule, the graident is:
+By the chain rule, the gradient is:
 
 $g_i = \frac{\partial \ell_i}{\partial F(x_i)} =\frac{\partial \ell_i}{\partial \Phi(z_i)} \cdot \frac{\partial \Phi(z_i)}{\partial z_i}\cdot \frac{\partial z_i}{\partial F(x_i)}$
 
@@ -310,7 +310,7 @@ $$
 
 ## Python Package Parameters Reference
 
-In Python, the random survival forest algorithm is implements through RandomSurvivalForest of the sksurv package (`sksurv.ensemble'). The standard xgb function from the xgboost package can be used to implement the CPH and AFT model with their parameters set up accordingly.
+In Python, the random survival forest algorithm is implemented through RandomSurvivalForest of the sksurv package (`sksurv.ensemble`). The standard xgb function from the xgboost package can be used to implement the CPH and AFT model with their parameters set up accordingly.
 
 ### Random Survival Forest 
 

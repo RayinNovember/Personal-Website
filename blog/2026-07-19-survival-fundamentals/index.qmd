@@ -54,7 +54,7 @@ In the language of statistics, the goal of survival analysis is to describe the 
 
 The Survival Function is the probability that the event time T is greater than a specific value t:
 
-$S(t) = Pr(T>t) = 1 - F(t)$
+$S(t) = \Pr(T>t) = 1 - F(t)$
 
 where $F(t)$ is the Cumulative Distribution Function of event time t.
 
@@ -83,7 +83,7 @@ This is the **conditional survival property**: the probability of surviving to t
 
 ### Hazard Function
 
-Besides the distribution of time to event, we also need a function to describe how likely an event can occur at a certain point of time. The 'risk' of the event occurence might increase, remain constant, or decrease over time. In survival analysis, such function is call the Hazard Function, which is defined as:
+Besides the distribution of time to event, we also need a function to describe how likely an event can occur at a certain point of time. The 'risk' of the event occurence might increase, remain constant, or decrease over time. In survival analysis, such function is called the Hazard Function, which is defined as:
 
 $$
 \lambda(t) = \lim_{h \to 0} \frac{P\big(\text{event in } [t, t+h) \mid \text{no event in } [0,t)\big)}{h}
@@ -189,9 +189,7 @@ $$
 
 which in the language of probability means:
 $$
-\begin{equation}
-\lambda(t) = \lim_{h \to 0} \frac{\Pr(t < T \leq t+h \mid T > t)}{h},
-\end{equation}
+\lambda(t) = \lim_{h \to 0} \frac{\Pr(t < T \leq t+h \mid T > t)}{h}
 $$
 
 which under the law of conditional probability becomes:
@@ -244,6 +242,7 @@ The expected number of customers leaving in the next x days can be estimated by 
 
 Here we need the expected remaining time until the event occurs, given that the subject has already survived to time $t_0$:
 
+$$
 \begin{align}
 e(t_0) &= \mathbb{E}[T - t_0 \mid T > t_0] \\[4pt]
 &= \int_0^\infty P(T - t_0 > u \mid T > t_0)\, du \\[4pt]
@@ -251,8 +250,9 @@ e(t_0) &= \mathbb{E}[T - t_0 \mid T > t_0] \\[4pt]
 &= \frac{1}{S(t_0)} \int_0^\infty S(t_0+u)\, du \\[4pt]
 &= \frac{1}{S(t_0)} \int_{t_0}^\infty S(t)\, dt
 \end{align}
+$$
 
-where $T$ is the event time, $t_0$ is the time already survived, and $T-t_0$ is the remaining time. The expected remaining lifetime can be calculated if the survival function is known, or estimated baseed on simulations. The latter provides more information about the distribution of remaining lifetime, which can be used to calculate percentiles rather than a single expected value.
+where $T$ is the event time, $t_0$ is the time already survived, and $T-t_0$ is the remaining time. The expected remaining lifetime can be calculated if the survival function is known, or estimated based on simulations. The latter provides more information about the distribution of remaining lifetime, which can be used to calculate percentiles rather than a single expected value.
 
 To get a distribution of remaining lifetime, we can use the conditional survival property to get samples:
 
