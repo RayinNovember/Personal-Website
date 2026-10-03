@@ -63,20 +63,6 @@ One thing worth noting is that some terminal nodes might end up with only a few 
 
 Within the same tree, each terminal node's CHF is a step function defined only at event times within that node. Two nodes will generally have different sets of event times. In other words, each tree generates an estimate for each of the event times. When there are $B$ trees, there are B estimates for each of the event times. RSF collects and averages all estimates for each event time. 
 
-When making predictions for a new subject $\mathbf{x}$, the subject is dropped down each of the $B$ trees, landing in terminal node $\mathrm{node}(\mathbf{x}, b)$ in tree $b$. The ensemble CHF at each time point $t_k$ is the average of the $B$ node-level CHFs:
-
-$$
-\hat{H}_e(t_k \mid \mathbf{x}) = \frac{1}{B}\sum_{b=1}^{B}
-  \hat{H}^b_{\mathrm{node}(\mathbf{x},\,b)}(t_k)
-$$
-
-The ensemble survival function is recovered as:
-
-$$
-\hat{S}_e(t \mid \mathbf{x}) = \exp\!\left(-\hat{H}_e(t \mid
-  \mathbf{x})\right)
-$$
-
 ### Out-of-Bag Error
 
 For each tree $b$, the OOB subjects (those excluded from the bootstrap sample) are dropped down tree $b$ to obtain their terminal-node CHF. The ensemble OOB CHF for subject $i$ aggregates predictions from only the trees in which $i$ was OOB:
@@ -91,7 +77,77 @@ This provides an honest estimate of prediction error without requiring a held-ou
 
 The OOB prediction error is measured by Harrell's C-index or the integrated Brier score, both evaluated on the OOB ensemble CHF.
 
+### How RSF Makes Predictions
+
+When making predictions for a new patient, RSF follows these steps:
+
+1. Drop the new case down every tree — it follows the split rules at each node until it lands in a terminal node. Each terminal node contains a cumulative hazard function for the cases that fell into it.
+2. Retrieve that node's cumulative hazard function $\hat{H}_b(t)$ from tree $b$
+3. Average across all $B$ trees to get the ensemble cumulative hazard: $\hat{H}(t) = \frac{1}{B} \sum_{b=1}^{B} \hat{H}_b(t)$
+
+The ensemble survival function is recovered as:
+
+$\hat{S}(t \mid \mathbf{x}) = \exp\!\left(-\hat{H}(t \mid\mathbf{x})\right)$
+
+::: {.callout-note collapse="true"}
+## Worked example: predicting survival for a new patient
+
+**Training data (simplified)**
+
+| ID | Age | Comorbidity Score | Time | Event |
+|----|-----|-------------------|------|-------|
+| 1  | 65  | 3                 | 12   | 1     |
+| 2  | 72  | 7                 | 8    | 1     |
+| 3  | 58  | 2                 | 24   | 0 (censored) |
+| 4  | 80  | 9                 | 5    | 1     |
+| 5  | 61  | 4                 | 18   | 1     |
+
+**New patient: Age = 70, Comorbidity = 6**
+
+After growing 3 trees on bootstrap samples, the new patient lands in a terminal node in each:
+
+- **Tree 1** → node containing IDs {2, 4} — events at $t = 5, 8$
+- **Tree 2** → node containing IDs {1, 2} — events at $t = 8, 12$
+- **Tree 3** → node containing IDs {2, 4, 5} — events at $t = 5, 8, 18$
+
+**Nelson-Aalen estimate for each node**
+
+Tree 1 node {2, 4}:
+
+| $t$ | $d_i$ | $n_i$ | $d_i / n_i$ | $\hat{H}(t)$ |
+|-----|--------|--------|-------------|--------------|
+| 5   | 1      | 2      | 0.500       | 0.500        |
+| 8   | 1      | 1      | 1.000       | 1.500        |
+
+Tree 2 node {1, 2}:
+
+| $t$ | $d_i$ | $n_i$ | $d_i / n_i$ | $\hat{H}(t)$ |
+|-----|--------|--------|-------------|--------------|
+| 8   | 1      | 2      | 0.500       | 0.500        |
+| 12  | 1      | 1      | 1.000       | 1.500        |
+
+Tree 3 node {2, 4, 5}:
+
+| $t$ | $d_i$ | $n_i$ | $d_i / n_i$ | $\hat{H}(t)$ |
+|-----|--------|--------|-------------|--------------|
+| 5   | 1      | 3      | 0.333       | 0.333        |
+| 8   | 1      | 2      | 0.500       | 0.833        |
+| 18  | 1      | 1      | 1.000       | 1.833        |
+
+**Average pointwise across trees** (carrying forward when no jump at that time):
+
+| $t$ | Tree 1 | Tree 2 | Tree 3 | Ensemble $\hat{H}(t)$ | $\hat{S}(t) = e^{-\hat{H}(t)}$ |
+|-----|--------|--------|--------|-----------------------|----------------------------------|
+| 5   | 0.500  | 0.000  | 0.333  | 0.278                 | 0.757                            |
+| 8   | 1.500  | 0.500  | 0.833  | 0.944                 | 0.389                            |
+| 12  | 1.500  | 1.500  | 0.833  | 1.278                 | 0.279                            |
+| 18  | 1.500  | 1.500  | 1.833  | 1.611                 | 0.200                            |
+
+This patient has an estimated survival probability of ~76% at month 5, falling to ~39% by month 8 and ~20% by month 18.
+:::
+
 For more information on RSF, check the official [R Vignette](https://www.randomforestsrc.org/articles/survival.html)
+
 
 ## XGBoost 
 
@@ -99,13 +155,13 @@ The standard XGBoost tree method can be applied to both Cox PH (CPH) model and A
 
 The standard loss function of the XGBoost tree per the [Xgboost paper](https://arxiv.org/abs/1603.02754) is: 
 
-$$\ell^{(t)} = \sum^{n}_{i=1}\ell(y_i,\hat{y}_i^{(t-1)}+\alpha f_t(x_i))+\dfrac{1}{2}\lambda\sum^J_{j=1}f^2_j(x)+\gamma T$$
+$\ell^{(t)} = \sum^{n}_{i=1}\ell(y_i,\hat{y}_i^{(t-1)}+\alpha f_t(x_i))+\dfrac{1}{2}\lambda\sum^J_{j=1}f^2_j(x)+\gamma T$
 
 where $\ell$ is the loss function, $f_j(x)$ is the prediction for leaf j and $\dfrac{1}{2}\lambda\sum^J_{j=1}f^2_j(x)$ is the L2 regularization term. 
 
 With second-degree Taylor expansion of the first summation term, we get the loss function:
 
-$$\ell^{(t)} = \sum^{n}_{i=1}[\ell(y_i,\hat{y}_i^{(t-1)}) + g_i f_t(x_i) + \dfrac{1}{2}h_i f^2_t(x_i)]+\dfrac{1}{2}\lambda\sum^J_{j=1}f^2_j(x)+\gamma T$$
+$\ell^{(t)} = \sum^{n}_{i=1}[\ell(y_i,\hat{y}_i^{(t-1)}) + g_i f_t(x_i) + \dfrac{1}{2}h_i f^2_t(x_i)]+\dfrac{1}{2}\lambda\sum^J_{j=1}f^2_j(x)+\gamma T$
 
 where $g_i = \dfrac{\partial \ell}{\partial \hat{y}_i^{(t-1)}}$ is the gradient of the loss function with respect to the current prediction and $h_i = \dfrac{\partial^2 \ell}{\partial (\hat{y}_i^{(t-1)})^2}$ is the hessian of the loss function with respect to the current prediction.
 
@@ -118,13 +174,13 @@ $$
 Gain = \dfrac{1}{2}\left[\dfrac{(\sum_{i\in j_L}g_i)^2}{\sum_{i\in j_L}h_i+\lambda}+\dfrac{(\sum_{i\in j_R}g_i)^2}{\sum_{i\in j_R}h_i+\lambda}-\dfrac{(\sum_{i\in j}g_i)^2}{\sum_{i\in j}h_i+\lambda}\right] - \gamma
 $$
 
-All we need to do is to get the proper loss function that incorporates the covariates for the CPH model and AFT model to get the corresponding $g_i$ and $h_i$.
+Therefore, all we need to do is to get the corresponding gradients $g_i$ and Hessians $h_i$ for the CPH model and AFT model.
 
 ### Cox Proportional Hazards Model
 
 With the CPH model, the linear combination of covariates - $\eta=\beta_1X_1+\beta_2X_2+...+\beta_pX_p$ represents the log hazard ratio. Each leaf output represents an increment from the current ensemble's log hazard ratio for any subject landing in that leaf.
 
-The loss function of the CPH model is based on the partial likelihood:
+The loss function of the CPH model is built upon the partial likelihood:
 $$
 \text{Partial Likelihood} = \prod\limits_{\text{observed event time}}\frac{\exp(\eta_{i})}{\displaystyle\sum_{\mathcal{R}(t_j)} \exp(\eta_{i})}
 $$
@@ -158,13 +214,13 @@ Expanding the brackets, we write the equation above as two terms:
 
 $\ell = \underbrace{-\sum_{\text{observed events}} \eta_{i}}_{\text{Term A}}+ \underbrace{\sum_{\text{observed events}}\log\sum_{\mathcal{R}(t_i)}\exp(\eta_{i})}_{\text{Term B}}$
 
-Differentiating Term A is straightforward: 
+Differentiating Term A with respect to $\eta_i$ is straightforward: 
 
 $\frac{\partial}{\partial \eta_{i}}\left[-\sum_{\text{observed events}} \eta_{i}\right] =\delta_i$
 
 where $\delta_i=1$ if event, 0 otherwise.
 
-Differentiating Term B requires chain rule:
+Differentiating Term B with respect to $\eta_i$ requires chain rule:
 
 For a single event time $t_i$, define:
 
@@ -197,7 +253,22 @@ h_i = \frac{\partial \frac{exp(\eta_{i})}{\sum_{\mathcal{R}(t_j)}\exp(\eta_{i})}
 $$
 
 We can proceed to get the result with the quotient rule. 
+
 :::
+
+#### How XGBoost CPH Model Makes Predictions
+
+The gradient and Hessian of XGBoost CPH model are derived by taking the derivative of the log-likelihood with respect to $\eta_i$. Therefore, the output of XGBoost CPH model the log relative hazard ratio.
+
+The process of making predictions with the XGBoost CPH model involves the following steps:
+
+1. Run XGBoost to get $\hat{f}(x_i)$ for all training observations
+2. Use the Breslow estimator on the training data with those risk scores to estimate $\hat{H}_0(t)$
+3. Repeat steps 1-4 for any new observations:
+   3.1 Drop a new observation - $x_\text{new}$ through all $B$ trees; sum the leaf values → $\hat{f}(x_\text{new})$
+   3.2 Exponentiate to get the hazard ratio: $e^{\hat{f}(x_\text{new})}$
+   3.3 Multiply the precomputed Breslow baseline: $\hat{H}(t \mid x_\text{new}) = \hat{H}_0(t) \cdot e^{\hat{f}(x_\text{new})}$
+   3.4 Survival probability: $\hat{S}(t) = e^{-\hat{H}(t \mid x_\text{new})}$
 
 
 ### Accelerated Failure Time (AFT) Model
@@ -242,7 +313,7 @@ $\log t_i = F(x_i) + \sigma \varepsilon_i, \qquad \varepsilon_i \sim f_Z$
 
 where $F(x_i)$ is the linear predictor $\beta^\top x$, $f_Z$ is the error distribution (normal, logistic, or Extreme); $\sigma$ is a fixed scale parameter. 
 
-Like with CPH, XGBoost minimizes the negative log likelihood.
+XGBoost minimizes the negative log likelihood.
 
 Let $z_i = \frac{\log t_i - F(x_i)}{\sigma}$, and $\Phi$ is the CDF of the error distribution, we can get the gradients and hessian for censored and uncensored subjects respectively:
 
@@ -307,6 +378,13 @@ $$h_i = \frac{\partial g_i}{\partial F(x_i)}=\frac{\partial g_i}{z_i}\cdot\frac{
 $$
 
 :::
+
+#### How XGBoost AFT Model Makes Predictions
+
+The XGBoost AFT model predicts $\hat{f}(x) = \mathbb{E}[\log T \mid x]$ — the expected log event time. For the AFT model, XGBoost follows these steps to make predictions for a new observation:
+
+1. Drop $x_\text{new}$ through all $B$ trees; sum the leaf values → $\hat{f}(x_\text{new})$
+2. Evaluate $\hat{S}(t) = 1 - F_\epsilon\!\left(\frac{\log t - \hat{f}(x_\text{new})}{\sigma}\right)$ using the chosen distribution's CDF
 
 ## Python Package Parameters Reference
 
