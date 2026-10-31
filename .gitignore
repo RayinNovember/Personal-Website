@@ -11,3 +11,5 @@ Thumbs.db
 /.luarc.json
 
 **/*.quarto_ipynb
+
+.vscode/settings.json
