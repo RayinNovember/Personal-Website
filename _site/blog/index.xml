@@ -88,10 +88,6 @@
 <p><img src="https://latex.codecogs.com/png.latex?%5Chat%7BH%7D(t)%20=%20%5Csum_%7Bt_j%20%5Cleq%20t%7D%20%5Cfrac%7Bd_j%7D%7Bn_j%7D"></p>
 <p>One thing worth noting is that some terminal nodes might end up with only a few events as a result of splitting, producing a sparse staircase with just few steps — a coarse and unstable estimate. As a guard against estimating CHF’s from too few event data, the RSF algorithm has a parameter <img src="https://latex.codecogs.com/png.latex?d_0"> (controlled by <code>nodesize</code> in <code>randomForestSRC</code>, default <code>15</code>) that defines the required minimal number of unique events.</p>
 <p>Within the same tree, each terminal node’s CHF is a step function defined only at event times within that node. Two nodes will generally have different sets of event times. In other words, each tree generates an estimate for each of the event times. When there are <img src="https://latex.codecogs.com/png.latex?B"> trees, there are B estimates for each of the event times. RSF collects and averages all estimates for each event time.</p>
-<p>When making predictions for a new subject <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bx%7D">, the subject is dropped down each of the <img src="https://latex.codecogs.com/png.latex?B"> trees, landing in terminal node <img src="https://latex.codecogs.com/png.latex?%5Cmathrm%7Bnode%7D(%5Cmathbf%7Bx%7D,%20b)"> in tree <img src="https://latex.codecogs.com/png.latex?b">. The ensemble CHF at each time point <img src="https://latex.codecogs.com/png.latex?t_k"> is the average of the <img src="https://latex.codecogs.com/png.latex?B"> node-level CHFs:</p>
-<p><img src="https://latex.codecogs.com/png.latex?%0A%5Chat%7BH%7D_e(t_k%20%5Cmid%20%5Cmathbf%7Bx%7D)%20=%20%5Cfrac%7B1%7D%7BB%7D%5Csum_%7Bb=1%7D%5E%7BB%7D%0A%20%20%5Chat%7BH%7D%5Eb_%7B%5Cmathrm%7Bnode%7D(%5Cmathbf%7Bx%7D,%5C,b)%7D(t_k)%0A"></p>
-<p>The ensemble survival function is recovered as:</p>
-<p><img src="https://latex.codecogs.com/png.latex?%0A%5Chat%7BS%7D_e(t%20%5Cmid%20%5Cmathbf%7Bx%7D)%20=%20%5Cexp%5C!%5Cleft(-%5Chat%7BH%7D_e(t%20%5Cmid%0A%20%20%5Cmathbf%7Bx%7D)%5Cright)%0A"></p>
 </section>
 <section id="out-of-bag-error" class="level3">
 <h3 class="anchored" data-anchor-id="out-of-bag-error">Out-of-Bag Error</h3>
@@ -99,6 +95,236 @@
 <p><img src="https://latex.codecogs.com/png.latex?%0A%5Chat%7BH%7D%5E%7B%5Cmathrm%7BOOB%7D%7D_e(t%20%5Cmid%20%5Cmathbf%7Bx%7D_i)%20=%20%5Cfrac%7B1%7D%7B%7C%5C%7Bb%20:%20i%0A%20%20%5Cin%20%5Cmathrm%7BOOB%7D_b%5C%7D%7C%7D%20%5Csum_%7Bb:%5C,i%20%5Cin%20%5Cmathrm%7BOOB%7D_b%7D%0A%20%20%5Chat%7BH%7D%5Eb_%7B%5Cmathrm%7Bnode%7D(%5Cmathbf%7Bx%7D_i,%5C,b)%7D(t)%0A"></p>
 <p>This provides an honest estimate of prediction error without requiring a held-out test set, analogous to cross-validation but at zero additional computational cost since the OOB sample is a by-product of bootstrap sampling.</p>
 <p>The OOB prediction error is measured by Harrell’s C-index or the integrated Brier score, both evaluated on the OOB ensemble CHF.</p>
+</section>
+<section id="how-rsf-makes-predictions" class="level3">
+<h3 class="anchored" data-anchor-id="how-rsf-makes-predictions">How RSF Makes Predictions</h3>
+<p>When making predictions for a new patient, RSF follows these steps:</p>
+<ol type="1">
+<li>Drop the new case down every tree — it follows the split rules at each node until it lands in a terminal node. Each terminal node contains a cumulative hazard function for the cases that fell into it.</li>
+<li>Retrieve that node’s cumulative hazard function <img src="https://latex.codecogs.com/png.latex?%5Chat%7BH%7D_b(t)"> from tree <img src="https://latex.codecogs.com/png.latex?b"></li>
+<li>Average across all <img src="https://latex.codecogs.com/png.latex?B"> trees to get the ensemble cumulative hazard: <img src="https://latex.codecogs.com/png.latex?%5Chat%7BH%7D(t)%20=%20%5Cfrac%7B1%7D%7BB%7D%20%5Csum_%7Bb=1%7D%5E%7BB%7D%20%5Chat%7BH%7D_b(t)"></li>
+</ol>
+<p>The ensemble survival function is recovered as:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%5Chat%7BS%7D(t%20%5Cmid%20%5Cmathbf%7Bx%7D)%20=%20%5Cexp%5C!%5Cleft(-%5Chat%7BH%7D(t%20%5Cmid%5Cmathbf%7Bx%7D)%5Cright)"></p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Worked example: predicting survival for a new patient
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p><strong>Training data (simplified)</strong></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>ID</th>
+<th>Age</th>
+<th>Comorbidity Score</th>
+<th>Time</th>
+<th>Event</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>65</td>
+<td>3</td>
+<td>12</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>72</td>
+<td>7</td>
+<td>8</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>58</td>
+<td>2</td>
+<td>24</td>
+<td>0 (censored)</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>80</td>
+<td>9</td>
+<td>5</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>61</td>
+<td>4</td>
+<td>18</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<p><strong>New patient: Age = 70, Comorbidity = 6</strong></p>
+<p>After growing 3 trees on bootstrap samples, the new patient lands in a terminal node in each:</p>
+<ul>
+<li><strong>Tree 1</strong> → node containing IDs {2, 4} — events at <img src="https://latex.codecogs.com/png.latex?t%20=%205,%208"></li>
+<li><strong>Tree 2</strong> → node containing IDs {1, 2} — events at <img src="https://latex.codecogs.com/png.latex?t%20=%208,%2012"></li>
+<li><strong>Tree 3</strong> → node containing IDs {2, 4, 5} — events at <img src="https://latex.codecogs.com/png.latex?t%20=%205,%208,%2018"></li>
+</ul>
+<p><strong>Nelson-Aalen estimate for each node</strong></p>
+<p>Tree 1 node {2, 4}:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th><img src="https://latex.codecogs.com/png.latex?t"></th>
+<th><img src="https://latex.codecogs.com/png.latex?d_i"></th>
+<th><img src="https://latex.codecogs.com/png.latex?n_i"></th>
+<th><img src="https://latex.codecogs.com/png.latex?d_i%20/%20n_i"></th>
+<th><img src="https://latex.codecogs.com/png.latex?%5Chat%7BH%7D(t)"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>5</td>
+<td>1</td>
+<td>2</td>
+<td>0.500</td>
+<td>0.500</td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td>1</td>
+<td>1</td>
+<td>1.000</td>
+<td>1.500</td>
+</tr>
+</tbody>
+</table>
+<p>Tree 2 node {1, 2}:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th><img src="https://latex.codecogs.com/png.latex?t"></th>
+<th><img src="https://latex.codecogs.com/png.latex?d_i"></th>
+<th><img src="https://latex.codecogs.com/png.latex?n_i"></th>
+<th><img src="https://latex.codecogs.com/png.latex?d_i%20/%20n_i"></th>
+<th><img src="https://latex.codecogs.com/png.latex?%5Chat%7BH%7D(t)"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>8</td>
+<td>1</td>
+<td>2</td>
+<td>0.500</td>
+<td>0.500</td>
+</tr>
+<tr class="even">
+<td>12</td>
+<td>1</td>
+<td>1</td>
+<td>1.000</td>
+<td>1.500</td>
+</tr>
+</tbody>
+</table>
+<p>Tree 3 node {2, 4, 5}:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th><img src="https://latex.codecogs.com/png.latex?t"></th>
+<th><img src="https://latex.codecogs.com/png.latex?d_i"></th>
+<th><img src="https://latex.codecogs.com/png.latex?n_i"></th>
+<th><img src="https://latex.codecogs.com/png.latex?d_i%20/%20n_i"></th>
+<th><img src="https://latex.codecogs.com/png.latex?%5Chat%7BH%7D(t)"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>5</td>
+<td>1</td>
+<td>3</td>
+<td>0.333</td>
+<td>0.333</td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td>1</td>
+<td>2</td>
+<td>0.500</td>
+<td>0.833</td>
+</tr>
+<tr class="odd">
+<td>18</td>
+<td>1</td>
+<td>1</td>
+<td>1.000</td>
+<td>1.833</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Average pointwise across trees</strong> (carrying forward when no jump at that time):</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 5%">
+<col style="width: 9%">
+<col style="width: 9%">
+<col style="width: 9%">
+<col style="width: 26%">
+<col style="width: 39%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><img src="https://latex.codecogs.com/png.latex?t"></th>
+<th>Tree 1</th>
+<th>Tree 2</th>
+<th>Tree 3</th>
+<th>Ensemble <img src="https://latex.codecogs.com/png.latex?%5Chat%7BH%7D(t)"></th>
+<th><img src="https://latex.codecogs.com/png.latex?%5Chat%7BS%7D(t)%20=%20e%5E%7B-%5Chat%7BH%7D(t)%7D"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>5</td>
+<td>0.500</td>
+<td>0.000</td>
+<td>0.333</td>
+<td>0.278</td>
+<td>0.757</td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td>1.500</td>
+<td>0.500</td>
+<td>0.833</td>
+<td>0.944</td>
+<td>0.389</td>
+</tr>
+<tr class="odd">
+<td>12</td>
+<td>1.500</td>
+<td>1.500</td>
+<td>0.833</td>
+<td>1.278</td>
+<td>0.279</td>
+</tr>
+<tr class="even">
+<td>18</td>
+<td>1.500</td>
+<td>1.500</td>
+<td>1.833</td>
+<td>1.611</td>
+<td>0.200</td>
+</tr>
+</tbody>
+</table>
+<p>This patient has an estimated survival probability of ~76% at month 5, falling to ~39% by month 8 and ~20% by month 18.</p>
+</div>
+</div>
+</div>
 <p>For more information on RSF, check the official <a href="https://www.randomforestsrc.org/articles/survival.html">R Vignette</a></p>
 </section>
 </section>
@@ -114,11 +340,11 @@
 <p>The optimal output for leaf <img src="https://latex.codecogs.com/png.latex?j"> is:</p>
 <p><img src="https://latex.codecogs.com/png.latex?f_j%5E*(x)%20=%20-%5Cdfrac%7B%5Csum_%7Bi%5Cin%20j%7Dg_i%7D%7B%5Csum_%7Bi%5Cin%20j%7Dh_i+%5Clambda%7D"></p>
 <p>The splitting rule is the same as the standard setting: <img src="https://latex.codecogs.com/png.latex?%0AGain%20=%20%5Cdfrac%7B1%7D%7B2%7D%5Cleft%5B%5Cdfrac%7B(%5Csum_%7Bi%5Cin%20j_L%7Dg_i)%5E2%7D%7B%5Csum_%7Bi%5Cin%20j_L%7Dh_i+%5Clambda%7D+%5Cdfrac%7B(%5Csum_%7Bi%5Cin%20j_R%7Dg_i)%5E2%7D%7B%5Csum_%7Bi%5Cin%20j_R%7Dh_i+%5Clambda%7D-%5Cdfrac%7B(%5Csum_%7Bi%5Cin%20j%7Dg_i)%5E2%7D%7B%5Csum_%7Bi%5Cin%20j%7Dh_i+%5Clambda%7D%5Cright%5D%20-%20%5Cgamma%0A"></p>
-<p>All we need to do is to get the proper loss function that incorporates the covariates for the CPH model and AFT model to get the corresponding <img src="https://latex.codecogs.com/png.latex?g_i"> and <img src="https://latex.codecogs.com/png.latex?h_i">.</p>
+<p>Therefore, all we need to do is to get the corresponding gradients <img src="https://latex.codecogs.com/png.latex?g_i"> and Hessians <img src="https://latex.codecogs.com/png.latex?h_i"> for the CPH model and AFT model.</p>
 <section id="cox-proportional-hazards-model" class="level3">
 <h3 class="anchored" data-anchor-id="cox-proportional-hazards-model">Cox Proportional Hazards Model</h3>
 <p>With the CPH model, the linear combination of covariates - <img src="https://latex.codecogs.com/png.latex?%5Ceta=%5Cbeta_1X_1+%5Cbeta_2X_2+...+%5Cbeta_pX_p"> represents the log hazard ratio. Each leaf output represents an increment from the current ensemble’s log hazard ratio for any subject landing in that leaf.</p>
-<p>The loss function of the CPH model is based on the partial likelihood: <img src="https://latex.codecogs.com/png.latex?%0A%5Ctext%7BPartial%20Likelihood%7D%20=%20%5Cprod%5Climits_%7B%5Ctext%7Bobserved%20event%20time%7D%7D%5Cfrac%7B%5Cexp(%5Ceta_%7Bi%7D)%7D%7B%5Cdisplaystyle%5Csum_%7B%5Cmathcal%7BR%7D(t_j)%7D%20%5Cexp(%5Ceta_%7Bi%7D)%7D%0A"></p>
+<p>The loss function of the CPH model is built upon the partial likelihood: <img src="https://latex.codecogs.com/png.latex?%0A%5Ctext%7BPartial%20Likelihood%7D%20=%20%5Cprod%5Climits_%7B%5Ctext%7Bobserved%20event%20time%7D%7D%5Cfrac%7B%5Cexp(%5Ceta_%7Bi%7D)%7D%7B%5Cdisplaystyle%5Csum_%7B%5Cmathcal%7BR%7D(t_j)%7D%20%5Cexp(%5Ceta_%7Bi%7D)%7D%0A"></p>
 <p>where <img src="https://latex.codecogs.com/png.latex?%5Ceta_%7Bij%7D=%5Cbeta_1X_%7B1i%7D+%5Cbeta_2X_%7B2i%7D+...+%5Cbeta_pX_%7Bpi%7D"> is the linear combination of covariates for subject i;</p>
 <p><img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BR%7D(t_j)"> is the risk set at time j.</p>
 <p>XGBoost’s loss function is the negative partial log-likelihood:</p>
@@ -130,7 +356,7 @@
 <p><img src="https://latex.codecogs.com/png.latex?w_%7Bi%7D(t_j)%20=%20%5Cfrac%7Be%5E%7B%5Ceta_%7Bi%7D%7D%7D%7B%5Csum_%7Bk%20%5Cin%20%5Cmathcal%7BR%7D(t_j)%7D%20e%5E%7B%5Ceta_%7Bk%7D%7D%7D"></p>
 <p>The <strong>hessian</strong> for subject i is: <img src="https://latex.codecogs.com/png.latex?%0Ah_i%20=%20%5Cfrac%7B%5Cpartial%5E2%20%5Cell%7D%7B%5Cpartial%20%5Ceta_i%5E2%7D%20=%20%5Csum_%7Bk%20%5Cin%20%5Cmathcal%7BR%7D(t_j)%7D%20w_i(t_j)%5Cbigl(1%20-%20w_i(t_j)%5Cbigr)%0A"></p>
 <div class="callout callout-style-default callout-note callout-titled" title="Gradient and Hessian Derivation">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -139,14 +365,14 @@
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>Expanding the brackets, we write the equation above as two terms:</p>
 <p><img src="https://latex.codecogs.com/png.latex?%5Cell%20=%20%5Cunderbrace%7B-%5Csum_%7B%5Ctext%7Bobserved%20events%7D%7D%20%5Ceta_%7Bi%7D%7D_%7B%5Ctext%7BTerm%20A%7D%7D+%20%5Cunderbrace%7B%5Csum_%7B%5Ctext%7Bobserved%20events%7D%7D%5Clog%5Csum_%7B%5Cmathcal%7BR%7D(t_i)%7D%5Cexp(%5Ceta_%7Bi%7D)%7D_%7B%5Ctext%7BTerm%20B%7D%7D"></p>
-<p>Differentiating Term A is straightforward:</p>
+<p>Differentiating Term A with respect to <img src="https://latex.codecogs.com/png.latex?%5Ceta_i"> is straightforward:</p>
 <p><img src="https://latex.codecogs.com/png.latex?%5Cfrac%7B%5Cpartial%7D%7B%5Cpartial%20%5Ceta_%7Bi%7D%7D%5Cleft%5B-%5Csum_%7B%5Ctext%7Bobserved%20events%7D%7D%20%5Ceta_%7Bi%7D%5Cright%5D%20=%5Cdelta_i"></p>
 <p>where <img src="https://latex.codecogs.com/png.latex?%5Cdelta_i=1"> if event, 0 otherwise.</p>
-<p>Differentiating Term B requires chain rule:</p>
+<p>Differentiating Term B with respect to <img src="https://latex.codecogs.com/png.latex?%5Ceta_i"> requires chain rule:</p>
 <p>For a single event time <img src="https://latex.codecogs.com/png.latex?t_i">, define:</p>
 <p><img src="https://latex.codecogs.com/png.latex?S_i%20=%20%5Csum_%7B%5Cmathcal%7BR%7D(t_j)%7D%5Cexp(%5Ceta_%7Bi%7D)"></p>
 <p>Then we have:</p>
@@ -161,6 +387,16 @@
 </div>
 </div>
 </div>
+<section id="how-xgboost-cph-model-makes-predictions" class="level4">
+<h4 class="anchored" data-anchor-id="how-xgboost-cph-model-makes-predictions">How XGBoost CPH Model Makes Predictions</h4>
+<p>The gradient and Hessian of XGBoost CPH model are derived by taking the derivative of the log-likelihood with respect to <img src="https://latex.codecogs.com/png.latex?%5Ceta_i">. Therefore, the output of XGBoost CPH model the log relative hazard ratio.</p>
+<p>The process of making predictions with the XGBoost CPH model involves the following steps:</p>
+<ol type="1">
+<li>Run XGBoost to get <img src="https://latex.codecogs.com/png.latex?%5Chat%7Bf%7D(x_i)"> for all training observations</li>
+<li>Use the Breslow estimator on the training data with those risk scores to estimate <img src="https://latex.codecogs.com/png.latex?%5Chat%7BH%7D_0(t)"></li>
+<li>Repeat steps 1-4 for any new observations: 3.1 Drop a new observation - <img src="https://latex.codecogs.com/png.latex?x_%5Ctext%7Bnew%7D"> through all <img src="https://latex.codecogs.com/png.latex?B"> trees; sum the leaf values → <img src="https://latex.codecogs.com/png.latex?%5Chat%7Bf%7D(x_%5Ctext%7Bnew%7D)"> 3.2 Exponentiate to get the hazard ratio: <img src="https://latex.codecogs.com/png.latex?e%5E%7B%5Chat%7Bf%7D(x_%5Ctext%7Bnew%7D)%7D"> 3.3 Multiply the precomputed Breslow baseline: <img src="https://latex.codecogs.com/png.latex?%5Chat%7BH%7D(t%20%5Cmid%20x_%5Ctext%7Bnew%7D)%20=%20%5Chat%7BH%7D_0(t)%20%5Ccdot%20e%5E%7B%5Chat%7Bf%7D(x_%5Ctext%7Bnew%7D)%7D"> 3.4 Survival probability: <img src="https://latex.codecogs.com/png.latex?%5Chat%7BS%7D(t)%20=%20e%5E%7B-%5Chat%7BH%7D(t%20%5Cmid%20x_%5Ctext%7Bnew%7D)%7D"></li>
+</ol>
+</section>
 </section>
 <section id="accelerated-failure-time-aft-model" class="level3">
 <h3 class="anchored" data-anchor-id="accelerated-failure-time-aft-model">Accelerated Failure Time (AFT) Model</h3>
@@ -200,7 +436,7 @@
 </table>
 <p>where <img src="https://latex.codecogs.com/png.latex?z_i%20=%20%5Cfrac%7B%5Clog%20t_i%20-%20F(x_i)%7D%7B%5Csigma%7D">, and <img src="https://latex.codecogs.com/png.latex?%5CPhi"> is the CDF of the error distribution specified for the AFT model.</p>
 <div class="callout callout-style-default callout-note callout-titled" title="Gradient and Hessian Derivation">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -209,12 +445,12 @@
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>With the AFT model, the log-time is being modeled as the response of a linear regression:</p>
 <p><img src="https://latex.codecogs.com/png.latex?%5Clog%20t_i%20=%20F(x_i)%20+%20%5Csigma%20%5Cvarepsilon_i,%20%5Cqquad%20%5Cvarepsilon_i%20%5Csim%20f_Z"></p>
 <p>where <img src="https://latex.codecogs.com/png.latex?F(x_i)"> is the linear predictor <img src="https://latex.codecogs.com/png.latex?%5Cbeta%5E%5Ctop%20x">, <img src="https://latex.codecogs.com/png.latex?f_Z"> is the error distribution (normal, logistic, or Extreme); <img src="https://latex.codecogs.com/png.latex?%5Csigma"> is a fixed scale parameter.</p>
-<p>Like with CPH, XGBoost minimizes the negative log likelihood.</p>
+<p>XGBoost minimizes the negative log likelihood.</p>
 <p>Let <img src="https://latex.codecogs.com/png.latex?z_i%20=%20%5Cfrac%7B%5Clog%20t_i%20-%20F(x_i)%7D%7B%5Csigma%7D">, and <img src="https://latex.codecogs.com/png.latex?%5CPhi"> is the CDF of the error distribution, we can get the gradients and hessian for censored and uncensored subjects respectively:</p>
 <p>For <strong>Right-censored subjects</strong>, the individual loss function is :</p>
 <p><img src="https://latex.codecogs.com/png.latex?%5Cell_i%20=%20-%20log(l_i)%20=%20%5CLambda(t_i)%20=%20logS(t_i)%20=%20log(1-%5CPhi(z_i))"></p>
@@ -244,6 +480,14 @@
 </div>
 </div>
 </div>
+<section id="how-xgboost-aft-model-makes-predictions" class="level4">
+<h4 class="anchored" data-anchor-id="how-xgboost-aft-model-makes-predictions">How XGBoost AFT Model Makes Predictions</h4>
+<p>The XGBoost AFT model predicts <img src="https://latex.codecogs.com/png.latex?%5Chat%7Bf%7D(x)%20=%20%5Cmathbb%7BE%7D%5B%5Clog%20T%20%5Cmid%20x%5D"> — the expected log event time. For the AFT model, XGBoost follows these steps to make predictions for a new observation:</p>
+<ol type="1">
+<li>Drop <img src="https://latex.codecogs.com/png.latex?x_%5Ctext%7Bnew%7D"> through all <img src="https://latex.codecogs.com/png.latex?B"> trees; sum the leaf values → <img src="https://latex.codecogs.com/png.latex?%5Chat%7Bf%7D(x_%5Ctext%7Bnew%7D)"></li>
+<li>Evaluate <img src="https://latex.codecogs.com/png.latex?%5Chat%7BS%7D(t)%20=%201%20-%20F_%5Cepsilon%5C!%5Cleft(%5Cfrac%7B%5Clog%20t%20-%20%5Chat%7Bf%7D(x_%5Ctext%7Bnew%7D)%7D%7B%5Csigma%7D%5Cright)"> using the chosen distribution’s CDF</li>
+</ol>
+</section>
 </section>
 </section>
 <section id="python-package-parameters-reference" class="level2">
@@ -12269,6 +12513,8 @@ May 30. <a href="https://changruiraywang.com/blog/2026-05-30-bayesian-regulariza
 <p>The gradient is: <img src="https://latex.codecogs.com/png.latex?g_i%20=%20-(y_i-%5Chat%7By%7D_i)"></p>
 <p>The hessian is: <img src="https://latex.codecogs.com/png.latex?h_i%20=%20%5Chat%7By%7D_i(1-%5Chat%7By%7D_i)"></p>
 <p>Here, <img src="https://latex.codecogs.com/png.latex?%5Chat%7By%7D_i"> is the predicted probability for the <img src="https://latex.codecogs.com/png.latex?i">th observation.</p>
+<p>The full loop of XGBoost training can be summarized as follows:</p>
+<p>Once the ensemble of <img src="https://latex.codecogs.com/png.latex?M"> trees is trained, prediction for a new observation <img src="https://latex.codecogs.com/png.latex?x"> is just a sum: <img src="https://latex.codecogs.com/png.latex?%5Chat%7By%7D%20=%20%5Csum_%7Bm=1%7D%5E%7BM%7D%20%5Ceta%20%5Ccdot%20f_m(x)"></p>
 </section>
 <section id="linear-and-dart-booster" class="level4">
 <h4 class="anchored" data-anchor-id="linear-and-dart-booster">Linear and Dart Booster</h4>

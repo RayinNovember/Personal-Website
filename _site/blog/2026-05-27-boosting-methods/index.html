@@ -303,6 +303,10 @@ window.Quarto = {
     <a class="nav-link" href="../../project/index.html"> 
 <span class="menu-text">Projects</span></a>
   </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../portfolio/index.html"> 
+<span class="menu-text">Portfolio</span></a>
+  </li>  
 </ul>
           </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
@@ -481,6 +485,8 @@ window.Quarto = {
 <p>The gradient is: <span class="math inline">\(g_i = -(y_i-\hat{y}_i)\)</span></p>
 <p>The hessian is: <span class="math inline">\(h_i = \hat{y}_i(1-\hat{y}_i)\)</span></p>
 <p>Here, <span class="math inline">\(\hat{y}_i\)</span> is the predicted probability for the <span class="math inline">\(i\)</span>th observation.</p>
+<p>The full loop of XGBoost training can be summarized as follows:</p>
+<p>Once the ensemble of <span class="math inline">\(M\)</span> trees is trained, prediction for a new observation <span class="math inline">\(x\)</span> is just a sum: <span class="math display">\[\hat{y} = \sum_{m=1}^{M} \eta \cdot f_m(x)\]</span></p>
 </section>
 <section id="linear-and-dart-booster" class="level4">
 <h4 class="anchored" data-anchor-id="linear-and-dart-booster">Linear and Dart Booster</h4>

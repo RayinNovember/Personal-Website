@@ -1,0 +1,36 @@
+---
+title: "Example Portfolio Item"
+author: Ray Wang
+date: "2026-10-30"
+categories:
+  - example
+subtitle: >
+  A placeholder portfolio entry showing the layout. Replace with real work samples.
+description: |
+  This is a placeholder demonstrating how a portfolio listing entry is structured.
+  Drop a `featured.png` (or `featured.jpg`) in this folder for the cover image,
+  add real content below, and rename the folder to your dated slug
+  (`YYYY-MM-DD-portfolio-slug`).
+links:
+- icon: github
+  name: Source
+  url: https://github.com/
+---
+
+## Overview
+
+Short summary of the work and the problem it addressed.
+
+## Approach
+
+How it was done — data, methods, and key decisions.
+
+## Results
+
+Outcomes, impact, and anything worth highlighting.
+
+## Tech
+
+- Tool / library 1
+- Tool / library 2
+- Tool / library 3

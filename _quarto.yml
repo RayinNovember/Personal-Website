@@ -25,6 +25,9 @@ website:
       - text: Projects
         aria-label: "Project Portfolio"
         href: project/index.qmd
+      - text: Portfolio
+        aria-label: "Portfolio"
+        href: portfolio/index.qmd
 
   page-footer:
     left: >-

@@ -303,6 +303,10 @@ window.Quarto = {
     <a class="nav-link" href="../../project/index.html"> 
 <span class="menu-text">Projects</span></a>
   </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../portfolio/index.html"> 
+<span class="menu-text">Portfolio</span></a>
+  </li>  
 </ul>
           </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
@@ -365,6 +369,7 @@ window.Quarto = {
   <li><a href="#log-rank-statistic" id="toc-log-rank-statistic" class="nav-link" data-scroll-target="#log-rank-statistic">Log-rank Statistic</a></li>
   <li><a href="#terminal-node-chf-estimation-and-ensemble-averaging" id="toc-terminal-node-chf-estimation-and-ensemble-averaging" class="nav-link" data-scroll-target="#terminal-node-chf-estimation-and-ensemble-averaging">Terminal Node CHF Estimation and Ensemble Averaging</a></li>
   <li><a href="#out-of-bag-error" id="toc-out-of-bag-error" class="nav-link" data-scroll-target="#out-of-bag-error">Out-of-Bag Error</a></li>
+  <li><a href="#how-rsf-makes-predictions" id="toc-how-rsf-makes-predictions" class="nav-link" data-scroll-target="#how-rsf-makes-predictions">How RSF Makes Predictions</a></li>
   </ul></li>
   <li><a href="#xgboost" id="toc-xgboost" class="nav-link" data-scroll-target="#xgboost">XGBoost</a>
   <ul class="collapse">
@@ -455,16 +460,6 @@ window.Quarto = {
 <p><span class="math inline">\(\hat{H}(t) = \sum_{t_j \leq t} \frac{d_j}{n_j}\)</span></p>
 <p>One thing worth noting is that some terminal nodes might end up with only a few events as a result of splitting, producing a sparse staircase with just few steps — a coarse and unstable estimate. As a guard against estimating CHF’s from too few event data, the RSF algorithm has a parameter <span class="math inline">\(d_0\)</span> (controlled by <code>nodesize</code> in <code>randomForestSRC</code>, default <code>15</code>) that defines the required minimal number of unique events.</p>
 <p>Within the same tree, each terminal node’s CHF is a step function defined only at event times within that node. Two nodes will generally have different sets of event times. In other words, each tree generates an estimate for each of the event times. When there are <span class="math inline">\(B\)</span> trees, there are B estimates for each of the event times. RSF collects and averages all estimates for each event time.</p>
-<p>When making predictions for a new subject <span class="math inline">\(\mathbf{x}\)</span>, the subject is dropped down each of the <span class="math inline">\(B\)</span> trees, landing in terminal node <span class="math inline">\(\mathrm{node}(\mathbf{x}, b)\)</span> in tree <span class="math inline">\(b\)</span>. The ensemble CHF at each time point <span class="math inline">\(t_k\)</span> is the average of the <span class="math inline">\(B\)</span> node-level CHFs:</p>
-<p><span class="math display">\[
-\hat{H}_e(t_k \mid \mathbf{x}) = \frac{1}{B}\sum_{b=1}^{B}
-  \hat{H}^b_{\mathrm{node}(\mathbf{x},\,b)}(t_k)
-\]</span></p>
-<p>The ensemble survival function is recovered as:</p>
-<p><span class="math display">\[
-\hat{S}_e(t \mid \mathbf{x}) = \exp\!\left(-\hat{H}_e(t \mid
-  \mathbf{x})\right)
-\]</span></p>
 </section>
 <section id="out-of-bag-error" class="level3">
 <h3 class="anchored" data-anchor-id="out-of-bag-error">Out-of-Bag Error</h3>
@@ -476,6 +471,236 @@ window.Quarto = {
 \]</span></p>
 <p>This provides an honest estimate of prediction error without requiring a held-out test set, analogous to cross-validation but at zero additional computational cost since the OOB sample is a by-product of bootstrap sampling.</p>
 <p>The OOB prediction error is measured by Harrell’s C-index or the integrated Brier score, both evaluated on the OOB ensemble CHF.</p>
+</section>
+<section id="how-rsf-makes-predictions" class="level3">
+<h3 class="anchored" data-anchor-id="how-rsf-makes-predictions">How RSF Makes Predictions</h3>
+<p>When making predictions for a new patient, RSF follows these steps:</p>
+<ol type="1">
+<li>Drop the new case down every tree — it follows the split rules at each node until it lands in a terminal node. Each terminal node contains a cumulative hazard function for the cases that fell into it.</li>
+<li>Retrieve that node’s cumulative hazard function <span class="math inline">\(\hat{H}_b(t)\)</span> from tree <span class="math inline">\(b\)</span></li>
+<li>Average across all <span class="math inline">\(B\)</span> trees to get the ensemble cumulative hazard: <span class="math inline">\(\hat{H}(t) = \frac{1}{B} \sum_{b=1}^{B} \hat{H}_b(t)\)</span></li>
+</ol>
+<p>The ensemble survival function is recovered as:</p>
+<p><span class="math inline">\(\hat{S}(t \mid \mathbf{x}) = \exp\!\left(-\hat{H}(t \mid\mathbf{x})\right)\)</span></p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Worked example: predicting survival for a new patient
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p><strong>Training data (simplified)</strong></p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>ID</th>
+<th>Age</th>
+<th>Comorbidity Score</th>
+<th>Time</th>
+<th>Event</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>65</td>
+<td>3</td>
+<td>12</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>72</td>
+<td>7</td>
+<td>8</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>58</td>
+<td>2</td>
+<td>24</td>
+<td>0 (censored)</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>80</td>
+<td>9</td>
+<td>5</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>61</td>
+<td>4</td>
+<td>18</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<p><strong>New patient: Age = 70, Comorbidity = 6</strong></p>
+<p>After growing 3 trees on bootstrap samples, the new patient lands in a terminal node in each:</p>
+<ul>
+<li><strong>Tree 1</strong> → node containing IDs {2, 4} — events at <span class="math inline">\(t = 5, 8\)</span></li>
+<li><strong>Tree 2</strong> → node containing IDs {1, 2} — events at <span class="math inline">\(t = 8, 12\)</span></li>
+<li><strong>Tree 3</strong> → node containing IDs {2, 4, 5} — events at <span class="math inline">\(t = 5, 8, 18\)</span></li>
+</ul>
+<p><strong>Nelson-Aalen estimate for each node</strong></p>
+<p>Tree 1 node {2, 4}:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th><span class="math inline">\(t\)</span></th>
+<th><span class="math inline">\(d_i\)</span></th>
+<th><span class="math inline">\(n_i\)</span></th>
+<th><span class="math inline">\(d_i / n_i\)</span></th>
+<th><span class="math inline">\(\hat{H}(t)\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>5</td>
+<td>1</td>
+<td>2</td>
+<td>0.500</td>
+<td>0.500</td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td>1</td>
+<td>1</td>
+<td>1.000</td>
+<td>1.500</td>
+</tr>
+</tbody>
+</table>
+<p>Tree 2 node {1, 2}:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th><span class="math inline">\(t\)</span></th>
+<th><span class="math inline">\(d_i\)</span></th>
+<th><span class="math inline">\(n_i\)</span></th>
+<th><span class="math inline">\(d_i / n_i\)</span></th>
+<th><span class="math inline">\(\hat{H}(t)\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>8</td>
+<td>1</td>
+<td>2</td>
+<td>0.500</td>
+<td>0.500</td>
+</tr>
+<tr class="even">
+<td>12</td>
+<td>1</td>
+<td>1</td>
+<td>1.000</td>
+<td>1.500</td>
+</tr>
+</tbody>
+</table>
+<p>Tree 3 node {2, 4, 5}:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th><span class="math inline">\(t\)</span></th>
+<th><span class="math inline">\(d_i\)</span></th>
+<th><span class="math inline">\(n_i\)</span></th>
+<th><span class="math inline">\(d_i / n_i\)</span></th>
+<th><span class="math inline">\(\hat{H}(t)\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>5</td>
+<td>1</td>
+<td>3</td>
+<td>0.333</td>
+<td>0.333</td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td>1</td>
+<td>2</td>
+<td>0.500</td>
+<td>0.833</td>
+</tr>
+<tr class="odd">
+<td>18</td>
+<td>1</td>
+<td>1</td>
+<td>1.000</td>
+<td>1.833</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Average pointwise across trees</strong> (carrying forward when no jump at that time):</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 5%">
+<col style="width: 9%">
+<col style="width: 9%">
+<col style="width: 9%">
+<col style="width: 26%">
+<col style="width: 39%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(t\)</span></th>
+<th>Tree 1</th>
+<th>Tree 2</th>
+<th>Tree 3</th>
+<th>Ensemble <span class="math inline">\(\hat{H}(t)\)</span></th>
+<th><span class="math inline">\(\hat{S}(t) = e^{-\hat{H}(t)}\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>5</td>
+<td>0.500</td>
+<td>0.000</td>
+<td>0.333</td>
+<td>0.278</td>
+<td>0.757</td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td>1.500</td>
+<td>0.500</td>
+<td>0.833</td>
+<td>0.944</td>
+<td>0.389</td>
+</tr>
+<tr class="odd">
+<td>12</td>
+<td>1.500</td>
+<td>1.500</td>
+<td>0.833</td>
+<td>1.278</td>
+<td>0.279</td>
+</tr>
+<tr class="even">
+<td>18</td>
+<td>1.500</td>
+<td>1.500</td>
+<td>1.833</td>
+<td>1.611</td>
+<td>0.200</td>
+</tr>
+</tbody>
+</table>
+<p>This patient has an estimated survival probability of ~76% at month 5, falling to ~39% by month 8 and ~20% by month 18.</p>
+</div>
+</div>
+</div>
 <p>For more information on RSF, check the official <a href="https://www.randomforestsrc.org/articles/survival.html">R Vignette</a></p>
 </section>
 </section>
@@ -483,21 +708,21 @@ window.Quarto = {
 <h2 class="anchored" data-anchor-id="xgboost">XGBoost</h2>
 <p>The standard XGBoost tree method can be applied to both Cox PH (CPH) model and Accelerated Failure Time (AFT) model. The power of XGBoost method lies in the fact that the general framework does not change. All we need to do is find the proper loss function.</p>
 <p>The standard loss function of the XGBoost tree per the <a href="https://arxiv.org/abs/1603.02754">Xgboost paper</a> is:</p>
-<p><span class="math display">\[\ell^{(t)} = \sum^{n}_{i=1}\ell(y_i,\hat{y}_i^{(t-1)}+\alpha f_t(x_i))+\dfrac{1}{2}\lambda\sum^J_{j=1}f^2_j(x)+\gamma T\]</span></p>
+<p><span class="math inline">\(\ell^{(t)} = \sum^{n}_{i=1}\ell(y_i,\hat{y}_i^{(t-1)}+\alpha f_t(x_i))+\dfrac{1}{2}\lambda\sum^J_{j=1}f^2_j(x)+\gamma T\)</span></p>
 <p>where <span class="math inline">\(\ell\)</span> is the loss function, <span class="math inline">\(f_j(x)\)</span> is the prediction for leaf j and <span class="math inline">\(\dfrac{1}{2}\lambda\sum^J_{j=1}f^2_j(x)\)</span> is the L2 regularization term.</p>
 <p>With second-degree Taylor expansion of the first summation term, we get the loss function:</p>
-<p><span class="math display">\[\ell^{(t)} = \sum^{n}_{i=1}[\ell(y_i,\hat{y}_i^{(t-1)}) + g_i f_t(x_i) + \dfrac{1}{2}h_i f^2_t(x_i)]+\dfrac{1}{2}\lambda\sum^J_{j=1}f^2_j(x)+\gamma T\]</span></p>
+<p><span class="math inline">\(\ell^{(t)} = \sum^{n}_{i=1}[\ell(y_i,\hat{y}_i^{(t-1)}) + g_i f_t(x_i) + \dfrac{1}{2}h_i f^2_t(x_i)]+\dfrac{1}{2}\lambda\sum^J_{j=1}f^2_j(x)+\gamma T\)</span></p>
 <p>where <span class="math inline">\(g_i = \dfrac{\partial \ell}{\partial \hat{y}_i^{(t-1)}}\)</span> is the gradient of the loss function with respect to the current prediction and <span class="math inline">\(h_i = \dfrac{\partial^2 \ell}{\partial (\hat{y}_i^{(t-1)})^2}\)</span> is the hessian of the loss function with respect to the current prediction.</p>
 <p>The optimal output for leaf <span class="math inline">\(j\)</span> is:</p>
 <p><span class="math inline">\(f_j^*(x) = -\dfrac{\sum_{i\in j}g_i}{\sum_{i\in j}h_i+\lambda}\)</span></p>
 <p>The splitting rule is the same as the standard setting: <span class="math display">\[
 Gain = \dfrac{1}{2}\left[\dfrac{(\sum_{i\in j_L}g_i)^2}{\sum_{i\in j_L}h_i+\lambda}+\dfrac{(\sum_{i\in j_R}g_i)^2}{\sum_{i\in j_R}h_i+\lambda}-\dfrac{(\sum_{i\in j}g_i)^2}{\sum_{i\in j}h_i+\lambda}\right] - \gamma
 \]</span></p>
-<p>All we need to do is to get the proper loss function that incorporates the covariates for the CPH model and AFT model to get the corresponding <span class="math inline">\(g_i\)</span> and <span class="math inline">\(h_i\)</span>.</p>
+<p>Therefore, all we need to do is to get the corresponding gradients <span class="math inline">\(g_i\)</span> and Hessians <span class="math inline">\(h_i\)</span> for the CPH model and AFT model.</p>
 <section id="cox-proportional-hazards-model" class="level3">
 <h3 class="anchored" data-anchor-id="cox-proportional-hazards-model">Cox Proportional Hazards Model</h3>
 <p>With the CPH model, the linear combination of covariates - <span class="math inline">\(\eta=\beta_1X_1+\beta_2X_2+...+\beta_pX_p\)</span> represents the log hazard ratio. Each leaf output represents an increment from the current ensemble’s log hazard ratio for any subject landing in that leaf.</p>
-<p>The loss function of the CPH model is based on the partial likelihood: <span class="math display">\[
+<p>The loss function of the CPH model is built upon the partial likelihood: <span class="math display">\[
 \text{Partial Likelihood} = \prod\limits_{\text{observed event time}}\frac{\exp(\eta_{i})}{\displaystyle\sum_{\mathcal{R}(t_j)} \exp(\eta_{i})}
 \]</span></p>
 <p>where <span class="math inline">\(\eta_{ij}=\beta_1X_{1i}+\beta_2X_{2i}+...+\beta_pX_{pi}\)</span> is the linear combination of covariates for subject i;</p>
@@ -513,7 +738,7 @@ Gain = \dfrac{1}{2}\left[\dfrac{(\sum_{i\in j_L}g_i)^2}{\sum_{i\in j_L}h_i+\lamb
 h_i = \frac{\partial^2 \ell}{\partial \eta_i^2} = \sum_{k \in \mathcal{R}(t_j)} w_i(t_j)\bigl(1 - w_i(t_j)\bigr)
 \]</span></p>
 <div class="callout callout-style-default callout-note callout-titled" title="Gradient and Hessian Derivation">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -522,14 +747,14 @@ h_i = \frac{\partial^2 \ell}{\partial \eta_i^2} = \sum_{k \in \mathcal{R}(t_j)} 
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>Expanding the brackets, we write the equation above as two terms:</p>
 <p><span class="math inline">\(\ell = \underbrace{-\sum_{\text{observed events}} \eta_{i}}_{\text{Term A}}+ \underbrace{\sum_{\text{observed events}}\log\sum_{\mathcal{R}(t_i)}\exp(\eta_{i})}_{\text{Term B}}\)</span></p>
-<p>Differentiating Term A is straightforward:</p>
+<p>Differentiating Term A with respect to <span class="math inline">\(\eta_i\)</span> is straightforward:</p>
 <p><span class="math inline">\(\frac{\partial}{\partial \eta_{i}}\left[-\sum_{\text{observed events}} \eta_{i}\right] =\delta_i\)</span></p>
 <p>where <span class="math inline">\(\delta_i=1\)</span> if event, 0 otherwise.</p>
-<p>Differentiating Term B requires chain rule:</p>
+<p>Differentiating Term B with respect to <span class="math inline">\(\eta_i\)</span> requires chain rule:</p>
 <p>For a single event time <span class="math inline">\(t_i\)</span>, define:</p>
 <p><span class="math inline">\(S_i = \sum_{\mathcal{R}(t_j)}\exp(\eta_{i})\)</span></p>
 <p>Then we have:</p>
@@ -554,6 +779,16 @@ h_i = \frac{\partial \frac{exp(\eta_{i})}{\sum_{\mathcal{R}(t_j)}\exp(\eta_{i})}
 </div>
 </div>
 </div>
+<section id="how-xgboost-cph-model-makes-predictions" class="level4">
+<h4 class="anchored" data-anchor-id="how-xgboost-cph-model-makes-predictions">How XGBoost CPH Model Makes Predictions</h4>
+<p>The gradient and Hessian of XGBoost CPH model are derived by taking the derivative of the log-likelihood with respect to <span class="math inline">\(\eta_i\)</span>. Therefore, the output of XGBoost CPH model the log relative hazard ratio.</p>
+<p>The process of making predictions with the XGBoost CPH model involves the following steps:</p>
+<ol type="1">
+<li>Run XGBoost to get <span class="math inline">\(\hat{f}(x_i)\)</span> for all training observations</li>
+<li>Use the Breslow estimator on the training data with those risk scores to estimate <span class="math inline">\(\hat{H}_0(t)\)</span></li>
+<li>Repeat steps 1-4 for any new observations: 3.1 Drop a new observation - <span class="math inline">\(x_\text{new}\)</span> through all <span class="math inline">\(B\)</span> trees; sum the leaf values → <span class="math inline">\(\hat{f}(x_\text{new})\)</span> 3.2 Exponentiate to get the hazard ratio: <span class="math inline">\(e^{\hat{f}(x_\text{new})}\)</span> 3.3 Multiply the precomputed Breslow baseline: <span class="math inline">\(\hat{H}(t \mid x_\text{new}) = \hat{H}_0(t) \cdot e^{\hat{f}(x_\text{new})}\)</span> 3.4 Survival probability: <span class="math inline">\(\hat{S}(t) = e^{-\hat{H}(t \mid x_\text{new})}\)</span></li>
+</ol>
+</section>
 </section>
 <section id="accelerated-failure-time-aft-model" class="level3">
 <h3 class="anchored" data-anchor-id="accelerated-failure-time-aft-model">Accelerated Failure Time (AFT) Model</h3>
@@ -599,7 +834,7 @@ h_i = \frac{\partial \frac{exp(\eta_{i})}{\sum_{\mathcal{R}(t_j)}\exp(\eta_{i})}
 </table>
 <p>where <span class="math inline">\(z_i = \frac{\log t_i - F(x_i)}{\sigma}\)</span>, and <span class="math inline">\(\Phi\)</span> is the CDF of the error distribution specified for the AFT model.</p>
 <div class="callout callout-style-default callout-note callout-titled" title="Gradient and Hessian Derivation">
-<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -608,12 +843,12 @@ h_i = \frac{\partial \frac{exp(\eta_{i})}{\sum_{\mathcal{R}(t_j)}\exp(\eta_{i})}
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>With the AFT model, the log-time is being modeled as the response of a linear regression:</p>
 <p><span class="math inline">\(\log t_i = F(x_i) + \sigma \varepsilon_i, \qquad \varepsilon_i \sim f_Z\)</span></p>
 <p>where <span class="math inline">\(F(x_i)\)</span> is the linear predictor <span class="math inline">\(\beta^\top x\)</span>, <span class="math inline">\(f_Z\)</span> is the error distribution (normal, logistic, or Extreme); <span class="math inline">\(\sigma\)</span> is a fixed scale parameter.</p>
-<p>Like with CPH, XGBoost minimizes the negative log likelihood.</p>
+<p>XGBoost minimizes the negative log likelihood.</p>
 <p>Let <span class="math inline">\(z_i = \frac{\log t_i - F(x_i)}{\sigma}\)</span>, and <span class="math inline">\(\Phi\)</span> is the CDF of the error distribution, we can get the gradients and hessian for censored and uncensored subjects respectively:</p>
 <p>For <strong>Right-censored subjects</strong>, the individual loss function is :</p>
 <p><span class="math inline">\(\ell_i = - log(l_i) = \Lambda(t_i) = logS(t_i) = log(1-\Phi(z_i))\)</span></p>
@@ -653,6 +888,14 @@ h_i = \frac{\partial \frac{exp(\eta_{i})}{\sum_{\mathcal{R}(t_j)}\exp(\eta_{i})}
 </div>
 </div>
 </div>
+<section id="how-xgboost-aft-model-makes-predictions" class="level4">
+<h4 class="anchored" data-anchor-id="how-xgboost-aft-model-makes-predictions">How XGBoost AFT Model Makes Predictions</h4>
+<p>The XGBoost AFT model predicts <span class="math inline">\(\hat{f}(x) = \mathbb{E}[\log T \mid x]\)</span> — the expected log event time. For the AFT model, XGBoost follows these steps to make predictions for a new observation:</p>
+<ol type="1">
+<li>Drop <span class="math inline">\(x_\text{new}\)</span> through all <span class="math inline">\(B\)</span> trees; sum the leaf values → <span class="math inline">\(\hat{f}(x_\text{new})\)</span></li>
+<li>Evaluate <span class="math inline">\(\hat{S}(t) = 1 - F_\epsilon\!\left(\frac{\log t - \hat{f}(x_\text{new})}{\sigma}\right)\)</span> using the chosen distribution’s CDF</li>
+</ol>
+</section>
 </section>
 </section>
 <section id="python-package-parameters-reference" class="level2">

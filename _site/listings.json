@@ -33,5 +33,11 @@
       "/project/2026-05-24-example-project/index.html",
       "/project/2026-04-10-personal-knowledge-librarian/index.html"
     ]
+  },
+  {
+    "listing": "/portfolio/index.html",
+    "items": [
+      "/portfolio/2026-10-30-example-portfolio/index.html"
+    ]
   }
 ]
